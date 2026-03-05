@@ -1,6 +1,85 @@
 /* =====================================================
-   ECLIPSE STORE — SCRIPT.JS  (v2 — with coupons + localStorage)
+   ECLIPSE STORE — SCRIPT.JS  (v3 — Firebase Integrated)
    ===================================================== */
+
+// ===== FIREBASE INIT =====
+const firebaseConfig = {
+    apiKey: "AIzaSyAzNaCsi3Yw5-6879_F1p0b1j0viyKThN4",
+    authDomain: "eclipse-store-001.firebaseapp.com",
+    projectId: "eclipse-store-001",
+    storageBucket: "eclipse-store-001.firebasestorage.app",
+    messagingSenderId: "42097707466",
+    appId: "1:42097707466:web:21d84f904dbdd1c0872733"
+};
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+const db = firebase.firestore();
+
+// ===== AUTH & USER STATE =====
+let currentUser = null;
+let currentWallet = 0;
+let currentAffiliate = '';
+let currentReferrals = 0;
+
+firebase.auth().onAuthStateChanged(user => {
+    currentUser = user;
+    if (user) {
+        db.collection('users').doc(user.uid).onSnapshot(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                currentWallet = data.walletBalance || 0;
+                currentAffiliate = data.affiliateCode || '';
+                currentReferrals = data.referralsCount || 0;
+
+                const ab = document.getElementById('authBtn');
+                if (ab) ab.innerHTML = `<span style="font-size:14px; font-weight:bold; margin-right:5px; color:var(--gold);">₹${currentWallet}</span> 👤`;
+                const an = document.getElementById('accNameDisplay'); if (an) an.textContent = user.email.split('@')[0];
+                const aw = document.getElementById('accWalletDisplay'); if (aw) aw.textContent = currentWallet;
+                const aa = document.getElementById('accAffiliateDisplay'); if (aa) aa.textContent = currentAffiliate;
+                const ar = document.getElementById('accReferralsDisplay'); if (ar) ar.textContent = currentReferrals;
+
+                const lo = document.getElementById('accountLoggedOut'); if (lo) lo.style.display = 'none';
+                const li = document.getElementById('accountLoggedIn'); if (li) li.style.display = 'block';
+
+                const optGrp = document.getElementById('authOptInGroup'); if (optGrp) optGrp.style.display = 'none';
+
+                const wtr = document.getElementById('osWalletToggleRow');
+                if (wtr && currentWallet > 0) {
+                    wtr.classList.remove('hidden');
+                    const ap = document.getElementById('availPoints'); if (ap) ap.textContent = currentWallet;
+                } else if (wtr) { wtr.classList.add('hidden'); const uc = document.getElementById('useWalletCheck'); if (uc) uc.checked = false; }
+                if (document.getElementById('osTotal')) updateOrderSummary();
+            }
+        });
+    } else {
+        currentWallet = 0; currentAffiliate = ''; currentReferrals = 0;
+        const ab = document.getElementById('authBtn'); if (ab) ab.innerHTML = `👤`;
+        const lo = document.getElementById('accountLoggedOut'); if (lo) lo.style.display = 'block';
+        const li = document.getElementById('accountLoggedIn'); if (li) li.style.display = 'none';
+
+        const optGrp = document.getElementById('authOptInGroup'); if (optGrp) optGrp.style.display = 'block';
+        const wtr = document.getElementById('osWalletToggleRow'); if (wtr) { wtr.classList.add('hidden'); const uc = document.getElementById('useWalletCheck'); if (uc) uc.checked = false; }
+        if (document.getElementById('osTotal')) updateOrderSummary();
+    }
+});
+
+function toggleAccountCreation() {
+    const chk = document.getElementById('createAccountCheck');
+    const flds = document.getElementById('accountCreationFields');
+    if (chk && flds) flds.style.display = chk.checked ? 'block' : 'none';
+}
+function openAuthModal() { openModal('accountModal'); }
+function doUserLogin() {
+    const e = document.getElementById('loginEmail').value.trim();
+    const p = document.getElementById('loginPwd').value;
+    const err = document.getElementById('loginError');
+    if (!e || !p) { err.textContent = 'Enter email and password'; err.classList.remove('hidden'); return; }
+    firebase.auth().signInWithEmailAndPassword(e, p).then(() => {
+        err.classList.add('hidden'); closeModal('accountModal'); showToast('Logged in!', 'success');
+    }).catch(e => { err.textContent = e.message; err.classList.remove('hidden'); });
+}
+function doUserLogout() { firebase.auth().signOut().then(() => { closeModal('accountModal'); showToast('Logged out.', 'success'); }); }
 
 // ===== STATE =====
 let cart = [];
@@ -10,24 +89,42 @@ let deliveryData = {};
 let appliedCoupon = null;
 const BASE_PRICE = 999;
 
-// ===== COUPONS (hardcoded; admin can override via localStorage) =====
+let activeCoupons = {};
+db.collection('coupons').onSnapshot(snap => {
+    activeCoupons = {};
+    snap.forEach(doc => { activeCoupons[doc.id] = doc.data(); });
+});
+
+// ===== COUPONS =====
 function getCoupons() {
-    const stored = localStorage.getItem('eclipse_coupons');
-    if (stored) return JSON.parse(stored);
-    return {
-        'ECLIPSE10': { discount: 10, type: 'percent', label: '10% off' },
-        'LAUNCH20': { discount: 20, type: 'percent', label: '20% off' },
-        'FLAT100': { discount: 100, type: 'flat', label: '₹100 off' },
-        'DREAM50': { discount: 50, type: 'flat', label: '₹50 off' }
-    };
+    return activeCoupons;
 }
 
 function calcFinalPrice() {
-    if (!appliedCoupon) return BASE_PRICE;
-    const c = getCoupons()[appliedCoupon];
-    if (!c) return BASE_PRICE;
-    if (c.type === 'percent') return Math.round(BASE_PRICE * (1 - c.discount / 100));
-    return Math.max(0, BASE_PRICE - c.discount);
+    let p = BASE_PRICE;
+    if (appliedCoupon) {
+        const c = getCoupons()[appliedCoupon];
+        if (c) {
+            if (c.type === 'percent') p = Math.round(p * (1 - c.discount / 100));
+            else p = Math.max(0, p - c.discount);
+        }
+    }
+
+    // Wallet deduction
+    const uwc = document.getElementById('useWalletCheck');
+    let pointsUsed = 0;
+    const wvr = document.getElementById('osWalletValRow');
+    const wu = document.getElementById('osWalletUsed');
+
+    if (uwc && uwc.checked && currentWallet > 0) {
+        pointsUsed = Math.min(p, currentWallet);
+        p -= pointsUsed;
+        if (wvr && wu) { wvr.classList.remove('hidden'); wu.textContent = `— ₹${pointsUsed}`; }
+    } else {
+        if (wvr) wvr.classList.add('hidden');
+    }
+
+    return { finalPrice: p, pointsUsed };
 }
 
 // ===== LOADER =====
@@ -210,22 +307,25 @@ function resetOrderModal() {
     updateOrderSummary();
 }
 function updateOrderSummary() {
-    const final = calcFinalPrice();
+    const { finalPrice, pointsUsed } = calcFinalPrice();
     const elMRP = document.getElementById('osMRP'); if (elMRP) elMRP.textContent = `₹${BASE_PRICE}`;
-    const elTotal = document.getElementById('osTotal'); if (elTotal) elTotal.textContent = `₹${final}`;
+    const elTotal = document.getElementById('osTotal'); if (elTotal) elTotal.textContent = `₹${finalPrice}`;
     const elDisc = document.getElementById('osDiscount');
     const elDiscRow = document.getElementById('osDiscountRow');
     const elUPIAmt = document.getElementById('upiAmountDisplay');
     const elOmPrice = document.getElementById('omPriceDisplay');
     const elBuyNow = document.getElementById('buyNowPrice');
     if (appliedCoupon) {
-        const saved = BASE_PRICE - final;
-        if (elDisc) elDisc.textContent = `— ₹${saved}`;
+        const c = getCoupons()[appliedCoupon];
+        let disc = 0;
+        if (c.type === 'percent') disc = Math.round(BASE_PRICE * (c.discount / 100));
+        else disc = c.discount;
+        if (elDisc) elDisc.textContent = `— ₹${Math.min(disc, BASE_PRICE)}`;
         if (elDiscRow) elDiscRow.classList.remove('hidden');
     } else { if (elDiscRow) elDiscRow.classList.add('hidden'); }
-    if (elUPIAmt) elUPIAmt.textContent = `₹${final}`;
-    if (elOmPrice) elOmPrice.textContent = `₹${final}`;
-    if (elBuyNow) elBuyNow.textContent = `₹${final}`;
+    if (elUPIAmt) elUPIAmt.textContent = `₹${finalPrice}`;
+    if (elOmPrice) elOmPrice.textContent = `₹${finalPrice}`;
+    if (elBuyNow) elBuyNow.textContent = `₹${finalPrice}`;
 }
 
 // ===== COUPON =====
@@ -236,10 +336,12 @@ function toggleCoupon() {
     if (isHidden) { wrap.classList.remove('hidden'); btn.textContent = 'Hide'; }
     else { wrap.classList.add('hidden'); btn.textContent = 'Apply Code'; }
 }
-function applyCoupon() {
+async function applyCoupon() {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
     const msgEl = document.getElementById('couponMsg');
     if (!code) { if (msgEl) { msgEl.textContent = 'Please enter a coupon code.'; msgEl.className = 'coupon-msg error'; } return; }
+
+    // 1. Check Standard Coupons
     const coupons = getCoupons();
     if (coupons[code]) {
         appliedCoupon = code;
@@ -247,15 +349,36 @@ function applyCoupon() {
         if (msgEl) { msgEl.textContent = `✅ Coupon applied — ${c.label}!`; msgEl.className = 'coupon-msg success'; }
         updateOrderSummary();
         showToast(`🎟️ ${c.label} applied!`, 'success');
-    } else {
-        appliedCoupon = null;
-        if (msgEl) { msgEl.textContent = '❌ Invalid coupon code.'; msgEl.className = 'coupon-msg error'; }
-        updateOrderSummary();
+        return;
+    }
+
+    // 2. Check Affiliate Codes
+    msgEl.textContent = 'Checking code...'; msgEl.className = 'coupon-msg';
+    try {
+        const snap = await db.collection('users').where('affiliateCode', '==', code).get();
+        if (!snap.empty) {
+            const referrerDoc = snap.docs[0];
+            if (currentUser && referrerDoc.id === currentUser.uid) {
+                msgEl.textContent = '❌ You cannot use your own code.'; msgEl.className = 'coupon-msg error';
+                return;
+            }
+            appliedCoupon = code;
+            activeCoupons[code] = { discount: 10, type: 'percent', label: 'Affiliate Code (10% Off)', referrerId: referrerDoc.id };
+            if (msgEl) { msgEl.textContent = `✅ Friend's code applied (10% off)!`; msgEl.className = 'coupon-msg success'; }
+            updateOrderSummary();
+            showToast(`🎟️ Affiliate applied!`, 'success');
+        } else {
+            appliedCoupon = null;
+            if (msgEl) { msgEl.textContent = '❌ Invalid coupon or affiliate code.'; msgEl.className = 'coupon-msg error'; }
+            updateOrderSummary();
+        }
+    } catch (e) {
+        msgEl.textContent = '❌ Database error verifying code.'; msgEl.className = 'coupon-msg error';
     }
 }
 
 // ===== PAYMENT FLOW =====
-function goToPayment() {
+async function goToPayment() {
     const name = document.getElementById('omName').value.trim();
     const phone = document.getElementById('omPhone').value.trim();
     const address = document.getElementById('omAddress').value.trim();
@@ -268,7 +391,29 @@ function goToPayment() {
     if (!city) { showToast('Enter your city.', 'error'); document.getElementById('omCity').focus(); return; }
     if (!/^\d{6}$/.test(pin)) { showToast('Enter a valid 6-digit PIN.', 'error'); document.getElementById('omPin').focus(); return; }
     if (!state) { showToast('Enter your state.', 'error'); document.getElementById('omState').focus(); return; }
-    deliveryData = { name, phone, email: document.getElementById('omEmail').value.trim(), address, city, pin, state };
+    deliveryData = { name, phone, email: document.getElementById('omEmail') ? document.getElementById('omEmail').value.trim() : '', address, city, pin, state };
+
+    const optIn = document.getElementById('createAccountCheck');
+    if (optIn && optIn.checked && !currentUser) {
+        const em = document.getElementById('omEmail').value.trim();
+        const pwd = document.getElementById('omPwd').value;
+        if (!em || pwd.length < 6) { showToast('Valid email and 6+ char password required to create account.', 'error'); return; }
+        document.getElementById('omStep1').style.opacity = '0.5';
+        try {
+            const cred = await firebase.auth().createUserWithEmailAndPassword(em, pwd);
+            const affCode = 'ECL-' + Math.random().toString(36).substr(2, 6).toUpperCase();
+            await db.collection('users').doc(cred.user.uid).set({
+                email: em, fullName: name, walletBalance: 0, affiliateCode: affCode, referralsCount: 0, createdAt: new Date().toISOString()
+            });
+            showToast('Account Created! Welcome to Eclipse.', 'success');
+        } catch (e) {
+            document.getElementById('omStep1').style.opacity = '1';
+            showToast(e.message, 'error');
+            return;
+        }
+        document.getElementById('omStep1').style.opacity = '1';
+    }
+
     document.getElementById('omStep1').classList.add('hidden');
     document.getElementById('omStep2').classList.remove('hidden');
     const codOption = document.getElementById('codOption');
@@ -290,16 +435,29 @@ function selectPayment(type) {
 }
 
 // ===== PLACE ORDER + SAVE TO LOCALSTORAGE =====
-function placeOrder() {
+async function placeOrder() {
     if (!selectedPayment) { document.getElementById('paymentError').classList.remove('hidden'); return; }
     if (selectedPayment === 'online') {
-        const utr = document.getElementById('utrInput').value.trim();
-        if (!utr || utr.length < 8) { showToast('Enter a valid UTR / Transaction ID.', 'error'); document.getElementById('utrInput').focus(); return; }
+        const u = document.getElementById('utrInput').value.trim();
+        if (u.length < 8) { showToast('Please enter a valid UTR / Trx ID.', 'error'); return; }
     }
-    const finalPrice = calcFinalPrice();
+
+    document.getElementById('omStep2').style.opacity = '0.5';
+
+    const { finalPrice, pointsUsed } = calcFinalPrice();
     const orderId = 'ECL' + Date.now().toString().slice(-8).toUpperCase();
-    const utr = selectedPayment === 'online' ? document.getElementById('utrInput').value.trim() : '';
-    // Save order
+    const utrStr = selectedPayment === 'online' ? document.getElementById('utrInput').value.trim() : '';
+
+    let referrerId = null;
+    if (appliedCoupon && activeCoupons[appliedCoupon] && activeCoupons[appliedCoupon].referrerId) {
+        referrerId = activeCoupons[appliedCoupon].referrerId;
+    }
+
+    let earnedPts = 0;
+    if (currentUser && selectedPayment === 'online') {
+        earnedPts = 50; // Earn 50 only if pre-paid online
+    }
+
     const order = {
         id: orderId,
         timestamp: new Date().toISOString(),
@@ -308,24 +466,63 @@ function placeOrder() {
         size: selectedSize,
         mrp: BASE_PRICE,
         coupon: appliedCoupon || '',
+        pointsUsed: pointsUsed,
         finalPrice,
         paymentMethod: selectedPayment,
-        utr,
-        status: 'Pending'
+        utr: utrStr,
+        status: 'Pending',
+        userId: currentUser ? currentUser.uid : null,
+        earnedPoints: earnedPts,
+        pointsAwarded: (earnedPts > 0) // Track if wallet already credited automatically
     };
-    const orders = JSON.parse(localStorage.getItem('eclipse_orders') || '[]');
-    orders.unshift(order);
-    localStorage.setItem('eclipse_orders', JSON.stringify(orders));
 
-    document.getElementById('orderId').textContent = orderId;
-    let msg = selectedPayment === 'cod'
-        ? `Your order for <strong>Karan Aujla Tee (${selectedSize})</strong> is placed! We'll call <strong>${deliveryData.phone}</strong> to confirm. COD amount: ₹${finalPrice}.`
-        : `Payment confirmed! <strong>Karan Aujla Tee (${selectedSize})</strong> will be dispatched to <strong>${deliveryData.city}</strong> within 1–3 days. UTR: <strong>${utr}</strong>. Paid: ₹${finalPrice}.`;
-    document.getElementById('successMsg').innerHTML = msg;
-    closeModal('orderModal'); openModal('successModal');
-    cart = []; updateCartCount();
-    selectedSize = null; appliedCoupon = null;
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+    try {
+        await db.collection('orders').doc(orderId).set(order);
+
+        // Handle Wallet Adjustments
+        if (currentUser) {
+            let offset = 0;
+            if (pointsUsed > 0) offset -= pointsUsed;
+            if (earnedPts > 0) offset += earnedPts;
+            if (offset !== 0) {
+                await db.collection('users').doc(currentUser.uid).update({
+                    walletBalance: firebase.firestore.FieldValue.increment(offset)
+                });
+            }
+        }
+
+        // Handle Affiliate Bonus
+        if (referrerId) {
+            const refDoc = await db.collection('users').doc(referrerId).get();
+            if (refDoc.exists) {
+                const refData = refDoc.data();
+                const newCount = (refData.referralsCount || 0) + 1;
+                const updates = { referralsCount: newCount };
+                if (newCount % 5 === 0) updates.walletBalance = firebase.firestore.FieldValue.increment(200);
+                await db.collection('users').doc(referrerId).update(updates);
+            }
+        }
+
+        document.getElementById('omStep2').style.opacity = '1';
+        document.getElementById('orderId').textContent = orderId;
+
+        let earnMsg = earnedPts > 0 ? `<br><br><span style="color:var(--gold);"><b>+50 Points</b> added to your Wallet!</span>` : (selectedPayment === 'cod' && currentUser ? `<br><br><i style="color:var(--grey);font-size:12px;">You'll earn 50 points when this order is delivered.</i>` : `<br><br><i style="color:var(--grey);font-size:12px;">Create an account next time to earn points!</i>`);
+
+        let msg = selectedPayment === 'cod'
+            ? `Your order for <strong>Karan Aujla Tee (${selectedSize})</strong> is placed! We'll call <strong>${deliveryData.phone}</strong> to confirm. COD amount: ₹${finalPrice}. ${earnMsg}`
+            : `Payment confirmed! <strong>Karan Aujla Tee (${selectedSize})</strong> will be dispatched to <strong>${deliveryData.city}</strong> within 1–3 days. UTR: <strong>${utrStr}</strong>. Paid: ₹${finalPrice}. ${earnMsg}`;
+
+        document.getElementById('successMsg').innerHTML = msg;
+        closeModal('orderModal'); openModal('successModal');
+        cart = []; updateCartCount();
+        selectedSize = null; appliedCoupon = null;
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+
+    } catch (err) {
+        document.getElementById('omStep2').style.opacity = '1';
+        showToast('Error connecting to database. Please try again.', 'error');
+        console.error(err);
+    }
 }
 
 // ===== COPY UPI =====
@@ -338,12 +535,13 @@ function submitNotify(e) {
     const name = document.getElementById('notifyName').value.trim();
     const contact = document.getElementById('notifyContact').value.trim();
     if (!name || !contact) return;
-    const list = JSON.parse(localStorage.getItem('eclipse_notify') || '[]');
-    list.unshift({ name, contact, timestamp: new Date().toISOString() });
-    localStorage.setItem('eclipse_notify', JSON.stringify(list));
-    showToast(`🔔 ${name}, you're on the list!`, 'success');
-    closeModal('notifyModal');
-    document.getElementById('notifyName').value = ''; document.getElementById('notifyContact').value = '';
+
+    db.collection('notify').add({ name, contact, timestamp: new Date().toISOString() })
+        .then(() => {
+            showToast(`🔔 ${name}, you're on the list!`, 'success');
+            closeModal('notifyModal');
+            document.getElementById('notifyName').value = ''; document.getElementById('notifyContact').value = '';
+        });
 }
 
 // ===== CONTACT FORM =====
@@ -353,11 +551,12 @@ function submitContactForm(e) {
     const contact = document.getElementById('cfContact').value.trim();
     const msg = document.getElementById('cfMessage').value.trim();
     if (!name || !contact || !msg) return;
-    const messages = JSON.parse(localStorage.getItem('eclipse_messages') || '[]');
-    messages.unshift({ name, contact, message: msg, timestamp: new Date().toISOString() });
-    localStorage.setItem('eclipse_messages', JSON.stringify(messages));
-    showToast(`✅ Message sent! We'll reply soon, ${name}.`, 'success');
-    document.getElementById('contactForm').reset();
+
+    db.collection('messages').add({ name, contact, message: msg, timestamp: new Date().toISOString() })
+        .then(() => {
+            showToast(`✅ Message sent! We'll reply soon, ${name}.`, 'success');
+            document.getElementById('contactForm').reset();
+        });
 }
 
 // ===== POLICY MODAL =====
