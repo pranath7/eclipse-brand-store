@@ -870,6 +870,8 @@
                     class="nav-badge" id="messagesCount">0</span></div>
             <div class="nav-item" onclick="showPanel('notify', this)"><span class="nav-icon">🔔</span>Notify List <span
                     class="nav-badge" id="notifyCount">0</span></div>
+            <div class="nav-item" onclick="showPanel('customers', this)"><span class="nav-icon">👥</span>Customers <span
+                    class="nav-badge" id="customersCount">0</span></div>
             <div class="nav-item" onclick="showPanel('coupons', this)"><span class="nav-icon">🎟️</span>Coupons</div>
             <div class="nav-item" onclick="showPanel('products', this)"><span class="nav-icon">👕</span>Products</div>
             <div class="nav-item" onclick="showPanel('settings', this)"><span class="nav-icon">⚙️</span>Settings</div>
@@ -1081,7 +1083,23 @@
 
     <div id="adminToast"></div>
 
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+
     <script>
+        // ===== FIREBASE INIT =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyAzNaCsi3Yw5-6879_F1p0b1j0viyKThN4",
+            authDomain: "eclipse-store-001.firebaseapp.com",
+            projectId: "eclipse-store-001",
+            storageBucket: "eclipse-store-001.firebasestorage.app",
+            messagingSenderId: "42097707466",
+            appId: "1:42097707466:web:21d84f904dbdd1c0872733"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+
         // ===== AUTH =====
         const ADMIN_PW_KEY = 'eclipse_admin_pw';
         function getStoredPw() { return localStorage.getItem(ADMIN_PW_KEY) || 'eclipse2025'; }
@@ -1127,25 +1145,88 @@
             document.getElementById('panel-' + name).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
-            const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
+            const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', customers: 'CUSTOMERS', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
             document.getElementById('topbarTitle').textContent = titles[name] || name.toUpperCase();
         }
 
-        // ===== DATA HELPERS =====
-        function getOrders() { return JSON.parse(localStorage.getItem('eclipse_orders') || '[]'); }
-        function getMessages() { return JSON.parse(localStorage.getItem('eclipse_messages') || '[]'); }
-        function getNotify() { return JSON.parse(localStorage.getItem('eclipse_notify') || '[]'); }
-        function getCoupons() { const s = localStorage.getItem('eclipse_coupons'); if (s) return JSON.parse(s); return { 'ECLIPSE10': { discount: 10, type: 'percent', label: '10% off' }, 'LAUNCH20': { discount: 20, type: 'percent', label: '20% off' }, 'FLAT100': { discount: 100, type: 'flat', label: '₹100 off' }, 'DREAM50': { discount: 50, type: 'flat', label: '₹50 off' } }; }
+        // ===== GLOBAL DATA STATE =====
+        let adminOrders = [];
+        let adminMessages = [];
+        let adminNotify = [];
+        let adminCoupons = {};
+        let adminUsers = [];
+        let unsubscribers = [];
 
-        // ===== LOAD ALL =====
+        function getOrders() { return adminOrders; }
+        function getMessages() { return adminMessages; }
+        function getNotify() { return adminNotify; }
+        function getCoupons() { return adminCoupons; }
+        function getUsers() { return adminUsers; }
+
+        // ===== LOAD ALL (FIRESTORE) =====
         function loadAllData() {
+            // Unsubscribe existing listeners
+            unsubscribers.forEach(u => u());
+            unsubscribers = [];
+
+            // 1. Listen to Orders
+            unsubscribers.push(
+                db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                    adminOrders = [];
+                    snap.forEach(doc => { adminOrders.push({ id: doc.id, ...doc.data() }) });
+                    updateDashboardAndRenders();
+                })
+            );
+
+            // 2. Listen to Messages
+            unsubscribers.push(
+                db.collection('messages').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                    adminMessages = [];
+                    snap.forEach(doc => { adminMessages.push({ id: doc.id, ...doc.data() }) });
+                    updateDashboardAndRenders();
+                })
+            );
+
+            // 3. Listen to Notify List
+            unsubscribers.push(
+                db.collection('notify').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                    adminNotify = [];
+                    snap.forEach(doc => { adminNotify.push({ id: doc.id, ...doc.data() }) });
+                    updateDashboardAndRenders();
+                })
+            );
+
+            // 4. Listen to Coupons
+            unsubscribers.push(
+                db.collection('coupons').onSnapshot(snap => {
+                    adminCoupons = {};
+                    snap.forEach(doc => { adminCoupons[doc.id] = doc.data(); });
+                    updateDashboardAndRenders();
+                })
+            );
+
+            // 5. Listen to Users
+            unsubscribers.push(
+                db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                    adminUsers = [];
+                    snap.forEach(doc => { adminUsers.push({ id: doc.id, ...doc.data() }); });
+                    updateDashboardAndRenders();
+                })
+            );
+
+            toast('Connected to Live Database 🟢', 's');
+        }
+
+        function updateDashboardAndRenders() {
             const orders = getOrders();
             const messages = getMessages();
             const notify = getNotify();
+            const users = getUsers();
             // Nav badges
             document.getElementById('ordersCount').textContent = orders.length;
             document.getElementById('messagesCount').textContent = messages.length;
             document.getElementById('notifyCount').textContent = notify.length;
+            document.getElementById('customersCount').textContent = users.length;
             // Dashboard stats
             const pendingOrders = orders.filter(o => o.status === 'Pending');
             const revenue = orders.filter(o => o.status !== 'Cancelled').reduce((acc, o) => acc + (o.finalPrice || o.mrp || 999), 0);
@@ -1153,13 +1234,14 @@
             document.getElementById('s-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
             document.getElementById('s-pending').textContent = pendingOrders.length;
             document.getElementById('s-messages').textContent = messages.length;
-            // Dashboard recent orders
+
+            // Re-render Views
             renderDashRecent(orders.slice(0, 5));
             renderOrders();
             renderMessages();
             renderNotify();
             renderCoupons();
-            toast('Data refreshed', 's');
+            renderUsers();
         }
 
         // ===== FORMAT DATE =====
@@ -1211,14 +1293,30 @@
             wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>City</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${filtered.map(o => orderRow(o, true)).join('')}</tbody></table></div>`;
         }
 
-        function updateOrderStatus(id, status) {
-            const orders = getOrders();
-            const idx = orders.findIndex(o => o.id === id);
-            if (idx === -1) return;
-            orders[idx].status = status;
-            localStorage.setItem('eclipse_orders', JSON.stringify(orders));
-            loadAllData();
-            toast(`Order ${status}!`, 's');
+        async function updateOrderStatus(id, status) {
+            try {
+                const orderRef = db.collection('orders').doc(id);
+                const orderDoc = await orderRef.get();
+                if (!orderDoc.exists) return;
+                const order = orderDoc.data();
+
+                // If fulfilling COD order for registered user & not yet awarded
+                if (status === 'Fulfilled' && order.paymentMethod === 'cod' && order.userId && !order.pointsAwarded) {
+                    const batch = db.batch();
+                    batch.update(orderRef, { status: status, pointsAwarded: true, earnedPoints: 50 });
+                    batch.update(db.collection('users').doc(order.userId), {
+                        walletBalance: firebase.firestore.FieldValue.increment(50)
+                    });
+                    await batch.commit();
+                    toast(`Order ${status} & 50 Pts Auto-Awarded!`, 's');
+                } else {
+                    await orderRef.update({ status: status });
+                    toast(`Order ${status}!`, 's');
+                }
+            } catch (e) {
+                toast('Error updating order', 'e');
+                console.error(e);
+            }
         }
 
         function exportOrders() {
@@ -1237,18 +1335,41 @@
             const msgs = getMessages();
             const wrap = document.getElementById('messagesWrap');
             if (!msgs.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✉️</div><p>No messages yet.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Contact</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>${msgs.map((m, i) => `<tr><td>${m.name}</td><td>${m.contact}</td><td style="max-width:320px;word-break:break-word;">${m.message}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(m.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteMessage(${i})">🗑</button></td></tr>`).join('')}</tbody></table>`;
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Contact</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>${msgs.map((m) => `<tr><td>${m.name}</td><td>${m.contact}</td><td style="max-width:320px;word-break:break-word;">${m.message}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(m.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteMessage('${m.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
         }
-        function deleteMessage(i) { const msgs = getMessages(); msgs.splice(i, 1); localStorage.setItem('eclipse_messages', JSON.stringify(msgs)); loadAllData(); toast('Deleted', 's'); }
+        function deleteMessage(id) {
+            db.collection('messages').doc(id).delete()
+                .then(() => toast('Deleted', 's'))
+                .catch(e => toast('Error deleting', 'e'));
+        }
 
         // ===== NOTIFY =====
         function renderNotify() {
             const list = getNotify();
             const wrap = document.getElementById('notifyWrap');
             if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p>No signups yet.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>Signed Up</th><th></th></tr></thead><tbody>${list.map((n, i) => `<tr><td>${i + 1}</td><td>${n.name}</td><td>${n.contact}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(n.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteNotify(${i})">🗑</button></td></tr>`).join('')}</tbody></table>`;
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>Signed Up</th><th></th></tr></thead><tbody>${list.map((n, i) => `<tr><td>${i + 1}</td><td>${n.name}</td><td>${n.contact}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(n.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteNotify('${n.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
         }
-        function deleteNotify(i) { const list = getNotify(); list.splice(i, 1); localStorage.setItem('eclipse_notify', JSON.stringify(list)); loadAllData(); toast('Removed', 's'); }
+        function deleteNotify(id) {
+            db.collection('notify').doc(id).delete()
+                .then(() => toast('Removed', 's'))
+                .catch(e => toast('Error deleting', 'e'));
+        }
+
+        // ===== CUSTOMERS =====
+        function renderUsers() {
+            const list = getUsers();
+            const wrap = document.getElementById('customersWrap');
+            if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>No registered customers yet.</p></div>'; return; }
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Wallet Balance</th><th>Affiliate Code</th><th>Referrals</th><th>Joined Date</th></tr></thead><tbody>${list.map((u) => `<tr>
+                <td style="font-weight:600;">${u.fullName || '—'}</td>
+                <td>${u.email}</td>
+                <td class="text-gold" style="font-weight:bold;font-size:16px;">₹${u.walletBalance || 0}</td>
+                <td style="font-family:monospace;letter-spacing:1px;">${u.affiliateCode || '—'}</td>
+                <td>${u.referralsCount || 0}</td>
+                <td style="font-size:11px;color:var(--grey)">${fmtDate(u.createdAt)}</td>
+            </tr>`).join('')}</tbody></table>`;
+        }
 
         // ===== COUPONS =====
         function renderCoupons() {
@@ -1269,50 +1390,49 @@
             const value = parseFloat(document.getElementById('cpValue').value);
             const label = document.getElementById('cpLabel').value.trim();
             if (!code || !value || !label) { toast('Fill in all coupon fields.', 'e'); return; }
-            const coupons = getCoupons();
-            coupons[code] = { discount: value, type, label };
-            localStorage.setItem('eclipse_coupons', JSON.stringify(coupons));
-            document.getElementById('cpCode').value = ''; document.getElementById('cpValue').value = ''; document.getElementById('cpLabel').value = '';
-            renderCoupons(); toast(`✅ Coupon ${code} added!`, 's');
+
+            db.collection('coupons').doc(code).set({ discount: value, type, label })
+                .then(() => {
+                    document.getElementById('cpCode').value = ''; document.getElementById('cpValue').value = ''; document.getElementById('cpLabel').value = '';
+                    toast(`✅ Coupon ${code} added!`, 's');
+                });
         }
         function deleteCoupon(code) {
-            const coupons = getCoupons();
-            delete coupons[code];
-            localStorage.setItem('eclipse_coupons', JSON.stringify(coupons));
-            renderCoupons(); toast(`Coupon ${code} removed.`, 's');
+            db.collection('coupons').doc(code).delete()
+                .then(() => toast(`Coupon ${code} removed.`, 's'));
         }
 
         // ===== PRODUCTS =====
         function updatePrice() {
             const np = parseInt(document.getElementById('peNewPrice').value);
             if (!np || np < 100) { toast('Enter a valid price.', 'e'); return; }
-            localStorage.setItem('eclipse_product_price', np);
-            document.getElementById('peCurrent').textContent = '₹' + np;
-            toast('✅ Price updated! Reload the store to apply.', 's');
+            db.collection('settings').doc('store').set({ price: np }, { merge: true })
+                .then(() => {
+                    document.getElementById('peCurrent').textContent = '₹' + np;
+                    toast('✅ Price updated!', 's');
+                });
         }
         function updateMRP() {
             const mrp = parseInt(document.getElementById('peMRP').value);
             if (!mrp || mrp < 100) { toast('Enter a valid MRP.', 'e'); return; }
-            localStorage.setItem('eclipse_product_mrp', mrp);
-            toast('✅ MRP updated! Reload the store to apply.', 's');
+            db.collection('settings').doc('store').set({ mrp: mrp }, { merge: true })
+                .then(() => toast('✅ MRP updated!', 's'));
         }
         function updateStock() {
             const st = document.getElementById('peStock').value;
-            localStorage.setItem('eclipse_product_stock', st);
-            toast('✅ Stock status: ' + st, 's');
+            db.collection('settings').doc('store').set({ stock: st }, { merge: true })
+                .then(() => toast('✅ Stock status: ' + st, 's'));
         }
         function saveAnnouncement() {
-            localStorage.setItem('eclipse_hero_tag', document.getElementById('heroTagEdit').value.trim());
-            localStorage.setItem('eclipse_hero_sub', document.getElementById('heroSubEdit').value.trim());
-            toast('✅ Announcement saved! Reload the store.', 's');
+            const tag = document.getElementById('heroTagEdit').value.trim();
+            const sub = document.getElementById('heroSubEdit').value.trim();
+            db.collection('settings').doc('store').set({ heroTag: tag, heroSub: sub }, { merge: true })
+                .then(() => toast('✅ Announcement saved!', 's'));
         }
 
         // ===== CLEAR DATA =====
         function clearData(key) {
-            if (!confirm('Are you sure? This cannot be undone.')) return;
-            localStorage.removeItem(key);
-            loadAllData();
-            toast('Cleared.', 's');
+            alert('Bulk deletion is disabled in the Live Database. Manage directly in Firebase Console.');
         }
 
         // ===== TOAST =====
@@ -1323,16 +1443,15 @@
             clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 3000);
         }
 
-        // Load product settings on page load
-        window.addEventListener('load', () => {
-            const p = localStorage.getItem('eclipse_product_price');
-            if (p) document.getElementById('peCurrent').textContent = '₹' + p;
-            const stock = localStorage.getItem('eclipse_product_stock');
-            if (stock) document.getElementById('peStock').value = stock;
-            const tag = localStorage.getItem('eclipse_hero_tag');
-            if (tag) document.getElementById('heroTagEdit').value = tag;
-            const sub = localStorage.getItem('eclipse_hero_sub');
-            if (sub) document.getElementById('heroSubEdit').value = sub;
+        // Load product settings from Firebase
+        db.collection('settings').doc('store').onSnapshot(doc => {
+            if (doc.exists) {
+                const data = doc.data();
+                if (data.price) document.getElementById('peCurrent').textContent = '₹' + data.price;
+                if (data.stock) document.getElementById('peStock').value = data.stock;
+                if (data.heroTag) document.getElementById('heroTagEdit').value = data.heroTag;
+                if (data.heroSub) document.getElementById('heroSubEdit').value = data.heroSub;
+            }
         });
     </script>
 </body>
