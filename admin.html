@@ -1,0 +1,1340 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>ECLIPSE — Admin Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@300;400;500;600;700&display=swap"
+        rel="stylesheet" />
+    <style>
+        :root {
+            --bg: #07070a;
+            --bg2: #0f0f14;
+            --bg3: #161620;
+            --surface: #1a1a26;
+            --border: rgba(255, 255, 255, 0.07);
+            --gold: #c9a84c;
+            --gold-l: #f0ca6e;
+            --green: #22c55e;
+            --red: #ef4444;
+            --blue: #3b82f6;
+            --orange: #f97316;
+            --white: #fff;
+            --grey: #6b7280;
+            --font: 'Inter', sans-serif;
+            --display: 'Bebas Neue', sans-serif;
+            --radius: 10px;
+            --radius-lg: 16px;
+            --shadow: 0 8px 30px rgba(0, 0, 0, 0.6);
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            background: var(--bg);
+            color: var(--white);
+            font-family: var(--font);
+            font-size: 14px;
+            line-height: 1.6;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            font-family: var(--font);
+            cursor: pointer;
+            border: none;
+        }
+
+        img {
+            max-width: 100%;
+        }
+
+        ::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--gold);
+            border-radius: 2px;
+        }
+
+        /* ---- LOGIN SCREEN ---- */
+        #loginScreen {
+            position: fixed;
+            inset: 0;
+            background: #000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+
+        .login-box {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 48px 40px;
+            text-align: center;
+            width: 360px;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.8);
+        }
+
+        .login-logo {
+            font-family: var(--display);
+            font-size: 36px;
+            letter-spacing: 8px;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .login-sub {
+            font-size: 11px;
+            letter-spacing: 3px;
+            text-transform: uppercase;
+            color: var(--grey);
+            margin-bottom: 36px;
+        }
+
+        .login-box input {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: white;
+            padding: 14px 16px;
+            font-size: 14px;
+            outline: none;
+            margin-bottom: 16px;
+            font-family: var(--font);
+            transition: border-color .3s;
+        }
+
+        .login-box input:focus {
+            border-color: var(--gold);
+        }
+
+        .login-box button {
+            width: 100%;
+            background: var(--gold);
+            color: #000;
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 14px;
+            border-radius: 100px;
+            transition: background .3s, transform .2s;
+        }
+
+        .login-box button:hover {
+            background: var(--gold-l);
+            transform: translateY(-1px);
+        }
+
+        .login-err {
+            color: var(--red);
+            font-size: 12px;
+            margin-top: 10px;
+            min-height: 16px;
+        }
+
+        /* ---- LAYOUT ---- */
+        #appShell {
+            display: none;
+            height: 100vh;
+            overflow: hidden;
+        }
+
+        #appShell.visible {
+            display: flex;
+        }
+
+        .sidebar {
+            width: 230px;
+            flex-shrink: 0;
+            background: var(--bg2);
+            border-right: 1px solid var(--border);
+            display: flex;
+            flex-direction: column;
+            padding: 24px 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-brand {
+            padding: 0 20px 28px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        .sidebar-brand .brand-name {
+            font-family: var(--display);
+            font-size: 26px;
+            letter-spacing: 5px;
+            color: var(--gold);
+        }
+
+        .sidebar-brand .brand-sub {
+            font-size: 10px;
+            letter-spacing: 2px;
+            color: var(--grey);
+            text-transform: uppercase;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 20px;
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.55);
+            cursor: pointer;
+            transition: all .2s;
+            border-left: 3px solid transparent;
+        }
+
+        .nav-item:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .nav-item.active {
+            color: var(--gold);
+            background: rgba(201, 168, 76, 0.07);
+            border-left-color: var(--gold);
+        }
+
+        .nav-item .nav-icon {
+            font-size: 16px;
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-badge {
+            margin-left: auto;
+            background: var(--gold);
+            color: #000;
+            font-size: 9px;
+            font-weight: 700;
+            padding: 2px 7px;
+            border-radius: 100px;
+        }
+
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 16px 20px;
+            border-top: 1px solid var(--border);
+        }
+
+        .logout-btn {
+            font-size: 12px;
+            color: var(--grey);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: color .2s;
+        }
+
+        .logout-btn:hover {
+            color: var(--red);
+        }
+
+        /* ---- MAIN ---- */
+        .main-area {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .topbar {
+            padding: 16px 28px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: var(--bg2);
+            flex-shrink: 0;
+        }
+
+        .topbar-title {
+            font-family: var(--display);
+            font-size: 24px;
+            letter-spacing: 3px;
+        }
+
+        .topbar-actions {
+            display: flex;
+            gap: 10px;
+            align-items: center;
+        }
+
+        .topbar-time {
+            font-size: 12px;
+            color: var(--grey);
+        }
+
+        .refresh-btn {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid var(--border);
+            color: white;
+            padding: 7px 14px;
+            border-radius: var(--radius);
+            font-size: 12px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            transition: background .2s;
+        }
+
+        .refresh-btn:hover {
+            background: rgba(255, 255, 255, 0.12);
+        }
+
+        .content-scroll {
+            flex: 1;
+            overflow-y: auto;
+            padding: 28px;
+        }
+
+        /* ---- PANELS ---- */
+        .panel {
+            display: none;
+        }
+
+        .panel.active {
+            display: block;
+        }
+
+        /* ---- STAT CARDS ---- */
+        .stat-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 28px;
+        }
+
+        .stat-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 22px 20px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-card::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            filter: blur(30px);
+            opacity: 0.3;
+        }
+
+        .stat-card.gold::before {
+            background: var(--gold);
+        }
+
+        .stat-card.green::before {
+            background: var(--green);
+        }
+
+        .stat-card.blue::before {
+            background: var(--blue);
+        }
+
+        .stat-card.orange::before {
+            background: var(--orange);
+        }
+
+        .stat-label {
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--grey);
+            margin-bottom: 10px;
+        }
+
+        .stat-value {
+            font-family: var(--display);
+            font-size: 36px;
+            letter-spacing: 2px;
+        }
+
+        .stat-card.gold .stat-value {
+            color: var(--gold);
+        }
+
+        .stat-card.green .stat-value {
+            color: var(--green);
+        }
+
+        .stat-card.blue .stat-value {
+            color: var(--blue);
+        }
+
+        .stat-card.orange .stat-value {
+            color: var(--orange);
+        }
+
+        .stat-sub {
+            font-size: 11px;
+            color: var(--grey);
+            margin-top: 6px;
+        }
+
+        /* ---- TABLES ---- */
+        .section-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            overflow: hidden;
+            margin-bottom: 24px;
+        }
+
+        .section-card-header {
+            padding: 18px 22px;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .section-card-header h3 {
+            font-size: 14px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .section-card-header span {
+            font-size: 11px;
+            color: var(--grey);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .data-table th {
+            padding: 11px 18px;
+            text-align: left;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            color: var(--gold);
+            border-bottom: 1px solid var(--border);
+            background: rgba(201, 168, 76, 0.04);
+        }
+
+        .data-table td {
+            padding: 13px 18px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.03);
+            font-size: 13px;
+            vertical-align: top;
+        }
+
+        .data-table tr:last-child td {
+            border-bottom: none;
+        }
+
+        .data-table tr:hover td {
+            background: rgba(255, 255, 255, 0.02);
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: var(--grey);
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+
+        /* ---- STATUS BADGES ---- */
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 3px 10px;
+            border-radius: 100px;
+            text-transform: uppercase;
+        }
+
+        .badge-pending {
+            background: rgba(249, 115, 22, 0.15);
+            color: var(--orange);
+        }
+
+        .badge-fulfilled {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green);
+        }
+
+        .badge-cancelled {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+        }
+
+        .badge-cod {
+            background: rgba(59, 130, 246, 0.15);
+            color: var(--blue);
+        }
+
+        .badge-online {
+            background: rgba(201, 168, 76, 0.15);
+            color: var(--gold);
+        }
+
+        /* ---- ACTION BUTTONS ---- */
+        .btn-sm {
+            font-size: 11px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            padding: 5px 14px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all .2s;
+        }
+
+        .btn-fulfill {
+            background: rgba(34, 197, 94, 0.15);
+            color: var(--green);
+            border: 1px solid rgba(34, 197, 94, 0.25);
+        }
+
+        .btn-fulfill:hover {
+            background: var(--green);
+            color: #000;
+        }
+
+        .btn-cancel {
+            background: rgba(239, 68, 68, 0.15);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, 0.25);
+        }
+
+        .btn-cancel:hover {
+            background: var(--red);
+            color: white;
+        }
+
+        .btn-delete {
+            background: rgba(239, 68, 68, 0.1);
+            color: var(--red);
+            border: 1px solid rgba(239, 68, 68, 0.2);
+        }
+
+        .btn-delete:hover {
+            background: var(--red);
+            color: white;
+        }
+
+        /* ---- FORM ELEMENTS ---- */
+        .form-row-admin {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        .form-group-admin {
+            margin-bottom: 16px;
+        }
+
+        .form-group-admin label {
+            display: block;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            color: var(--grey);
+            margin-bottom: 8px;
+        }
+
+        .form-group-admin input,
+        .form-group-admin select {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: white;
+            padding: 11px 14px;
+            font-size: 13px;
+            font-family: var(--font);
+            outline: none;
+            transition: border-color .3s;
+        }
+
+        .form-group-admin input:focus,
+        .form-group-admin select:focus {
+            border-color: var(--gold);
+        }
+
+        .form-group-admin select option {
+            background: var(--bg3);
+        }
+
+        .btn-gold {
+            background: var(--gold);
+            color: #000;
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 10px 24px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: background .3s;
+        }
+
+        .btn-gold:hover {
+            background: var(--gold-l);
+        }
+
+        .btn-outline {
+            background: transparent;
+            color: var(--gold);
+            border: 1px solid var(--gold);
+            font-size: 12px;
+            font-weight: 700;
+            letter-spacing: 2px;
+            text-transform: uppercase;
+            padding: 10px 24px;
+            border-radius: 100px;
+            cursor: pointer;
+            transition: all .3s;
+        }
+
+        .btn-outline:hover {
+            background: var(--gold);
+            color: #000;
+        }
+
+        /* ---- COUPON CARDS ---- */
+        .coupon-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .coupon-card {
+            background: var(--bg3);
+            border: 2px dashed rgba(201, 168, 76, 0.2);
+            border-radius: var(--radius-lg);
+            padding: 20px;
+            position: relative;
+        }
+
+        .coupon-code {
+            font-family: var(--display);
+            font-size: 24px;
+            letter-spacing: 4px;
+            color: var(--gold);
+            margin-bottom: 6px;
+        }
+
+        .coupon-info {
+            font-size: 12px;
+            color: var(--grey);
+            margin-bottom: 12px;
+        }
+
+        .coupon-del {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            background: none;
+            border: none;
+            color: var(--grey);
+            font-size: 16px;
+            cursor: pointer;
+            transition: color .2s;
+        }
+
+        .coupon-del:hover {
+            color: var(--red);
+        }
+
+        /* ---- PRODUCT EDITOR ---- */
+        .product-editor-card {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            padding: 24px;
+            margin-bottom: 24px;
+        }
+
+        .product-editor-card h4 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            margin-bottom: 18px;
+            color: var(--gold);
+        }
+
+        .pe-row {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
+        }
+
+        .pe-label {
+            font-size: 12px;
+            color: var(--grey);
+            min-width: 120px;
+        }
+
+        .pe-val {
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .pe-input {
+            background: var(--bg);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: white;
+            padding: 8px 14px;
+            font-size: 14px;
+            font-family: var(--font);
+            outline: none;
+            max-width: 180px;
+            transition: border-color .3s;
+        }
+
+        .pe-input:focus {
+            border-color: var(--gold);
+        }
+
+        /* ---- TOAST ---- */
+        #adminToast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: var(--surface);
+            border: 1px solid var(--border);
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-size: 13px;
+            font-weight: 600;
+            z-index: 9999;
+            white-space: nowrap;
+            transition: transform .4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        #adminToast.show {
+            transform: translateX(-50%) translateY(0);
+        }
+
+        #adminToast.s {
+            border-color: rgba(34, 197, 94, 0.4);
+            color: var(--green);
+        }
+
+        #adminToast.e {
+            border-color: rgba(239, 68, 68, 0.4);
+            color: var(--red);
+        }
+
+        /* ---- MISC ---- */
+        .flex-r {
+            display: flex;
+            gap: 8px;
+        }
+
+        .mt-4 {
+            margin-top: 16px;
+        }
+
+        .text-gold {
+            color: var(--gold);
+        }
+
+        .text-grey {
+            color: var(--grey);
+        }
+
+        .divider {
+            border: none;
+            border-top: 1px solid var(--border);
+            margin: 20px 0;
+        }
+
+        .filter-row {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-select {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: white;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+            cursor: pointer;
+        }
+
+        .search-input {
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            color: white;
+            padding: 8px 14px;
+            font-size: 12px;
+            font-family: var(--font);
+            outline: none;
+            width: 220px;
+        }
+
+        .search-input:focus,
+        .filter-select:focus {
+            border-color: var(--gold);
+        }
+
+        .revenue-total {
+            font-family: 'Bebas Neue';
+            font-size: 28px;
+            color: var(--green);
+            letter-spacing: 2px;
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ===== LOGIN ===== -->
+    <div id="loginScreen">
+        <div class="login-box">
+            <div class="login-logo">ECLIPSE</div>
+            <div class="login-sub">Admin Portal</div>
+            <input type="password" id="pwInput" placeholder="Enter admin password"
+                onkeydown="if(event.key==='Enter') doLogin()" />
+            <button onclick="doLogin()">LOGIN</button>
+            <div class="login-err" id="loginErr"></div>
+            <div style="margin-top:16px;font-size:10px;color:var(--grey)">Default password: eclipse2025</div>
+        </div>
+    </div>
+
+    <!-- ===== APP SHELL ===== -->
+    <div id="appShell">
+        <!-- SIDEBAR -->
+        <aside class="sidebar">
+            <div class="sidebar-brand">
+                <div class="brand-name">ECLIPSE</div>
+                <div class="brand-sub">Admin Portal</div>
+            </div>
+            <div class="nav-item active" onclick="showPanel('dashboard', this)"><span
+                    class="nav-icon">📊</span>Dashboard</div>
+            <div class="nav-item" onclick="showPanel('orders', this)"><span class="nav-icon">📦</span>Orders <span
+                    class="nav-badge" id="ordersCount">0</span></div>
+            <div class="nav-item" onclick="showPanel('messages', this)"><span class="nav-icon">✉️</span>Messages <span
+                    class="nav-badge" id="messagesCount">0</span></div>
+            <div class="nav-item" onclick="showPanel('notify', this)"><span class="nav-icon">🔔</span>Notify List <span
+                    class="nav-badge" id="notifyCount">0</span></div>
+            <div class="nav-item" onclick="showPanel('coupons', this)"><span class="nav-icon">🎟️</span>Coupons</div>
+            <div class="nav-item" onclick="showPanel('products', this)"><span class="nav-icon">👕</span>Products</div>
+            <div class="nav-item" onclick="showPanel('settings', this)"><span class="nav-icon">⚙️</span>Settings</div>
+            <div class="sidebar-footer">
+                <div class="logout-btn" onclick="doLogout()"><span>🚪</span> Logout</div>
+            </div>
+        </aside>
+
+        <!-- MAIN -->
+        <div class="main-area">
+            <div class="topbar">
+                <div class="topbar-title" id="topbarTitle">DASHBOARD</div>
+                <div class="topbar-actions">
+                    <span class="topbar-time" id="topbarTime"></span>
+                    <button class="refresh-btn" onclick="loadAllData()">↻ Refresh</button>
+                    <button class="refresh-btn" onclick="window.open('store.html','_blank')">🛍️ View Store</button>
+                </div>
+            </div>
+            <div class="content-scroll">
+
+                <!-- DASHBOARD -->
+                <div class="panel active" id="panel-dashboard">
+                    <div class="stat-grid">
+                        <div class="stat-card gold">
+                            <div class="stat-label">Total Orders</div>
+                            <div class="stat-value" id="s-orders">0</div>
+                            <div class="stat-sub">All time</div>
+                        </div>
+                        <div class="stat-card green">
+                            <div class="stat-label">Revenue</div>
+                            <div class="stat-value" id="s-revenue">₹0</div>
+                            <div class="stat-sub">Confirmed orders</div>
+                        </div>
+                        <div class="stat-card blue">
+                            <div class="stat-label">Pending</div>
+                            <div class="stat-value" id="s-pending">0</div>
+                            <div class="stat-sub">Awaiting fulfillment</div>
+                        </div>
+                        <div class="stat-card orange">
+                            <div class="stat-label">Messages</div>
+                            <div class="stat-value" id="s-messages">0</div>
+                            <div class="stat-sub">Customer inquiries</div>
+                        </div>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3>Recent Orders</h3><span id="recentOrderNote">Last 5</span>
+                        </div>
+                        <div id="dashRecentOrders"></div>
+                    </div>
+                </div>
+
+                <!-- ORDERS -->
+                <div class="panel" id="panel-orders">
+                    <div class="filter-row">
+                        <input type="text" class="search-input" id="orderSearch"
+                            placeholder="Search by name or order ID…" oninput="renderOrders()" />
+                        <select class="filter-select" id="orderStatusFilter" onchange="renderOrders()">
+                            <option value="">All Statuses</option>
+                            <option value="Pending">Pending</option>
+                            <option value="Fulfilled">Fulfilled</option>
+                            <option value="Cancelled">Cancelled</option>
+                        </select>
+                        <select class="filter-select" id="orderPayFilter" onchange="renderOrders()">
+                            <option value="">All Payment</option>
+                            <option value="cod">COD</option>
+                            <option value="online">Online</option>
+                        </select>
+                        <button class="btn-gold btn-sm" onclick="exportOrders()">⬇ Export CSV</button>
+                    </div>
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3>All Orders</h3><span id="ordersTotal"></span>
+                        </div>
+                        <div id="ordersTableWrap">
+                            <div class="empty-state">
+                                <div class="empty-icon">📦</div>
+                                <p>No orders yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- MESSAGES -->
+                <div class="panel" id="panel-messages">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3>Customer Messages</h3><span>From contact form</span>
+                        </div>
+                        <div id="messagesWrap">
+                            <div class="empty-state">
+                                <div class="empty-icon">✉️</div>
+                                <p>No messages yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- NOTIFY LIST -->
+                <div class="panel" id="panel-notify">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3>Notify Me Signups</h3><span>Drop 002 interest list</span>
+                        </div>
+                        <div id="notifyWrap">
+                            <div class="empty-state">
+                                <div class="empty-icon">🔔</div>
+                                <p>No signups yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- COUPONS -->
+                <div class="panel" id="panel-coupons">
+                    <div class="section-card" style="padding:24px;margin-bottom:24px;">
+                        <div class="section-card-header" style="padding:0 0 18px;">
+                            <h3>Add Coupon Code</h3>
+                        </div>
+                        <div class="form-row-admin">
+                            <div class="form-group-admin"><label>Coupon Code</label><input type="text" id="cpCode"
+                                    placeholder="e.g. SUMMER25" /></div>
+                            <div class="form-group-admin">
+                                <label>Discount Type</label>
+                                <select id="cpType">
+                                    <option value="percent">Percent (%)</option>
+                                    <option value="flat">Flat (₹)</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="form-row-admin">
+                            <div class="form-group-admin"><label>Discount Value</label><input type="number" id="cpValue"
+                                    placeholder="e.g. 10 for 10% or ₹100" /></div>
+                            <div class="form-group-admin"><label>Label (shown to user)</label><input type="text"
+                                    id="cpLabel" placeholder="e.g. 10% off" /></div>
+                        </div>
+                        <button class="btn-gold" onclick="addCoupon()">Add Coupon</button>
+                    </div>
+                    <h3
+                        style="font-size:13px;font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:16px;">
+                        Active Coupons</h3>
+                    <div class="coupon-grid" id="couponGrid"></div>
+                </div>
+
+                <!-- PRODUCTS -->
+                <div class="panel" id="panel-products">
+                    <div class="product-editor-card">
+                        <h4>Product — Karan Aujla Signature Drop Tee 001</h4>
+                        <div class="pe-row">
+                            <div class="pe-label">Current Price</div>
+                            <div class="pe-val text-gold" id="peCurrent">₹999</div>
+                        </div>
+                        <div class="pe-row">
+                            <div class="pe-label">New Price (₹)</div>
+                            <input type="number" class="pe-input" id="peNewPrice" placeholder="e.g. 1099" min="100" />
+                            <button class="btn-gold" onclick="updatePrice()">Update Price</button>
+                        </div>
+                        <div class="pe-row">
+                            <div class="pe-label">MRP / Old Price</div><input type="number" class="pe-input" id="peMRP"
+                                placeholder="e.g. 1299" min="100" /><button class="btn-outline"
+                                onclick="updateMRP()">Update MRP</button>
+                        </div>
+                        <div class="pe-row">
+                            <div class="pe-label">Stock Status</div>
+                            <select class="pe-input" id="peStock">
+                                <option value="In Stock">In Stock</option>
+                                <option value="Low Stock">Low Stock</option>
+                                <option value="Out of Stock">Out of Stock</option>
+                            </select>
+                            <button class="btn-outline" onclick="updateStock()">Update Stock</button>
+                        </div>
+                    </div>
+                    <div class="product-editor-card">
+                        <h4>Announcements / Hero Text</h4>
+                        <div class="form-group-admin"><label>Hero Tag (e.g. NEW DROP 001)</label><input type="text"
+                                id="heroTagEdit" placeholder="NEW DROP 001" /></div>
+                        <div class="form-group-admin"><label>Hero Subtitle</label><input type="text" id="heroSubEdit"
+                                placeholder="Tagline under the title" /></div>
+                        <button class="btn-gold" onclick="saveAnnouncement()">Save to Store</button>
+                    </div>
+                </div>
+
+                <!-- SETTINGS -->
+                <div class="panel" id="panel-settings">
+                    <div class="product-editor-card">
+                        <h4>Admin Password</h4>
+                        <div class="form-group-admin"><label>New Password</label><input type="password" id="newPw"
+                                placeholder="New password" /></div>
+                        <div class="form-group-admin"><label>Confirm Password</label><input type="password"
+                                id="newPwConfirm" placeholder="Confirm new password" /></div>
+                        <button class="btn-gold" onclick="changePassword()">Change Password</button>
+                    </div>
+                    <div class="product-editor-card">
+                        <h4>Danger Zone</h4>
+                        <div class="flex-r">
+                            <button class="btn-cancel btn-sm" onclick="clearData('eclipse_orders')">🗑 Clear All
+                                Orders</button>
+                            <button class="btn-cancel btn-sm" onclick="clearData('eclipse_messages')">🗑 Clear
+                                Messages</button>
+                            <button class="btn-cancel btn-sm" onclick="clearData('eclipse_notify')">🗑 Clear Notify
+                                List</button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div><!-- /appShell -->
+
+    <div id="adminToast"></div>
+
+    <script>
+        // ===== AUTH =====
+        const ADMIN_PW_KEY = 'eclipse_admin_pw';
+        function getStoredPw() { return localStorage.getItem(ADMIN_PW_KEY) || 'eclipse2025'; }
+        function doLogin() {
+            const pw = document.getElementById('pwInput').value;
+            if (pw === getStoredPw()) {
+                sessionStorage.setItem('eclipse_admin_auth', '1');
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appShell').classList.add('visible');
+                loadAllData(); startClock();
+            } else {
+                document.getElementById('loginErr').textContent = '❌ Incorrect password.';
+            }
+        }
+        function doLogout() { sessionStorage.removeItem('eclipse_admin_auth'); location.reload(); }
+        function changePassword() {
+            const np = document.getElementById('newPw').value;
+            const nc = document.getElementById('newPwConfirm').value;
+            if (!np) { toast('Enter a new password.', 'e'); return; }
+            if (np !== nc) { toast('Passwords do not match.', 'e'); return; }
+            localStorage.setItem(ADMIN_PW_KEY, np);
+            toast('✅ Password updated!', 's');
+            document.getElementById('newPw').value = ''; document.getElementById('newPwConfirm').value = '';
+        }
+        // Auto-login if already authenticated
+        window.addEventListener('load', () => {
+            if (sessionStorage.getItem('eclipse_admin_auth') === '1') {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appShell').classList.add('visible');
+                loadAllData(); startClock();
+            }
+        });
+
+        // ===== CLOCK =====
+        function startClock() {
+            function tick() { document.getElementById('topbarTime').textContent = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
+            tick(); setInterval(tick, 10000);
+        }
+
+        // ===== PANEL NAVIGATION =====
+        function showPanel(name, el) {
+            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+            document.getElementById('panel-' + name).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+            el.classList.add('active');
+            const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
+            document.getElementById('topbarTitle').textContent = titles[name] || name.toUpperCase();
+        }
+
+        // ===== DATA HELPERS =====
+        function getOrders() { return JSON.parse(localStorage.getItem('eclipse_orders') || '[]'); }
+        function getMessages() { return JSON.parse(localStorage.getItem('eclipse_messages') || '[]'); }
+        function getNotify() { return JSON.parse(localStorage.getItem('eclipse_notify') || '[]'); }
+        function getCoupons() { const s = localStorage.getItem('eclipse_coupons'); if (s) return JSON.parse(s); return { 'ECLIPSE10': { discount: 10, type: 'percent', label: '10% off' }, 'LAUNCH20': { discount: 20, type: 'percent', label: '20% off' }, 'FLAT100': { discount: 100, type: 'flat', label: '₹100 off' }, 'DREAM50': { discount: 50, type: 'flat', label: '₹50 off' } }; }
+
+        // ===== LOAD ALL =====
+        function loadAllData() {
+            const orders = getOrders();
+            const messages = getMessages();
+            const notify = getNotify();
+            // Nav badges
+            document.getElementById('ordersCount').textContent = orders.length;
+            document.getElementById('messagesCount').textContent = messages.length;
+            document.getElementById('notifyCount').textContent = notify.length;
+            // Dashboard stats
+            const pendingOrders = orders.filter(o => o.status === 'Pending');
+            const revenue = orders.filter(o => o.status !== 'Cancelled').reduce((acc, o) => acc + (o.finalPrice || o.mrp || 999), 0);
+            document.getElementById('s-orders').textContent = orders.length;
+            document.getElementById('s-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+            document.getElementById('s-pending').textContent = pendingOrders.length;
+            document.getElementById('s-messages').textContent = messages.length;
+            // Dashboard recent orders
+            renderDashRecent(orders.slice(0, 5));
+            renderOrders();
+            renderMessages();
+            renderNotify();
+            renderCoupons();
+            toast('Data refreshed', 's');
+        }
+
+        // ===== FORMAT DATE =====
+        function fmtDate(iso) {
+            if (!iso) return '—';
+            const d = new Date(iso);
+            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+        }
+
+        // ===== ORDER TABLE =====
+        function orderRow(o, showActions = true) {
+            const payBadge = o.paymentMethod === 'cod' ? '<span class="badge badge-cod">COD</span>' : '<span class="badge badge-online">Online</span>';
+            const statusBadge = `<span class="badge badge-${o.status?.toLowerCase() || 'pending'}">${o.status || 'Pending'}</span>`;
+            const actions = showActions ? `<div class="flex-r"><button class="btn-sm btn-fulfill" onclick="updateOrderStatus('${o.id}','Fulfilled')">✅ Fulfill</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>` : '';
+            return `<tr>
+      <td><span class="text-gold" style="font-size:11px;font-family:'Bebas Neue';letter-spacing:2px;">${o.id}</span></td>
+      <td>${o.customer?.name || '—'}<br/><span style="font-size:11px;color:var(--grey)">${o.customer?.phone || ''}</span></td>
+      <td>${o.product || 'Tee'}<br/><span style="font-size:11px;color:var(--grey)">Size: ${o.size || '—'}</span></td>
+      <td>${o.customer?.city || '—'}</td>
+      <td>₹${o.finalPrice || o.mrp || 999}${o.coupon ? `<br/><span style="font-size:10px;color:var(--green)">🎟 ${o.coupon}</span>` : ''}</td>
+      <td>${payBadge}</td>
+      <td>${statusBadge}</td>
+      <td style="font-size:11px;color:var(--grey)">${fmtDate(o.timestamp)}</td>
+      ${showActions ? `<td>${actions}</td>` : ''}
+    </tr>`;
+        }
+
+        function renderDashRecent(orders) {
+            const wrap = document.getElementById('dashRecentOrders');
+            if (!orders.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet. Once customers place orders, they\'ll appear here.</p></div>'; return; }
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>City</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead><tbody>${orders.map(o => orderRow(o, false)).join('')}</tbody></table>`;
+        }
+
+        function renderOrders() {
+            const orders = getOrders();
+            const search = document.getElementById('orderSearch')?.value?.toLowerCase() || '';
+            const statusF = document.getElementById('orderStatusFilter')?.value || '';
+            const payF = document.getElementById('orderPayFilter')?.value || '';
+            let filtered = orders.filter(o => {
+                const matchSearch = !search || (o.id + o.customer?.name + o.customer?.phone).toLowerCase().includes(search);
+                const matchStatus = !statusF || o.status === statusF;
+                const matchPay = !payF || o.paymentMethod === payF;
+                return matchSearch && matchStatus && matchPay;
+            });
+            const wrap = document.getElementById('ordersTableWrap');
+            const totalEl = document.getElementById('ordersTotal');
+            if (totalEl) totalEl.textContent = `${filtered.length} of ${orders.length} orders`;
+            if (!filtered.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No matching orders found.</p></div>'; return; }
+            wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>City</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${filtered.map(o => orderRow(o, true)).join('')}</tbody></table></div>`;
+        }
+
+        function updateOrderStatus(id, status) {
+            const orders = getOrders();
+            const idx = orders.findIndex(o => o.id === id);
+            if (idx === -1) return;
+            orders[idx].status = status;
+            localStorage.setItem('eclipse_orders', JSON.stringify(orders));
+            loadAllData();
+            toast(`Order ${status}!`, 's');
+        }
+
+        function exportOrders() {
+            const orders = getOrders();
+            if (!orders.length) { toast('No orders to export.', 'e'); return; }
+            const headers = ['Order ID', 'Name', 'Phone', 'Email', 'Address', 'City', 'PIN', 'State', 'Product', 'Size', 'MRP', 'Coupon', 'Final Price', 'Payment', 'UTR', 'Status', 'Date'];
+            const rows = orders.map(o => [o.id, o.customer?.name, o.customer?.phone, o.customer?.email, o.customer?.address?.replace(/,/g, ' '), o.customer?.city, o.customer?.pin, o.customer?.state, o.product, o.size, o.mrp, o.coupon, o.finalPrice, o.paymentMethod, o.utr, o.status, fmtDate(o.timestamp)].map(v => `"${v || ''}"`).join(','));
+            const csv = [headers.join(','), ...rows].join('\n');
+            const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            a.download = `eclipse-orders-${Date.now()}.csv`; a.click();
+            toast('✅ CSV exported!', 's');
+        }
+
+        // ===== MESSAGES =====
+        function renderMessages() {
+            const msgs = getMessages();
+            const wrap = document.getElementById('messagesWrap');
+            if (!msgs.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✉️</div><p>No messages yet.</p></div>'; return; }
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Contact</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>${msgs.map((m, i) => `<tr><td>${m.name}</td><td>${m.contact}</td><td style="max-width:320px;word-break:break-word;">${m.message}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(m.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteMessage(${i})">🗑</button></td></tr>`).join('')}</tbody></table>`;
+        }
+        function deleteMessage(i) { const msgs = getMessages(); msgs.splice(i, 1); localStorage.setItem('eclipse_messages', JSON.stringify(msgs)); loadAllData(); toast('Deleted', 's'); }
+
+        // ===== NOTIFY =====
+        function renderNotify() {
+            const list = getNotify();
+            const wrap = document.getElementById('notifyWrap');
+            if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p>No signups yet.</p></div>'; return; }
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>Signed Up</th><th></th></tr></thead><tbody>${list.map((n, i) => `<tr><td>${i + 1}</td><td>${n.name}</td><td>${n.contact}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(n.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteNotify(${i})">🗑</button></td></tr>`).join('')}</tbody></table>`;
+        }
+        function deleteNotify(i) { const list = getNotify(); list.splice(i, 1); localStorage.setItem('eclipse_notify', JSON.stringify(list)); loadAllData(); toast('Removed', 's'); }
+
+        // ===== COUPONS =====
+        function renderCoupons() {
+            const coupons = getCoupons();
+            const grid = document.getElementById('couponGrid');
+            if (!Object.keys(coupons).length) { grid.innerHTML = '<p style="color:var(--grey);font-size:13px;">No coupons yet.</p>'; return; }
+            grid.innerHTML = Object.entries(coupons).map(([code, c]) => `
+      <div class="coupon-card">
+        <button class="coupon-del" onclick="deleteCoupon('${code}')">✕</button>
+        <div class="coupon-code">${code}</div>
+        <div class="coupon-info">${c.type === 'percent' ? c.discount + '% off' : '₹' + c.discount + ' flat off'} &nbsp;•&nbsp; ${c.label}</div>
+        <span class="badge badge-fulfilled">Active</span>
+      </div>`).join('');
+        }
+        function addCoupon() {
+            const code = document.getElementById('cpCode').value.trim().toUpperCase();
+            const type = document.getElementById('cpType').value;
+            const value = parseFloat(document.getElementById('cpValue').value);
+            const label = document.getElementById('cpLabel').value.trim();
+            if (!code || !value || !label) { toast('Fill in all coupon fields.', 'e'); return; }
+            const coupons = getCoupons();
+            coupons[code] = { discount: value, type, label };
+            localStorage.setItem('eclipse_coupons', JSON.stringify(coupons));
+            document.getElementById('cpCode').value = ''; document.getElementById('cpValue').value = ''; document.getElementById('cpLabel').value = '';
+            renderCoupons(); toast(`✅ Coupon ${code} added!`, 's');
+        }
+        function deleteCoupon(code) {
+            const coupons = getCoupons();
+            delete coupons[code];
+            localStorage.setItem('eclipse_coupons', JSON.stringify(coupons));
+            renderCoupons(); toast(`Coupon ${code} removed.`, 's');
+        }
+
+        // ===== PRODUCTS =====
+        function updatePrice() {
+            const np = parseInt(document.getElementById('peNewPrice').value);
+            if (!np || np < 100) { toast('Enter a valid price.', 'e'); return; }
+            localStorage.setItem('eclipse_product_price', np);
+            document.getElementById('peCurrent').textContent = '₹' + np;
+            toast('✅ Price updated! Reload the store to apply.', 's');
+        }
+        function updateMRP() {
+            const mrp = parseInt(document.getElementById('peMRP').value);
+            if (!mrp || mrp < 100) { toast('Enter a valid MRP.', 'e'); return; }
+            localStorage.setItem('eclipse_product_mrp', mrp);
+            toast('✅ MRP updated! Reload the store to apply.', 's');
+        }
+        function updateStock() {
+            const st = document.getElementById('peStock').value;
+            localStorage.setItem('eclipse_product_stock', st);
+            toast('✅ Stock status: ' + st, 's');
+        }
+        function saveAnnouncement() {
+            localStorage.setItem('eclipse_hero_tag', document.getElementById('heroTagEdit').value.trim());
+            localStorage.setItem('eclipse_hero_sub', document.getElementById('heroSubEdit').value.trim());
+            toast('✅ Announcement saved! Reload the store.', 's');
+        }
+
+        // ===== CLEAR DATA =====
+        function clearData(key) {
+            if (!confirm('Are you sure? This cannot be undone.')) return;
+            localStorage.removeItem(key);
+            loadAllData();
+            toast('Cleared.', 's');
+        }
+
+        // ===== TOAST =====
+        let tt;
+        function toast(msg, type = 's') {
+            const t = document.getElementById('adminToast');
+            t.textContent = msg; t.className = `show ${type}`;
+            clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 3000);
+        }
+
+        // Load product settings on page load
+        window.addEventListener('load', () => {
+            const p = localStorage.getItem('eclipse_product_price');
+            if (p) document.getElementById('peCurrent').textContent = '₹' + p;
+            const stock = localStorage.getItem('eclipse_product_stock');
+            if (stock) document.getElementById('peStock').value = stock;
+            const tag = localStorage.getItem('eclipse_hero_tag');
+            if (tag) document.getElementById('heroTagEdit').value = tag;
+            const sub = localStorage.getItem('eclipse_hero_sub');
+            if (sub) document.getElementById('heroSubEdit').value = sub;
+        });
+    </script>
+</body>
+
+</html>
