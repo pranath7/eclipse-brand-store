@@ -434,13 +434,19 @@ function selectPayment(type) {
     }
 }
 
-// ===== PLACE ORDER + RAZORPAY INTEGRATION =====
+// ===== PLACE ORDER + MANUAL PAYMENT =====
 async function placeOrder() {
     if (!selectedPayment) { document.getElementById('paymentError').classList.remove('hidden'); return; }
+    if (selectedPayment === 'online') {
+        const u = document.getElementById('utrInput').value.trim();
+        if (u.length < 8) { showToast('Please enter a valid UTR / Trx ID.', 'error'); return; }
+    }
 
     document.getElementById('omStep2').style.opacity = '0.5';
 
     const { finalPrice, pointsUsed } = calcFinalPrice();
+    const orderId = 'ECL' + Date.now().toString().slice(-8).toUpperCase();
+    const utrStr = selectedPayment === 'online' ? document.getElementById('utrInput').value.trim() : '';
 
     let referrerId = null;
     if (appliedCoupon && activeCoupons[appliedCoupon] && activeCoupons[appliedCoupon].referrerId) {
@@ -452,71 +458,6 @@ async function placeOrder() {
         earnedPts = 50; // Earn 50 only if pre-paid online
     }
 
-    if (selectedPayment === 'online') {
-        try {
-            // 1. Ask our backend to generate a Razorpay Order ID securely
-            const res = await fetch('/api/create-razorpay-order', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ amount: finalPrice })
-            });
-            const orderData = await res.json();
-            if (!orderData || !orderData.id) throw new Error(orderData.error || "Could not create Razorpay Order");
-
-            // 2. Open official Razorpay Checkout Window
-            const options = {
-                key: 'YOUR_RAZORPAY_TEST_KEY_ID', // Replace with your Live or Test Key ID in Vercel
-                amount: orderData.amount,
-                currency: orderData.currency,
-                name: "ECLIPSE",
-                description: "Karan Aujla Tee",
-                order_id: orderData.id,
-                handler: async function (response) {
-                    // Payment successful!
-                    const orderId = 'ECL' + Date.now().toString().slice(-8).toUpperCase();
-                    await saveOrderToFirestore(orderId, finalPrice, pointsUsed, earnedPts, referrerId, response.razorpay_payment_id);
-                    document.getElementById('omStep2').style.opacity = '1';
-                    closeModal('orderModal'); openModal('successModal');
-                    document.getElementById('successMsg').innerHTML = `Payment confirmed! <strong>Karan Aujla Tee (${selectedSize})</strong> will be dispatched to <strong>${deliveryData.city}</strong> within 1–3 days. <br><br><span style="color:#888;font-size:12px;">Transaction ID: ${response.razorpay_payment_id}</span>${earnedPts > 0 ? '<br><br><span style="color:var(--gold);"><b>+50 Points</b> added to your Wallet!</span>' : ''}`;
-                    document.getElementById('orderId').textContent = orderId;
-                    cart = []; updateCartCount();
-                    selectedSize = null; appliedCoupon = null;
-                    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-                },
-                prefill: {
-                    name: deliveryData.name,
-                    email: deliveryData.email || (currentUser ? currentUser.email : ''),
-                    contact: deliveryData.phone
-                },
-                theme: { color: "#c9a84c" }
-            };
-            const rzp1 = new window.Razorpay(options);
-            rzp1.on('payment.failed', function (response) {
-                showToast('Payment Failed or Cancelled.', 'error');
-                document.getElementById('omStep2').style.opacity = '1';
-            });
-            rzp1.open();
-        } catch (error) {
-            console.error(error);
-            showToast(error.message || 'Payment Gateway Error. Are you running on localhost?', 'error');
-            document.getElementById('omStep2').style.opacity = '1';
-        }
-    } else {
-        // --- COD FLOW ---
-        const orderId = 'ECL' + Date.now().toString().slice(-8).toUpperCase();
-        await saveOrderToFirestore(orderId, finalPrice, pointsUsed, earnedPts, referrerId, 'COD');
-        document.getElementById('omStep2').style.opacity = '1';
-        let earnMsg = currentUser ? `<br><br><i style="color:var(--grey);font-size:12px;">You'll earn 50 points when this order is delivered.</i>` : `<br><br><i style="color:var(--grey);font-size:12px;">Create an account next time to earn points!</i>`;
-        document.getElementById('successMsg').innerHTML = `Your order for <strong>Karan Aujla Tee (${selectedSize})</strong> is placed! We'll call <strong>${deliveryData.phone}</strong> to confirm. COD amount: ₹${finalPrice}. ${earnMsg}`;
-        document.getElementById('orderId').textContent = orderId;
-        closeModal('orderModal'); openModal('successModal');
-        cart = []; updateCartCount();
-        selectedSize = null; appliedCoupon = null;
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-    }
-}
-
-async function saveOrderToFirestore(orderId, finalPrice, pointsUsed, earnedPts, referrerId, paymentRef) {
     const order = {
         id: orderId,
         timestamp: new Date().toISOString(),
@@ -528,16 +469,17 @@ async function saveOrderToFirestore(orderId, finalPrice, pointsUsed, earnedPts, 
         pointsUsed: pointsUsed,
         finalPrice,
         paymentMethod: selectedPayment,
-        utr: paymentRef,
+        utr: utrStr,
         status: 'Pending',
         userId: currentUser ? currentUser.uid : null,
         earnedPoints: earnedPts,
-        pointsAwarded: (earnedPts > 0)
+        pointsAwarded: (earnedPts > 0) // Track if wallet already credited automatically
     };
 
     try {
         await db.collection('orders').doc(orderId).set(order);
 
+        // Handle Wallet Adjustments
         if (currentUser) {
             let offset = 0;
             if (pointsUsed > 0) offset -= pointsUsed;
@@ -549,6 +491,7 @@ async function saveOrderToFirestore(orderId, finalPrice, pointsUsed, earnedPts, 
             }
         }
 
+        // Handle Affiliate Bonus
         if (referrerId) {
             const refDoc = await db.collection('users').doc(referrerId).get();
             if (refDoc.exists) {
@@ -559,11 +502,31 @@ async function saveOrderToFirestore(orderId, finalPrice, pointsUsed, earnedPts, 
                 await db.collection('users').doc(referrerId).update(updates);
             }
         }
-    } catch (e) {
-        console.error("Firestore Error Saving Order:", e);
-        showToast('Error saving order details.', 'error');
+
+        document.getElementById('omStep2').style.opacity = '1';
+        document.getElementById('orderId').textContent = orderId;
+
+        let earnMsg = earnedPts > 0 ? `<br><br><span style="color:var(--gold);"><b>+50 Points</b> added to your Wallet!</span>` : (selectedPayment === 'cod' && currentUser ? `<br><br><i style="color:var(--grey);font-size:12px;">You'll earn 50 points when this order is delivered.</i>` : `<br><br><i style="color:var(--grey);font-size:12px;">Create an account next time to earn points!</i>`);
+
+        let msg = selectedPayment === 'cod'
+            ? `Your order for <strong>Karan Aujla Tee (${selectedSize})</strong> is placed! We'll call <strong>${deliveryData.phone}</strong> to confirm. COD amount: ₹${finalPrice}. ${earnMsg}`
+            : `Payment confirmed! <strong>Karan Aujla Tee (${selectedSize})</strong> will be dispatched to <strong>${deliveryData.city}</strong> within 1–3 days. UTR: <strong>${utrStr}</strong>. Paid: ₹${finalPrice}. ${earnMsg}`;
+
+        document.getElementById('successMsg').innerHTML = msg;
+        closeModal('orderModal'); openModal('successModal');
+        cart = []; updateCartCount();
+        selectedSize = null; appliedCoupon = null;
+        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
+
+    } catch (err) {
+        document.getElementById('omStep2').style.opacity = '1';
+        showToast('Error connecting to database. Please try again.', 'error');
+        console.error(err);
     }
 }
+
+// ===== COPY UPI =====
+function copyUPI() { navigator.clipboard.writeText('pranath7@fam').then(() => showToast('✅ UPI ID copied!', 'success')).catch(() => showToast('UPI: pranath7@fam', 'success')); }
 
 // ===== NOTIFY =====
 function openNotifyModal() { openModal('notifyModal'); }
