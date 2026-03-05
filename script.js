@@ -402,4 +402,28 @@ if (omPhoneEl) omPhoneEl.addEventListener('input', e => { e.target.value = e.tar
 const omPinEl = document.getElementById('omPin');
 if (omPinEl) omPinEl.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
 
+// ===== CUSTOM ORDERS =====
+function sendCustomWhatsApp() {
+    const type = document.getElementById('customType').value;
+    const qty = document.getElementById('customQty').value;
+    const color = document.getElementById('customColor').value || 'Any';
+    const idea = document.getElementById('customIdea').value;
+
+    let message = `Hi Eclipse! 🌑\nI want to make a *Custom Order*.\n\n`;
+    message += `👕 *Garment:* ${type}\n`;
+    message += `📦 *Quantity:* ${qty}\n`;
+    message += `🎨 *Color:* ${color}\n`;
+
+    if (idea.trim()) {
+        message += `💡 *Design Idea:* ${idea}\n`;
+    }
+
+    message += `\nI have the design file ready to send.`;
+
+    const phone = "916369142027";
+    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
+
+    window.open(url, '_blank');
+}
+
 console.log('%c ECLIPSE STORE v2 ', 'background:#c9a84c;color:#000;font-size:18px;font-weight:bold;padding:6px 16px;border-radius:4px;');

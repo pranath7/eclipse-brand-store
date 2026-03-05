@@ -45,6 +45,7 @@
                 <li><a href="#hero" class="nav-link">Home</a></li>
                 <li><a href="#products" class="nav-link">Shop</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
+                <li><a href="#custom" class="nav-link">Custom</a></li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
             <div class="nav-actions">
@@ -66,6 +67,7 @@
             <a href="#hero" class="mobile-link">Home</a>
             <a href="#products" class="mobile-link">Shop</a>
             <a href="#about" class="mobile-link">About</a>
+            <a href="#custom" class="mobile-link">Custom</a>
             <a href="#contact" class="mobile-link">Contact</a>
         </div>
     </nav>
@@ -168,6 +170,82 @@
                         <h3 class="product-name">Next Drop — 002</h3>
                         <div class="product-price-row"><span class="product-price">TBA</span></div>
                         <button class="btn btn-ghost" onclick="openNotifyModal()">Notify Me</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== CUSTOM STUDIO ===== -->
+    <section id="custom" style="padding: 100px 0;">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">— MAKE IT YOURS —</div>
+                <h2 class="section-title">CUSTOM STUDIO</h2>
+            </div>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <h3
+                        style="font-family: var(--font-display); font-size: 32px; letter-spacing: 2px; margin-bottom: 20px;">
+                        Bring Your Vision To Life</h3>
+                    <p style="color: var(--grey); margin-bottom: 24px; line-height: 1.8;">Got a design in mind? Let us
+                        print it on our premium heavy-weight fabrics. Choose your style, tell us the quantity, and send
+                        your design directly on WhatsApp.</p>
+                    <div class="contact-item">
+                        <div class="contact-icon">👕</div>
+                        <div><strong>Oversized T-Shirts</strong>
+                            <p>Premium 180 GSM Cotton</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">✨</div>
+                        <div><strong>Crop Tops</strong>
+                            <p>Trendy & Comfortable Fit</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">🧥</div>
+                        <div><strong>Winter Hoodies</strong>
+                            <p>Heavyweight & Fleece-lined</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="contact-form">
+                    <h3 style="margin-bottom: 24px;">Start Your Custom Order</h3>
+                    <div class="form-group">
+                        <label>Garment Type</label>
+                        <select id="customType"
+                            style="width: 100%; padding: 14px 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px; color: white; margin-top: 8px; outline: none; cursor: pointer; font-family: 'Inter', sans-serif;">
+                            <option value="Oversized T-Shirt" style="background: var(--bg2);">Oversized T-Shirt</option>
+                            <option value="Crop Top" style="background: var(--bg2);">Crop Top</option>
+                            <option value="Hoodie" style="background: var(--bg2);">Premium Hoodie</option>
+                        </select>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Quantity</label>
+                            <input type="number" id="customQty" min="1" value="1" required />
+                        </div>
+                        <div class="form-group">
+                            <label>Color Preference</label>
+                            <input type="text" id="customColor" placeholder="e.g. Black, White" />
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Design Idea (Optional)</label>
+                        <textarea id="customIdea" rows="3" placeholder="Describe what you want printed..."></textarea>
+                    </div>
+                    <button type="button" class="btn btn-primary full-width" onclick="sendCustomWhatsApp()">
+                        <span style="display:flex;align-items:center;justify-content:center;gap:8px;">
+                            <svg viewBox="0 0 24 24" width="20" height="20" fill="currentColor">
+                                <path
+                                    d="M12.031 0C5.383 0 0 5.383 0 12.033c0 2.12.551 4.195 1.597 6.014L.15 23.333l5.442-1.427a11.968 11.968 0 0 0 6.44 1.868h.004c6.647 0 12.031-5.383 12.031-12.032C24.067 5.383 18.679 0 12.031 0zm.004 21.758a9.982 9.982 0 0 1-5.093-1.38l-.365-.217-3.784.992.936-3.757-.238-.378a9.962 9.962 0 0 1-1.524-5.263c0-5.509 4.482-9.991 9.992-9.991 5.511 0 9.993 4.484 9.993 9.991 0 5.51-4.482 9.992-9.992 9.992zm5.48-7.485c-.3-.15-1.776-.877-2.05-.977-.275-.101-.475-.15-.675.15-.2.302-.775.978-.95 1.178-.175.201-.35.226-.65.076a8.216 8.216 0 0 1-2.422-1.495 9.098 9.098 0 0 1-1.681-2.09c-.175-.302-.018-.466.132-.616.135-.134.3-.302.45-.452.15-.15.2-.25.3-.402.101-.15.051-.275 0-.427-.051-.15-.675-1.628-.925-2.23-.243-.588-.49-.508-.675-.517-.175-.008-.375-.01-.575-.01s-.525.075-.801.376c-.275.3-1.05 1.026-1.05 2.503 0 1.477 1.075 2.903 1.226 3.104.15.2 2.116 3.232 5.127 4.532.717.31 1.275.495 1.712.634.721.229 1.378.196 1.895.119.582-.087 1.776-.726 2.026-1.428.25-.702.25-1.304.175-1.428-.075-.125-.275-.201-.575-.351z" />
+                            </svg>
+                            Design on WhatsApp
+                        </span>
+                    </button>
+                    <div style="text-align: center; margin-top: 16px; font-size: 13px; color: var(--grey);">
+                        Or directly DM us: <strong style="color: var(--gold);">+91 63691 42027</strong>
                     </div>
                 </div>
             </div>
