@@ -527,39 +527,19 @@
                         <p>COD available only within Chennai region.</p>
                     </div>
                 </div>
-                <div class="upi-section hidden" id="upiSection">
-                    <div class="upi-box">
-                        <div class="upi-qr-area"><img src="payment-qr.png" alt="QR Code" class="upi-qr-img" /></div>
-                        <div class="upi-details">
-                            <div class="upi-id-box">
-                                <span class="upi-id-label">UPI ID</span>
-                                <span class="upi-id-value">pranath7@fam</span>
-                                <button class="copy-btn" onclick="copyUPI()" title="Copy UPI">
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                                        stroke-width="2">
-                                        <rect x="9" y="9" width="13" height="13" rx="2" />
-                                        <path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1" />
-                                    </svg>
-                                </button>
-                            </div>
-                            <div class="upi-amount-box">
-                                <span>Amount to Pay</span>
-                                <span class="upi-amount" id="upiAmountDisplay">₹999</span>
-                            </div>
-                            <ol class="upi-steps">
-                                <li>Scan QR or use UPI ID above</li>
-                                <li>Pay the amount shown</li>
-                                <li>Note the UTR / Transaction ID</li>
-                                <li>Enter UTR below and place order</li>
-                            </ol>
-                        </div>
+                <div class="upi-section hidden" id="upiSection"
+                    style="text-align:center; padding: 30px 20px; border: 1px solid var(--border); border-radius: var(--radius-lg); margin-bottom: 24px; background: var(--bg3);">
+                    <div style="margin-bottom: 12px;">
+                        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="var(--gold)"
+                            stroke-width="1.5">
+                            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+                            <path d="M7 11V7a5 5 0 0110 0v4"></path>
+                        </svg>
                     </div>
-                    <div class="form-group utr-group">
-                        <label>UTR / Transaction ID *</label>
-                        <input type="text" id="utrInput" placeholder="e.g. 406123456789 (12-digit UTR)"
-                            maxlength="20" />
-                        <div class="utr-hint">Find this in your UPI app payment history</div>
-                    </div>
+                    <strong>Secure Payment Processing</strong>
+                    <p style="font-size:13px; color:var(--grey); margin-top:8px; line-height:1.5;">You will be securely
+                        redirected to the official Razorpay Secure Gateway to complete your payment via UPI, Credit
+                        Card, or Netbanking.</p>
                 </div>
 
                 <!-- ===== COUPON SECTION ===== -->
@@ -810,6 +790,9 @@
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+
+    <!-- Razorpay Checkout SDK -->
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
 
     <script src="script.js"></script>
 </body>
