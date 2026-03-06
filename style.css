@@ -2328,3 +2328,145 @@ button,
 .pw-toggle-btn:active {
   transform: scale(0.95);
 }
+
+/* ===== REVIEWS SECTION ===== */
+.rating-summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 15px;
+}
+
+.rating-number {
+  font-size: 64px;
+  font-weight: 800;
+  font-family: var(--font-display);
+  color: var(--gold);
+  line-height: 1;
+}
+
+.rating-stars {
+  font-size: 24px;
+  letter-spacing: 4px;
+}
+
+.rating-count {
+  font-size: 14px;
+  color: var(--grey);
+  letter-spacing: 1px;
+}
+
+.reviews-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 30px;
+  margin-top: 60px;
+}
+
+.review-card {
+  background: var(--bg-alt);
+  border: 1px solid var(--border);
+  border-radius: 16px;
+  padding: 30px;
+  transition: transform 0.3s ease, border-color 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+  position: relative;
+  overflow: hidden;
+}
+
+.review-card:hover {
+  transform: translateY(-5px);
+  border-color: var(--gold);
+}
+
+.review-card::before {
+  content: '"';
+  position: absolute;
+  top: 10px;
+  right: 20px;
+  font-size: 80px;
+  font-family: serif;
+  color: rgba(201, 168, 76, 0.05);
+  line-height: 1;
+}
+
+.review-stars {
+  color: var(--gold);
+  font-size: 16px;
+  letter-spacing: 2px;
+}
+
+.review-text {
+  font-size: 15px;
+  line-height: 1.7;
+  color: #ddd;
+  font-style: italic;
+}
+
+.review-author {
+  margin-top: auto;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.author-avatar {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--gold);
+  color: var(--bg);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.author-info strong {
+  display: block;
+  font-size: 14px;
+  color: white;
+  letter-spacing: 1px;
+}
+
+.author-info span {
+  font-size: 11px;
+  color: var(--green);
+  text-transform: uppercase;
+  font-weight: 600;
+}
+
+/* Star Rating Input */
+.star-rating-input {
+  display: flex;
+  flex-direction: row-reverse;
+  justify-content: flex-end;
+  gap: 10px;
+}
+
+.star-rating-input input {
+  display: none;
+}
+
+.star-rating-input label {
+  font-size: 32px;
+  color: #333;
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.star-rating-input label:hover,
+.star-rating-input label:hover~label,
+.star-rating-input input:checked~label {
+  color: var(--gold);
+}
+
+@media (max-width: 768px) {
+  .reviews-grid {
+    grid-template-columns: 1fr;
+  }
+}

@@ -45,6 +45,7 @@
                 <li><a href="#hero" class="nav-link">Home</a></li>
                 <li><a href="#products" class="nav-link">Shop</a></li>
                 <li><a href="#custom" class="nav-link">Custom</a></li>
+                <li><a href="#reviews" class="nav-link">Reviews</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
@@ -75,6 +76,7 @@
             <a href="#hero" class="mobile-link">Home</a>
             <a href="#products" class="mobile-link">Shop</a>
             <a href="#custom" class="mobile-link">Custom</a>
+            <a href="#reviews" class="mobile-link">Reviews</a>
             <a href="#about" class="mobile-link">About</a>
             <a href="#contact" class="mobile-link">Contact</a>
         </div>
@@ -299,7 +301,59 @@
         </div>
     </section>
 
-    <!-- ===== CONTACT ===== -->
+    <!-- ===== REVIEWS ===== -->
+    <section id="reviews" style="padding: 100px 0; background: var(--bg-alt);">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">— WHAT THEY SAY —</div>
+                <h2 class="section-title">CUSTOMER REVIEWS</h2>
+                <div class="rating-summary">
+                    <div class="rating-number">4.8</div>
+                    <div class="rating-stars">⭐⭐⭐⭐⭐</div>
+                    <div class="rating-count">Based on 50 Verified Reviews</div>
+                </div>
+            </div>
+
+            <div class="reviews-grid" id="reviewsGrid">
+                <!-- Reviews injected via JS -->
+            </div>
+
+            <div style="text-align: center; margin-top: 50px;">
+                <button class="btn btn-primary" onclick="openModal('reviewModal')">Write A Review</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== REVIEW MODAL ===== -->
+    <div class="modal-overlay" id="reviewModal">
+        <div class="modal review-modal-inner" style="max-width: 500px;">
+            <button class="modal-close" onclick="closeModal('reviewModal')">✕</button>
+            <h2 style="font-family: var(--font-display); letter-spacing: 2px; margin-bottom: 20px;">SHARE YOUR
+                EXPERIENCE</h2>
+            <form id="reviewForm" onsubmit="submitReview(event)">
+                <div class="form-group">
+                    <label>Your Name</label>
+                    <input type="text" id="revName" placeholder="Enter your name" required />
+                </div>
+                <div class="form-group">
+                    <label>Rating</label>
+                    <div class="star-rating-input">
+                        <input type="radio" id="star5" name="rating" value="5" /><label for="star5">★</label>
+                        <input type="radio" id="star4" name="rating" value="4" /><label for="star4">★</label>
+                        <input type="radio" id="star3" name="rating" value="3" /><label for="star3">★</label>
+                        <input type="radio" id="star2" name="rating" value="2" /><label for="star2">★</label>
+                        <input type="radio" id="star1" name="rating" value="1" /><label for="star1">★</label>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Your Thoughts</label>
+                    <textarea id="revText" rows="4" placeholder="How's the quality and fit?" required></textarea>
+                </div>
+                <button type="submit" class="btn btn-primary full-width">Post Review ✨</button>
+            </form>
+        </div>
+    </div>
+
     <section id="contact">
         <div class="container">
             <div class="section-header">

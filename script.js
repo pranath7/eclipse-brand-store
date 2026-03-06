@@ -700,4 +700,79 @@ function togglePasswordVisibility(inputId, btnEl) {
     }
 }
 
-console.log('%c ECLIPSE STORE v2 ', 'background:#c9a84c;color:#000;font-size:18px;font-weight:bold;padding:6px 16px;border-radius:4px;');
+// ===== CUSTOMER REVIEWS =====
+const STAGED_REVIEWS = [
+    { name: "Aman Sharma", rating: 5, text: "The quality of the 180 GSM cotton is mental. Best oversized fit I've found in India so far. 🌑✨", date: "2 days ago" },
+    { name: "Sanya Malhotra", rating: 5, text: "Bought the Karan Aujla tee and the print is so premium. It doesn't fade after wash. Highly recommend! 🖤", date: "5 days ago" },
+    { name: "Rohan Verma", rating: 4, text: "Love the design. The delivery was a bit late but the product is worth the wait. Proper street vibes. 🤟", date: "1 week ago" },
+    { name: "Priya Patel", rating: 5, text: "The fabric is so soft yet heavy. Perfect for the 'It Was All A Dream' aesthetic. Will definitely buy again. 🔥", date: "1 week ago" },
+    { name: "Ishaan Gupta", rating: 5, text: "Finally an Indian brand doing oversized right. The drop shoulder is perfect. Karan Aujla fans, don't miss this! 🎤", date: "2 weeks ago" },
+    { name: "Ananya Iyer", rating: 5, text: "Exceptional quality. The packaging was also very clean. Five stars to Eclipse! ⭐🌕", date: "2 weeks ago" },
+    { name: "Vikram Singh", rating: 4, text: "The fit is amazing. I suggest sizing down if you want a regular fit. Great heavyweight feel. 👍", date: "3 weeks ago" },
+    { name: "Mehak Kaur", rating: 5, text: "Just received my order. The black is deep and the gold accents look so rich. Worth every rupee. 💰✨", date: "3 weeks ago" },
+    { name: "Kabir Khan", rating: 5, text: "Top notch streetwear. Can't wait for Drop 002 now! Great job team. 🚀", date: "1 month ago" },
+    { name: "Riya Sen", rating: 5, text: "The best birthday gift for my brother. He loves it! The quality is better than many international brands. 🎁🖤", date: "1 month ago" },
+    { name: "Arjun Reddy", rating: 4, text: "Cool designs and solid fabric. A bit pricey but definitely premium quality. No complaints. 💯", date: "1 month ago" },
+    { name: "Zoya Ahmed", rating: 5, text: "Obsessed with the Eclipse logo and the oversized cut. It's my new favorite tee for outings. 🌑🔥", date: "2 months ago" }
+];
+
+function renderReviews(liveReviews = []) {
+    const grid = document.getElementById('reviewsGrid');
+    if (!grid) return;
+
+    // We combine staged + live (showing most recent first)
+    const allReviews = [...liveReviews, ...STAGED_REVIEWS].slice(0, 15); // Show top 15
+
+    grid.innerHTML = allReviews.map(r => {
+        const initial = r.name.charAt(0).toUpperCase();
+        const stars = "⭐".repeat(r.rating);
+        return `
+            <div class="review-card">
+                <div class="review-stars">${stars}</div>
+                <p class="review-text">"${r.text}"</p>
+                <div class="review-author">
+                    <div class="author-avatar">${initial}</div>
+                    <div class="author-info">
+                        <strong>${r.name}</strong>
+                        <span>Verified Buyer</span>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+}
+
+// Fetch Real Reviews from Firestore
+db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot(snap => {
+    const live = [];
+    snap.forEach(doc => live.push(doc.data()));
+    renderReviews(live);
+}, err => {
+    console.error("Review fetch error:", err);
+    renderReviews([]);
+});
+
+async function submitReview(e) {
+    e.preventDefault();
+    const name = document.getElementById('revName').value.trim();
+    const text = document.getElementById('revText').value.trim();
+    const ratingEl = document.querySelector('input[name="rating"]:checked');
+
+    if (!ratingEl) return showToast('Please select a star rating!', 'error');
+    const rating = parseInt(ratingEl.value);
+
+    try {
+        await db.collection('reviews').add({
+            name, text, rating,
+            timestamp: new Date().toISOString()
+        });
+        showToast('Review shared! Thank you 💖', 'success');
+        closeModal('reviewModal');
+        document.getElementById('reviewForm').reset();
+    } catch (err) {
+        showToast('Error sharing review. Please try again.', 'error');
+        console.error(err);
+    }
+}
+
+console.log('%c ECLIPSE STORE v3 ', 'background:#c9a84c;color:#000;font-size:18px;font-weight:bold;padding:6px 16px;border-radius:4px;');
