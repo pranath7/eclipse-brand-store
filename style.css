@@ -1648,7 +1648,6 @@ footer {
   line-height: 1.5;
 }
 
-.utr-group {}
 
 .utr-hint {
   font-size: 11px;
@@ -2219,5 +2218,40 @@ footer {
   .footer-inner {
     flex-direction: column;
     gap: 32px;
+  }
+}
+
+/* ---- MOBILE TOUCH / SAFARI FIX ---- */
+@media (hover: none) and (pointer: coarse) {
+
+  body,
+  button,
+  .payment-option,
+  .size-btn,
+  a,
+  .cart-item-remove,
+  .pm-thumb,
+  input,
+  select,
+  textarea {
+    cursor: auto !important;
+  }
+
+  button,
+  a,
+  .payment-option,
+  .size-btn,
+  .cart-item-remove,
+  .pm-thumb,
+  .quick-view-btn,
+  .flip-btn,
+  .modal-close,
+  .product-card {
+    cursor: pointer !important;
+  }
+
+  .cursor,
+  .cursor-follower {
+    display: none !important;
   }
 }
