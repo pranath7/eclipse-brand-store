@@ -564,6 +564,13 @@ async function placeOrder() {
             : `Payment confirmed! <strong>Karan Aujla Tee (${selectedSize})</strong> will be dispatched to <strong>${deliveryData.city}</strong> within 1–3 days. UTR: <strong>${utrStr}</strong>. Paid: ₹${finalPrice}. ${earnMsg}`;
 
         document.getElementById('successMsg').innerHTML = msg;
+
+        // Generate WhatsApp confirmation link
+        const waMsg = encodeURIComponent(`Hi! I just placed an order on ECLIPSE.\n\n*Order ID:* ${orderId}\n*Product:* Karan Aujla Tee — 001 (${selectedSize})\n*Amount:* ₹${finalPrice}\n\nPlease confirm my order!`);
+        const waLink = `https://wa.me/916369142027?text=${waMsg}`;
+        const waBtn = document.getElementById('waConfirmBtn');
+        if (waBtn) waBtn.href = waLink;
+
         closeModal('orderModal'); openModal('successModal');
         cart = []; updateCartCount();
         selectedSize = null; appliedCoupon = null;

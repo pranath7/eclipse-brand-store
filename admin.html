@@ -1168,6 +1168,28 @@
                 .catch(e => toast('Error deleting', 'e'));
         }
 
+        function notifyOnWhatsApp(orderId) {
+            const o = adminOrders.find(x => x.id === orderId);
+            if (!o) return toast('Order not found', 'e');
+
+            const phone = o.delivery?.phone || o.customer?.phone;
+            if (!phone) return toast('No phone number found', 'e');
+
+            const status = o.status || 'Pending';
+            let msg = `Hi ${o.customer?.name || 'Customer'},\n\nUpdate on your *ECLIPSE* Order #${o.id}:\n\nYour order is now *${status.toUpperCase()}*.`;
+
+            if (status === 'Shipped') {
+                msg += `\n\nIt will reach you soon! Stay tuned. 🚚`;
+            } else if (status === 'Processing') {
+                msg += `\n\nWe are currently packing your items with care. ✨`;
+            } else if (status === 'Delivered') {
+                msg += `\n\nHope you love your new gear! Tag us on Instagram @eclipseclothingx 🖤`;
+            }
+
+            const waLink = `https://wa.me/91${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+            window.open(waLink, '_blank');
+        }
+
         function deleteCoupon(code) {
             db.collection('coupons').doc(code).delete()
                 .then(() => toast(`Coupon ${code} removed.`, 's'));
@@ -1342,6 +1364,9 @@
                     // It's Delivered or Cancelled, maybe allow reverting?
                     actions = `<div style="font-size:11px;color:var(--grey);">-</div>`;
                 }
+
+                // Add WhatsApp Button to all rows with a phone number
+                actions = `<button class="btn-sm" style="background:#25D366; color:white; border:none; margin-right:8px;" onclick="notifyOnWhatsApp('${o.id}')" title="WhatsApp Customer">💬</button>` + actions;
 
                 // Add Delete Button to all orders for Admin cleanup
                 actions += `<div style="margin-top:5px;"><button class="btn-sm btn-cancel" style="width:100%;" onclick="deleteOrder('${o.id}')">🗑️ Delete Order</button></div>`;
