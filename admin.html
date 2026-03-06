@@ -1084,6 +1084,8 @@
                     <div class="product-editor-card">
                         <h4>Danger Zone</h4>
                         <div class="flex-r">
+                            <button class="btn-cancel btn-sm" onclick="cleanupDemoOrders()">🧹 Cleanup Demo Orders (Keep
+                                Parv Jain)</button>
                             <button class="btn-cancel btn-sm" onclick="clearData('eclipse_orders')">🗑 Clear All
                                 Orders</button>
                             <button class="btn-cancel btn-sm" onclick="clearData('eclipse_messages')">🗑 Clear
@@ -1116,6 +1118,60 @@
         };
         firebase.initializeApp(firebaseConfig);
         const db = firebase.firestore();
+
+        // ===== GLOBAL FUNCTIONS (Must be first for HTML accessibility) =====
+        async function deleteOrder(id) {
+            if (!confirm(`Are you sure you want to PERMANENTLY delete order ${id}? This cannot be undone.`)) return;
+            try {
+                await db.collection('orders').doc(id).delete();
+                toast(`Order ${id} deleted!`, 's');
+            } catch (e) {
+                toast('Error deleting order', 'e');
+                console.error(e);
+            }
+        }
+
+        async function cleanupDemoOrders() {
+            if (!confirm("This will delete ALL orders except those for 'Parv Jain'. Proceed?")) return;
+            const orders = adminOrders; // Use the cached list from global state
+            let count = 0;
+            const batch = db.batch();
+
+            orders.forEach(o => {
+                const name = (o.customer?.name || "").toLowerCase();
+                if (!name.includes("parv") && !name.includes("jain")) {
+                    batch.delete(db.collection('orders').doc(o.id));
+                    count++;
+                }
+            });
+
+            if (count === 0) { toast("No demo orders found to clean up.", "e"); return; }
+
+            try {
+                await batch.commit();
+                toast(`Successfully cleaned up ${count} demo orders!`, 's');
+            } catch (e) {
+                toast("Error during cleanup", "e");
+                console.error(e);
+            }
+        }
+
+        function deleteMessage(id) {
+            db.collection('messages').doc(id).delete()
+                .then(() => toast('Deleted', 's'))
+                .catch(e => toast('Error deleting', 'e'));
+        }
+
+        function deleteNotify(id) {
+            db.collection('notify').doc(id).delete()
+                .then(() => toast('Removed', 's'))
+                .catch(e => toast('Error deleting', 'e'));
+        }
+
+        function deleteCoupon(code) {
+            db.collection('coupons').doc(code).delete()
+                .then(() => toast(`Coupon ${code} removed.`, 's'));
+        }
 
         // ===== AUTH =====
         const ADMIN_PW_KEY = 'eclipse_admin_pw';
@@ -1372,11 +1428,7 @@
             if (!msgs.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✉️</div><p>No messages yet.</p></div>'; return; }
             wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Contact</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>${msgs.map((m) => `<tr><td>${m.name}</td><td>${m.contact}</td><td style="max-width:320px;word-break:break-word;">${m.message}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(m.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteMessage('${m.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
         }
-        function deleteMessage(id) {
-            db.collection('messages').doc(id).delete()
-                .then(() => toast('Deleted', 's'))
-                .catch(e => toast('Error deleting', 'e'));
-        }
+        // function deleteMessage(id) { ... moved up ... }
 
         // ===== NOTIFY =====
         function renderNotify() {
@@ -1385,11 +1437,7 @@
             if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p>No signups yet.</p></div>'; return; }
             wrap.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>Signed Up</th><th></th></tr></thead><tbody>${list.map((n, i) => `<tr><td>${i + 1}</td><td>${n.name}</td><td>${n.contact}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(n.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteNotify('${n.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
         }
-        function deleteNotify(id) {
-            db.collection('notify').doc(id).delete()
-                .then(() => toast('Removed', 's'))
-                .catch(e => toast('Error deleting', 'e'));
-        }
+        // function deleteNotify(id) { ... moved up ... }
 
         // ===== CUSTOMERS =====
         function renderUsers() {
@@ -1432,10 +1480,10 @@
                     toast(`✅ Coupon ${code} added!`, 's');
                 });
         }
-        function deleteCoupon(code) {
-            db.collection('coupons').doc(code).delete()
-                .then(() => toast(`Coupon ${code} removed.`, 's'));
-        }
+        // function deleteCoupon(code) {
+        //     db.collection('coupons').doc(code).delete()
+        //         .then(() => toast(`Coupon ${code} removed.`, 's'));
+        // }
 
         // ===== PRODUCTS =====
         function updatePrice() {
@@ -1489,16 +1537,6 @@
             }
         });
 
-        async function deleteOrder(id) {
-            if (!confirm(`Are you sure you want to PERMANENTLY delete order ${id}? This cannot be undone.`)) return;
-            try {
-                await db.collection('orders').doc(id).delete();
-                toast(`Order ${id} deleted!`, 's');
-            } catch (e) {
-                toast('Error deleting order', 'e');
-                console.error(e);
-            }
-        }
     </script>
 </body>
 
