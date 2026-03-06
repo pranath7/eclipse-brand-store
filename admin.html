@@ -1307,7 +1307,7 @@
         function renderDashRecent(orders) {
             const wrap = document.getElementById('dashRecentOrders');
             if (!orders.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet. Once customers place orders, they\'ll appear here.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>City</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th></tr></thead><tbody>${orders.map(o => orderRow(o, false)).join('')}</tbody></table>`;
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>City</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${orders.map(o => orderRow(o, true)).join('')}</tbody></table>`;
         }
 
         function renderOrders() {
