@@ -447,9 +447,12 @@ async function goToPayment() {
             });
             showToast('Account Created! Welcome to Eclipse.', 'success');
         } catch (e) {
-            document.getElementById('omStep1').style.opacity = '1';
-            showToast(e.message, 'error');
-            return;
+            // Ignore if email is already in use because they might be re-clicking 'Continue'
+            if (e.code !== 'auth/email-already-in-use') {
+                document.getElementById('omStep1').style.opacity = '1';
+                showToast(e.message, 'error');
+                return;
+            }
         }
         document.getElementById('omStep1').style.opacity = '1';
     }
