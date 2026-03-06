@@ -721,7 +721,7 @@ function renderReviews(liveReviews = []) {
     if (!grid) return;
 
     // We combine staged + live (showing most recent first)
-    const allReviews = [...liveReviews, ...STAGED_REVIEWS].slice(0, 15); // Show top 15
+    const allReviews = [...liveReviews, ...STAGED_REVIEWS].slice(0, 3); // Show top 3 only
 
     grid.innerHTML = allReviews.map(r => {
         const initial = r.name.charAt(0).toUpperCase();
