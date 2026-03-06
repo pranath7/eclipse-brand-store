@@ -2255,3 +2255,35 @@ footer {
     display: none !important;
   }
 }
+
+/* ---- GLOBAL CURSOR FALLBACK ---- */
+/* Restores native cursor everywhere to ensure visibility if JS fails */
+body,
+a,
+button,
+.payment-option,
+.size-btn,
+.cart-item-remove,
+.pm-thumb,
+input,
+select,
+textarea,
+.quick-view-btn,
+.flip-btn,
+.modal-close,
+.product-card {
+  cursor: auto;
+}
+
+a,
+button,
+.payment-option,
+.size-btn,
+.cart-item-remove,
+.pm-thumb,
+.quick-view-btn,
+.flip-btn,
+.modal-close,
+.product-card {
+  cursor: pointer;
+}
