@@ -49,6 +49,14 @@
                 <li><a href="#contact" class="nav-link">Contact</a></li>
             </ul>
             <div class="nav-actions">
+                <button class="auth-btn" id="authBtn" aria-label="Account" onclick="openAuthModal()"
+                    style="background:none; border:none; color:white; cursor:pointer; font-size:20px; display:flex; align-items:center;">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+                        stroke-width="1.8">
+                        <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                        <circle cx="12" cy="7" r="4"></circle>
+                    </svg>
+                </button>
                 <button class="cart-btn" id="cartBtn" aria-label="Cart">
                     <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor"
                         stroke-width="1.8">
@@ -465,6 +473,24 @@
                 </div>
                 <div class="form-group"><label>State *</label><input type="text" id="omState" value="Tamil Nadu"
                         placeholder="State" required /></div>
+
+                <div class="auth-opt-in" id="authOptInGroup"
+                    style="background:#111; border:1px solid #333; padding:15px; border-radius:12px; margin-bottom:20px;">
+                    <label style="display:flex; align-items:center; cursor:pointer;">
+                        <input type="checkbox" id="createAccountCheck" onchange="toggleAccountCreation()"
+                            style="margin-right:10px; width:18px; height:18px;">
+                        <span style="font-weight:600; font-size:15px;">Create an account & earn 50 Points!</span>
+                    </label>
+                    <div id="accountCreationFields" style="display:none; margin-top:15px;">
+                        <p style="font-size:12px; color:var(--grey); margin-bottom:10px;">Get 50 points on this order (1
+                            pt = ₹1) + get your own Affiliate Code.</p>
+                        <div class="form-group"><label>Email *</label><input type="email" id="omEmail"
+                                placeholder="your@email.com" /></div>
+                        <div class="form-group"><label>Create Password *</label><input type="password" id="omPwd"
+                                placeholder="Min 6 characters" /></div>
+                    </div>
+                </div>
+
                 <button class="btn btn-primary full-width" onclick="goToPayment()">Continue to Payment →</button>
             </div>
 
@@ -552,12 +578,27 @@
                     </div>
                 </div>
 
-                <!-- ORDER SUMMARY -->
                 <div class="order-summary">
                     <h4 class="os-title">Order Summary</h4>
                     <div class="os-row"><span>Karan Aujla Tee × 1</span><span id="osMRP">₹999</span></div>
                     <div class="os-row os-discount hidden" id="osDiscountRow"><span>Coupon Discount</span><span
                             id="osDiscount" class="discount-green">— ₹0</span></div>
+
+                    <!-- WALLET POINTS -->
+                    <div class="os-row os-wallet hidden" id="osWalletToggleRow"
+                        style="padding:10px 0; border-top:1px dashed #333; margin-top:10px; flex-direction:column; align-items:flex-start;">
+                        <label
+                            style="display:flex; align-items:center; cursor:pointer; width:100%; justify-content:space-between;">
+                            <span>Use Wallet Points (<span id="availPoints">0</span>)</span>
+                            <input type="checkbox" id="useWalletCheck" onchange="calcFinalPrice()"
+                                style="width:16px; height:16px;" />
+                        </label>
+                    </div>
+                    <div class="os-row os-wallet-discount hidden" id="osWalletValRow" style="color:var(--gold);">
+                        <span>Points Used</span>
+                        <span id="osWalletUsed">— ₹0</span>
+                    </div>
+
                     <div class="os-row os-total"><span>Total</span><span id="osTotal">₹999</span></div>
                 </div>
 
@@ -700,8 +741,76 @@
         </div>
     </div>
 
+    <!-- ===== ACCOUNT MODAL ===== -->
+    <div class="modal-overlay" id="accountModal">
+        <div class="modal auth-modal-inner" style="max-width:400px; padding:30px;">
+            <button class="modal-close" onclick="closeModal('accountModal')">✕</button>
+
+            <!-- LOGGED OUT VIEW -->
+            <div id="accountLoggedOut">
+                <h2
+                    style="font-family:'Bebas Neue', sans-serif; font-size:32px; letter-spacing:2px; margin-bottom:10px;">
+                    LOGIN</h2>
+                <p style="color:var(--grey); font-size:14px; margin-bottom:20px;">Login to view your wallet balance and
+                    affiliate rewards.</p>
+                <div class="form-group"><label>Email</label><input type="email" id="loginEmail"
+                        placeholder="your@email.com" /></div>
+                <div class="form-group"><label>Password</label><input type="password" id="loginPwd"
+                        placeholder="Enter password" /></div>
+                <div class="payment-error hidden" id="loginError" style="margin-bottom:15px;"></div>
+                <button class="btn btn-primary full-width" onclick="doUserLogin()">Login →</button>
+                <div style="font-size:13px; text-align:center; color:var(--grey); margin-top:20px; line-height:1.5;">
+                    Need an account? Opt-in at checkout to create one and earn 50 bonus points on your first order!
+                </div>
+            </div>
+
+            <!-- LOGGED IN VIEW -->
+            <div id="accountLoggedIn" style="display:none;">
+                <h2
+                    style="font-family:'Bebas Neue', sans-serif; font-size:32px; letter-spacing:2px; margin-bottom:5px;">
+                    MY ACCOUNT</h2>
+                <p style="color:var(--grey); font-size:14px; margin-bottom:20px;">Welcome back, <strong
+                        id="accNameDisplay" style="color:white; font-weight:600;">—</strong></p>
+
+                <div
+                    style="background:#111; border:1px solid var(--gold); border-radius:12px; padding:20px; text-align:center; margin-bottom:20px;">
+                    <div
+                        style="font-size:12px; color:var(--gold); font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:5px;">
+                        Wallet Balance</div>
+                    <div style="font-size:36px; font-weight:700; font-family:'Bebas Neue', sans-serif; letter-spacing:2px; color:white;"
+                        id="accWalletDisplay">0</div>
+                    <div style="font-size:11px; color:var(--grey); margin-top:5px;">1 Point = ₹1 Off Next Order</div>
+                </div>
+
+                <div
+                    style="background:#111; border:1px solid #333; border-radius:12px; padding:20px; text-align:center; margin-bottom:20px;">
+                    <div
+                        style="font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:10px;">
+                        Your Affiliate Code</div>
+                    <div id="accAffiliateDisplay"
+                        style="font-family:monospace; background:#000; color:white; padding:10px; font-size:18px; font-weight:700; letter-spacing:3px; border-radius:6px; cursor:pointer;"
+                        onclick="navigator.clipboard.writeText(this.innerText).then(()=>showToast('Code Copied!','s'))">
+                        LOADING...</div>
+                    <div style="font-size:12px; color:var(--grey); margin-top:10px; line-height:1.4;">
+                        Refer 5 friends using this code to earn 200 points!<br>
+                        <strong style="color:white;">Current Referrals: <span id="accReferralsDisplay">0</span> /
+                            5</strong>
+                    </div>
+                </div>
+
+                <button class="btn btn-ghost full-width" onclick="doUserLogout()"
+                    style="border:1px solid #333; color:var(--grey);">Log Out</button>
+            </div>
+        </div>
+    </div>
+
     <div class="toast" id="toast"></div>
-    <script src="script.js"></script>
+
+    <!-- Firebase SDK Compat -->
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+    <script src="script.js?v=3"></script>
 </body>
 
 </html>
