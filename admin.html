@@ -1376,7 +1376,7 @@
       <td><span class="text-gold" style="font-size:11px;font-family:'Bebas Neue';letter-spacing:2px;">${o.id}</span></td>
       <td>${o.customer?.name || '—'}<br/><span style="font-size:11px;color:var(--grey)">${o.customer?.phone || ''}</span></td>
       <td>${o.product || 'Tee'}<br/><span style="font-size:11px;color:var(--grey)">Size: ${o.size || '—'}</span></td>
-      <td>${o.customer?.city || '—'}</td>
+      <td><div style="font-size:11px; max-width:150px; line-height:1.2; white-space: normal;">${o.customer?.address || '—'}<br/><span style="color:var(--grey)">${o.customer?.city || ''}, ${o.customer?.pin || ''}</span></div></td>
       <td>₹${o.finalPrice || o.mrp || 999}${o.coupon ? `<br/><span style="font-size:10px;color:var(--green)">🎟 ${o.coupon}</span>` : ''}</td>
       <td>${payBadge}</td>
       <td>${statusBadge}</td>
@@ -1388,7 +1388,7 @@
         function renderDashRecent(orders) {
             const wrap = document.getElementById('dashRecentOrders');
             if (!orders.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet. Once customers place orders, they\'ll appear here.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>City</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${orders.map(o => orderRow(o, true)).join('')}</tbody></table>`;
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Address</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${orders.map(o => orderRow(o, true)).join('')}</tbody></table>`;
         }
 
         function renderOrders() {
@@ -1406,7 +1406,7 @@
             const totalEl = document.getElementById('ordersTotal');
             if (totalEl) totalEl.textContent = `${filtered.length} of ${orders.length} orders`;
             if (!filtered.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No matching orders found.</p></div>'; return; }
-            wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>City</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${filtered.map(o => orderRow(o, true)).join('')}</tbody></table></div>`;
+            wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Address</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${filtered.map(o => orderRow(o, true)).join('')}</tbody></table></div>`;
         }
 
         async function updateOrderStatus(id, status) {
