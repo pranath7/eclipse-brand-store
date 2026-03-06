@@ -54,7 +54,7 @@ firebase.auth().onAuthStateChanged(user => {
                 if (document.getElementById('osTotal')) updateOrderSummary();
             }
         });
-        
+
         // Fetch User's Orders
         if (userOrdersUnsub) userOrdersUnsub();
         userOrdersUnsub = db.collection('orders')
@@ -65,7 +65,7 @@ firebase.auth().onAuthStateChanged(user => {
                 snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
                 renderUserOrders(orders);
             });
-            
+
     } else {
         if (userOrdersUnsub) { userOrdersUnsub(); userOrdersUnsub = null; }
         currentWallet = 0; currentAffiliate = ''; currentReferrals = 0;
@@ -82,12 +82,12 @@ firebase.auth().onAuthStateChanged(user => {
 function renderUserOrders(orders) {
     const wrap = document.getElementById('accOrdersDisplay');
     if (!wrap) return;
-    
+
     if (orders.length === 0) {
         wrap.innerHTML = `<div style="text-align:center; color:var(--grey); font-size:13px; padding:10px;">No orders yet. Start shopping!</div>`;
         return;
     }
-    
+
     wrap.innerHTML = orders.map(o => {
         const d = new Date(o.timestamp);
         const dateStr = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
@@ -663,6 +663,25 @@ function sendCustomWhatsApp() {
     const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
 
     window.open(url, '_blank');
+}
+
+
+// ===== PASSWORD VISIBILITY TOGGLE =====
+function togglePasswordVisibility(inputId, btnEl) {
+    const input = document.getElementById(inputId);
+    if (!input) return;
+
+    if (input.type === 'password') {
+        input.type = 'text';
+        btnEl.textContent = 'Hide';
+        btnEl.classList.add('active');
+        btnEl.title = "Hide Password";
+    } else {
+        input.type = 'password';
+        btnEl.textContent = '👁️';
+        btnEl.classList.remove('active');
+        btnEl.title = "Show Password";
+    }
 }
 
 console.log('%c ECLIPSE STORE v2 ', 'background:#c9a84c;color:#000;font-size:18px;font-weight:bold;padding:6px 16px;border-radius:4px;');
