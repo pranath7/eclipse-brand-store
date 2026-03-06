@@ -431,7 +431,9 @@ async function goToPayment() {
     if (!city) { showToast('Enter your city.', 'error'); document.getElementById('omCity').focus(); return; }
     if (!/^\d{6}$/.test(pin)) { showToast('Enter a valid 6-digit PIN.', 'error'); document.getElementById('omPin').focus(); return; }
     if (!state) { showToast('Enter your state.', 'error'); document.getElementById('omState').focus(); return; }
-    deliveryData = { name, phone, email: document.getElementById('omEmail') ? document.getElementById('omEmail').value.trim() : '', address, city, pin, state };
+
+    const deliveryEmail = document.getElementById('omEmailDelivery') ? document.getElementById('omEmailDelivery').value.trim() : '';
+    deliveryData = { name, phone, email: deliveryEmail, address, city, pin, state };
 
     const optIn = document.getElementById('createAccountCheck');
     if (optIn && optIn.checked && !currentUser) {
