@@ -66,14 +66,24 @@ if __name__ == "__main__":
     bot = EclipseBot()
     
     print("-" * 30)
-    print("ECLIPSE MARKETING BOT ACTIVE")
+    print("🌑 ECLIPSE MARKETING BOT — AUTO MODE 🌑")
     print("-" * 30)
-    print("1. Generate AI visuals using 'ai_content_gen.py'")
-    print("2. Place the visual file in this directory.")
-    print("3. Run this script to post them!")
     
-    # Example Usage (Commented out to prevent accidental runs)
-    # bot.login()
-    # bot.upload_photo("my_ai_lookbook_1.jpg")
+    # The default image I generated for you
+    DEFAULT_IMAGE = "eclipse_lookbook_1.png"
+
+    if IG_USERNAME == "YOUR_USERNAME":
+        print("[ACTION REQUIRED] Please open 'ig_bot.py' and enter your IG_USERNAME and IG_PASSWORD.")
+    elif not os.path.exists(DEFAULT_IMAGE):
+        print(f"[ERROR] {DEFAULT_IMAGE} not found. Please ensure the image is in the folder.")
+    else:
+        print(f"Bot starting... Preparing to post {DEFAULT_IMAGE} to your feed.")
+        # Uncomment the lines below to start the automation
+        # bot.login()
+        # bot.upload_photo(DEFAULT_IMAGE)
+        # bot.respond_to_comments()
     
-    print("\n[READY] Fill in your IG credentials in the script to start the movement.")
+    print("\n" + "-" * 30)
+    print("Next Steps:")
+    print("1. Add your credentials inside 'ig_bot.py'.")
+    print("2. Run: python ig_bot.py")
