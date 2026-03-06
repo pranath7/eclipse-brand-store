@@ -1488,17 +1488,14 @@
                 if (data.heroSub) document.getElementById('heroSubEdit').value = data.heroSub;
             }
         });
-    </script>
-    <script>
-        // Global functions
+
         async function deleteOrder(id) {
             if (!confirm(`Are you sure you want to PERMANENTLY delete order ${id}? This cannot be undone.`)) return;
             try {
-                await firebase.firestore().collection('orders').doc(id).delete();
-                // Find a way to trigger toast from global scope, or just rely on the snapshot listener to remove the row
-                alert(`Order ${id} deleted!`);
+                await db.collection('orders').doc(id).delete();
+                toast(`Order ${id} deleted!`, 's');
             } catch (e) {
-                alert('Error deleting order: ' + e.message);
+                toast('Error deleting order', 'e');
                 console.error(e);
             }
         }
