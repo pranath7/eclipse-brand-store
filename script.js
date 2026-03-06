@@ -22,6 +22,8 @@ let currentWallet = 0;
 let currentAffiliate = '';
 let currentReferrals = 0;
 
+let userOrdersUnsub = null;
+
 firebase.auth().onAuthStateChanged(user => {
     currentUser = user;
     if (user) {
@@ -52,7 +54,20 @@ firebase.auth().onAuthStateChanged(user => {
                 if (document.getElementById('osTotal')) updateOrderSummary();
             }
         });
+        
+        // Fetch User's Orders
+        if (userOrdersUnsub) userOrdersUnsub();
+        userOrdersUnsub = db.collection('orders')
+            .where('userId', '==', user.uid)
+            .orderBy('timestamp', 'desc')
+            .onSnapshot(snap => {
+                const orders = [];
+                snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+                renderUserOrders(orders);
+            });
+            
     } else {
+        if (userOrdersUnsub) { userOrdersUnsub(); userOrdersUnsub = null; }
         currentWallet = 0; currentAffiliate = ''; currentReferrals = 0;
         const ab = document.getElementById('authBtn'); if (ab) ab.innerHTML = `👤`;
         const lo = document.getElementById('accountLoggedOut'); if (lo) lo.style.display = 'block';
@@ -63,6 +78,31 @@ firebase.auth().onAuthStateChanged(user => {
         if (document.getElementById('osTotal')) updateOrderSummary();
     }
 });
+
+function renderUserOrders(orders) {
+    const wrap = document.getElementById('accOrdersDisplay');
+    if (!wrap) return;
+    
+    if (orders.length === 0) {
+        wrap.innerHTML = `<div style="text-align:center; color:var(--grey); font-size:13px; padding:10px;">No orders yet. Start shopping!</div>`;
+        return;
+    }
+    
+    wrap.innerHTML = orders.map(o => {
+        const d = new Date(o.timestamp);
+        const dateStr = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
+        const st = (o.status || 'Pending').toLowerCase();
+        return `
+        <div class="acc-order-item">
+            <div class="acc-o-left">
+                <div class="acc-o-title">${o.product} — 001 (${o.size})</div>
+                <div class="acc-o-date">Ordered on ${dateStr} • ${o.id}</div>
+            </div>
+            <div class="acc-o-status status-${st}">${o.status || 'Pending'}</div>
+        </div>
+        `;
+    }).join('');
+}
 
 function toggleAccountCreation() {
     const chk = document.getElementById('createAccountCheck');

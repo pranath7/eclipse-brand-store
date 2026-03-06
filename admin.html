@@ -932,7 +932,9 @@
                         <select class="filter-select" id="orderStatusFilter" onchange="renderOrders()">
                             <option value="">All Statuses</option>
                             <option value="Pending">Pending</option>
-                            <option value="Fulfilled">Fulfilled</option>
+                            <option value="Processing">Processing</option>
+                            <option value="Shipped">Shipped</option>
+                            <option value="Delivered">Delivered</option>
                             <option value="Cancelled">Cancelled</option>
                         </select>
                         <select class="filter-select" id="orderPayFilter" onchange="renderOrders()">
@@ -965,6 +967,21 @@
                             <div class="empty-state">
                                 <div class="empty-icon">✉️</div>
                                 <p>No messages yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- CUSTOMERS -->
+                <div class="panel" id="panel-customers">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3>Registered Customers</h3><span>All user accounts</span>
+                        </div>
+                        <div id="customersWrap">
+                            <div class="empty-state">
+                                <div class="empty-icon">👥</div>
+                                <p>No registered customers yet.</p>
                             </div>
                         </div>
                     </div>
@@ -1255,7 +1272,22 @@
         function orderRow(o, showActions = true) {
             const payBadge = o.paymentMethod === 'cod' ? '<span class="badge badge-cod">COD</span>' : '<span class="badge badge-online">Online</span>';
             const statusBadge = `<span class="badge badge-${o.status?.toLowerCase() || 'pending'}">${o.status || 'Pending'}</span>`;
-            const actions = showActions ? `<div class="flex-r"><button class="btn-sm btn-fulfill" onclick="updateOrderStatus('${o.id}','Fulfilled')">✅ Fulfill</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>` : '';
+
+            // Build actions based on current status
+            let actions = '';
+            if (showActions) {
+                if (!o.status || o.status === 'Pending') {
+                    actions = `<div class="flex-r"><button class="btn-sm btn-outline" style="border-color:#60a5fa;color:#60a5fa;" onclick="updateOrderStatus('${o.id}','Processing')">⚙️ Process</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>`;
+                } else if (o.status === 'Processing') {
+                    actions = `<div class="flex-r"><button class="btn-sm btn-outline" style="border-color:#c084fc;color:#c084fc;" onclick="updateOrderStatus('${o.id}','Shipped')">🚚 Ship</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>`;
+                } else if (o.status === 'Shipped') {
+                    actions = `<div class="flex-r"><button class="btn-sm btn-fulfill" onclick="updateOrderStatus('${o.id}','Delivered')">✅ Deliver</button></div>`;
+                } else {
+                    // It's Delivered or Cancelled, maybe allow reverting?
+                    actions = `<div style="font-size:11px;color:var(--grey);">-</div>`;
+                }
+            }
+
             return `<tr>
       <td><span class="text-gold" style="font-size:11px;font-family:'Bebas Neue';letter-spacing:2px;">${o.id}</span></td>
       <td>${o.customer?.name || '—'}<br/><span style="font-size:11px;color:var(--grey)">${o.customer?.phone || ''}</span></td>
@@ -1301,7 +1333,7 @@
                 const order = orderDoc.data();
 
                 // If fulfilling COD order for registered user & not yet awarded
-                if (status === 'Fulfilled' && order.paymentMethod === 'cod' && order.userId && !order.pointsAwarded) {
+                if (status === 'Delivered' && order.paymentMethod === 'cod' && order.userId && !order.pointsAwarded) {
                     const batch = db.batch();
                     batch.update(orderRef, { status: status, pointsAwarded: true, earnedPoints: 50 });
                     batch.update(db.collection('users').doc(order.userId), {

@@ -798,6 +798,18 @@
                     </div>
                 </div>
 
+                <div
+                    style="background:#111; border:1px solid #333; border-radius:12px; padding:20px; margin-bottom:20px;">
+                    <div
+                        style="font-size:12px; font-weight:600; letter-spacing:1px; text-transform:uppercase; margin-bottom:15px; text-align:center;">
+                        Order History</div>
+                    <div id="accOrdersDisplay" style="display:flex; flex-direction:column; gap:12px;">
+                        <!-- Orders will be injected here via JS -->
+                        <div style="text-align:center; color:var(--grey); font-size:13px; padding:10px;">Loading
+                            orders...</div>
+                    </div>
+                </div>
+
                 <button class="btn btn-ghost full-width" onclick="doUserLogout()"
                     style="border:1px solid #333; color:var(--grey);">Log Out</button>
             </div>
