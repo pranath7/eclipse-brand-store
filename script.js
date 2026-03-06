@@ -447,12 +447,13 @@ async function goToPayment() {
             });
             showToast('Account Created! Welcome to Eclipse.', 'success');
         } catch (e) {
-            // Ignore if email is already in use because they might be re-clicking 'Continue'
-            if (e.code !== 'auth/email-already-in-use') {
-                document.getElementById('omStep1').style.opacity = '1';
+            document.getElementById('omStep1').style.opacity = '1';
+            if (e.code === 'auth/email-already-in-use') {
+                showToast('Email already in use. Please uncheck "Create Account" or log in first.', 'error');
+            } else {
                 showToast(e.message, 'error');
-                return;
             }
+            return;
         }
         document.getElementById('omStep1').style.opacity = '1';
     }
