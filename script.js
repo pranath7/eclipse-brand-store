@@ -59,11 +59,16 @@ firebase.auth().onAuthStateChanged(user => {
         if (userOrdersUnsub) userOrdersUnsub();
         userOrdersUnsub = db.collection('orders')
             .where('userId', '==', user.uid)
-            .orderBy('timestamp', 'desc')
             .onSnapshot(snap => {
                 const orders = [];
                 snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
+                // Sort client-side to avoid needing a composite index in Firebase
+                orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
                 renderUserOrders(orders);
+            }, err => {
+                const wrap = document.getElementById('accOrdersDisplay');
+                if (wrap) wrap.innerHTML = `<div style="text-align:center; color:var(--red); font-size:13px; padding:10px;">Error loading orders.</div>`;
+                console.error("Order fetch error:", err);
             });
 
     } else {
