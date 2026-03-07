@@ -873,7 +873,8 @@
             <div class="nav-item" onclick="showPanel('customers', this)"><span class="nav-icon">👥</span>Customers <span
                     class="nav-badge" id="customersCount">0</span></div>
             <div class="nav-item" onclick="showPanel('leads', this)"><span class="nav-icon">🛒</span>Abandoned Carts
-                <span class="nav-badge" id="leadsCount" style="background:var(--red); color:white;">0</span></div>
+                <span class="nav-badge" id="leadsCount" style="background:var(--red); color:white;">0</span>
+            </div>
             <div class="nav-item" onclick="showPanel('coupons', this)"><span class="nav-icon">🎟️</span>Coupons</div>
             <div class="nav-item" onclick="showPanel('products', this)"><span class="nav-icon">👕</span>Products</div>
             <div class="nav-item" onclick="showPanel('settings', this)"><span class="nav-icon">⚙️</span>Settings</div>
@@ -1085,17 +1086,6 @@
                         <div class="form-group-admin"><label>Hero Subtitle</label><input type="text" id="heroSubEdit"
                                 placeholder="Tagline under the title" /></div>
                         <button class="btn-gold" onclick="saveAnnouncement()">Save to Store</button>
-                    </div>
-                </div>
-
-                <!-- SETTINGS -->
-                <div class="panel" id="panel-settings">
-                    <div class="product-editor-card">
-                        <h4>Admin Password</h4>
-                        <div class="form-group-admin"><label>New Password</label><input type="password" id="newPw"
-                                placeholder="New password" /></div>
-                        <div class="form-group-admin"><label>Confirm Password</label><input type="password"
-                                id="newPwConfirm" placeholder="Confirm new password" /></div>
                         <button class="btn-gold" onclick="changePassword()">Change Password</button>
                     </div>
                     <div class="product-editor-card">
@@ -1107,324 +1097,354 @@
                                 Orders</button>
                             <button class="btn-cancel btn-sm" onclick="clearData('eclipse_messages')">🗑 Clear
                                 Messages</button>
-                            <button class="btn-cancel btn-sm" onclick="clearData('eclipse_notify')">🗑 Clear Notify
-                                List</button>
                         </div>
                     </div>
-                </div>
 
+                </div>
             </div>
         </div>
-    </div><!-- /appShell -->
 
-    <div id="adminToast"></div>
+        <!-- ===== CREDIT MANAGEMENT MODAL ===== -->
+        <div id="creditModal" class="modal">
+            <div class="modal-content" style="max-width:400px;">
+                <span class="close" onclick="closeModal('creditModal')">&times;</span>
+                <h2 id="creditModalTitle">Manage Credits</h2>
+                <div class="form-group" style="margin-top:20px;">
+                    <label>Current Balance: <span id="currentWalletVal" class="text-gold">₹0</span></label>
+                    <div class="flex-r" style="margin-top:10px;">
+                        <input type="number" id="creditAmount" placeholder="Amount (e.g. 100)" style="flex:1;">
+                    </div>
+                    <div class="flex-r" style="margin-top:15px; gap:10px;">
+                        <button class="btn" style="background:var(--green); flex:1; color:white;"
+                            onclick="applyCreditChange(true)">+ Add Credits</button>
+                        <button class="btn" style="background:var(--red); flex:1; color:white;"
+                            onclick="applyCreditChange(false)">- Deduct Credits</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-    <!-- Firebase SDK Compat -->
-    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+        <!-- ===== REFERRAL DETAIL MODAL ===== -->
+        <div id="referralModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal('referralModal')">&times;</span>
+                <h2 id="referralModalTitle">Referral Network</h2>
+                <p id="referrerNameSub" style="color:var(--grey); margin-bottom:20px;"></p>
+                <div id="referralListWrap">
+                    <!-- Referral list details will be injected here -->
+                </div>
+            </div>
+        </div>
+        <!-- /appShell -->
 
-    <script>
-        // ===== FIREBASE INIT =====
-        const firebaseConfig = {
-            apiKey: "AIzaSyAzNaCsi3Yw5-6879_F1p0b1j0viyKThN4",
-            authDomain: "eclipse-store-001.firebaseapp.com",
-            projectId: "eclipse-store-001",
-            storageBucket: "eclipse-store-001.firebasestorage.app",
-            messagingSenderId: "42097707466",
-            appId: "1:42097707466:web:21d84f904dbdd1c0872733"
-        };
-        firebase.initializeApp(firebaseConfig);
-        const db = firebase.firestore();
+        <div id="adminToast"></div>
 
-        // ===== GLOBAL FUNCTIONS (Must be first for HTML accessibility) =====
-        async function deleteOrder(id) {
-            if (!confirm(`Are you sure you want to PERMANENTLY delete order ${id}? This cannot be undone.`)) return;
-            try {
-                await db.collection('orders').doc(id).delete();
-                toast(`Order ${id} deleted!`, 's');
-            } catch (e) {
-                toast('Error deleting order', 'e');
-                console.error(e);
+        <!-- Firebase SDK Compat -->
+        <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-app-compat.js"></script>
+        <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
+
+        <script>
+            // ===== FIREBASE INIT =====
+            const firebaseConfig = {
+                apiKey: "AIzaSyAzNaCsi3Yw5-6879_F1p0b1j0viyKThN4",
+                authDomain: "eclipse-store-001.firebaseapp.com",
+                projectId: "eclipse-store-001",
+                storageBucket: "eclipse-store-001.firebasestorage.app",
+                messagingSenderId: "42097707466",
+                appId: "1:42097707466:web:21d84f904dbdd1c0872733"
+            };
+            firebase.initializeApp(firebaseConfig);
+            const db = firebase.firestore();
+
+            // ===== GLOBAL FUNCTIONS (Must be first for HTML accessibility) =====
+            async function deleteOrder(id) {
+                if (!confirm(`Are you sure you want to PERMANENTLY delete order ${id}? This cannot be undone.`)) return;
+                try {
+                    await db.collection('orders').doc(id).delete();
+                    toast(`Order ${id} deleted!`, 's');
+                } catch (e) {
+                    toast('Error deleting order', 'e');
+                    console.error(e);
+                }
             }
-        }
 
-        async function cleanupDemoOrders() {
-            if (!confirm("This will delete ALL orders except those for 'Parv Jain'. Proceed?")) return;
-            const orders = adminOrders; // Use the cached list from global state
-            let count = 0;
-            const batch = db.batch();
+            async function cleanupDemoOrders() {
+                if (!confirm("This will delete ALL orders except those for 'Parv Jain'. Proceed?")) return;
+                const orders = adminOrders; // Use the cached list from global state
+                let count = 0;
+                const batch = db.batch();
 
-            orders.forEach(o => {
-                const name = (o.customer?.name || "").toLowerCase();
-                if (!name.includes("parv") && !name.includes("jain")) {
-                    batch.delete(db.collection('orders').doc(o.id));
-                    count++;
+                orders.forEach(o => {
+                    const name = (o.customer?.name || "").toLowerCase();
+                    if (!name.includes("parv") && !name.includes("jain")) {
+                        batch.delete(db.collection('orders').doc(o.id));
+                        count++;
+                    }
+                });
+
+                if (count === 0) { toast("No demo orders found to clean up.", "e"); return; }
+
+                try {
+                    await batch.commit();
+                    toast(`Successfully cleaned up ${count} demo orders!`, 's');
+                } catch (e) {
+                    toast("Error during cleanup", "e");
+                    console.error(e);
+                }
+            }
+
+            function deleteMessage(id) {
+                db.collection('messages').doc(id).delete()
+                    .then(() => toast('Deleted', 's'))
+                    .catch(e => toast('Error deleting', 'e'));
+            }
+
+            function deleteNotify(id) {
+                db.collection('notify').doc(id).delete()
+                    .then(() => toast('Removed', 's'))
+                    .catch(e => toast('Error deleting', 'e'));
+            }
+
+            function notifyOnWhatsApp(orderId) {
+                const o = adminOrders.find(x => x.id === orderId);
+                if (!o) return toast('Order not found', 'e');
+
+                const phone = o.delivery?.phone || o.customer?.phone;
+                if (!phone) return toast('No phone number found', 'e');
+
+                const status = o.status || 'Pending';
+                let msg = `Hi ${o.customer?.name || 'Customer'},\n\nUpdate on your *ECLIPSE* Order #${o.id}:\n\nYour order is now *${status.toUpperCase()}*.`;
+
+                if (status === 'Shipped') {
+                    msg += `\n\nIt will reach you soon! Stay tuned. 🚚`;
+                } else if (status === 'Processing') {
+                    msg += `\n\nWe are currently packing your items with care. ✨`;
+                } else if (status === 'Delivered') {
+                    msg += `\n\nHope you love your new gear! Tag us on Instagram @eclipseclothingx 🖤`;
+                }
+
+                const waLink = `https://wa.me/91${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+                window.open(waLink, '_blank');
+            }
+
+            function deleteCoupon(code) {
+                db.collection('coupons').doc(code).delete()
+                    .then(() => toast(`Coupon ${code} removed.`, 's'));
+            }
+
+            function deleteLead(id) {
+                if (!confirm('Permanently delete this lead?')) return;
+                db.collection('leads').doc(id).delete()
+                    .then(() => toast('Lead removed', 's'))
+                    .catch(e => toast('Error', 'e'));
+            }
+
+            function recoverLead(leadId) {
+                const l = adminLeads.find(x => x.id === leadId);
+                if (!l) return toast('Lead not found', 'e');
+
+                const phone = l.customer?.phone;
+                const name = l.customer?.name || 'there';
+                const city = l.customer?.city || '';
+                const item = (l.cart && l.cart[0]) ? l.cart[0].name : 'ECLIPSE gear';
+
+                let msg = `Hi ${name}! 🌑 I'm from ECLIPSE. I saw you were checking out the *${item}* earlier but didn't finish the order. \n\nWas there any technical issue? I'd love to help you get this to ${city}! \n\nAs a direct thank you, I can offer you *FREE SHIPPING* if you finish today. Let me know! 🚀`;
+
+                const waLink = `https://wa.me/91${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+                window.open(waLink, '_blank');
+            }
+
+            // ===== AUTH =====
+            const ADMIN_PW_KEY = 'eclipse_admin_pw';
+            function getStoredPw() { return localStorage.getItem(ADMIN_PW_KEY) || 'eclipse2025'; }
+            function doLogin() {
+                const pw = document.getElementById('pwInput').value;
+                if (pw === getStoredPw()) {
+                    sessionStorage.setItem('eclipse_admin_auth', '1');
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appShell').classList.add('visible');
+                    loadAllData(); startClock();
+                } else {
+                    document.getElementById('loginErr').textContent = '❌ Incorrect password.';
+                }
+            }
+            function doLogout() { sessionStorage.removeItem('eclipse_admin_auth'); location.reload(); }
+            function changePassword() {
+                const np = document.getElementById('newPw').value;
+                const nc = document.getElementById('newPwConfirm').value;
+                if (!np) { toast('Enter a new password.', 'e'); return; }
+                if (np !== nc) { toast('Passwords do not match.', 'e'); return; }
+                localStorage.setItem(ADMIN_PW_KEY, np);
+                toast('✅ Password updated!', 's');
+                document.getElementById('newPw').value = ''; document.getElementById('newPwConfirm').value = '';
+            }
+            // Auto-login if already authenticated
+            window.addEventListener('load', () => {
+                if (sessionStorage.getItem('eclipse_admin_auth') === '1') {
+                    document.getElementById('loginScreen').style.display = 'none';
+                    document.getElementById('appShell').classList.add('visible');
+                    loadAllData(); startClock();
                 }
             });
 
-            if (count === 0) { toast("No demo orders found to clean up.", "e"); return; }
-
-            try {
-                await batch.commit();
-                toast(`Successfully cleaned up ${count} demo orders!`, 's');
-            } catch (e) {
-                toast("Error during cleanup", "e");
-                console.error(e);
-            }
-        }
-
-        function deleteMessage(id) {
-            db.collection('messages').doc(id).delete()
-                .then(() => toast('Deleted', 's'))
-                .catch(e => toast('Error deleting', 'e'));
-        }
-
-        function deleteNotify(id) {
-            db.collection('notify').doc(id).delete()
-                .then(() => toast('Removed', 's'))
-                .catch(e => toast('Error deleting', 'e'));
-        }
-
-        function notifyOnWhatsApp(orderId) {
-            const o = adminOrders.find(x => x.id === orderId);
-            if (!o) return toast('Order not found', 'e');
-
-            const phone = o.delivery?.phone || o.customer?.phone;
-            if (!phone) return toast('No phone number found', 'e');
-
-            const status = o.status || 'Pending';
-            let msg = `Hi ${o.customer?.name || 'Customer'},\n\nUpdate on your *ECLIPSE* Order #${o.id}:\n\nYour order is now *${status.toUpperCase()}*.`;
-
-            if (status === 'Shipped') {
-                msg += `\n\nIt will reach you soon! Stay tuned. 🚚`;
-            } else if (status === 'Processing') {
-                msg += `\n\nWe are currently packing your items with care. ✨`;
-            } else if (status === 'Delivered') {
-                msg += `\n\nHope you love your new gear! Tag us on Instagram @eclipseclothingx 🖤`;
+            // ===== CLOCK =====
+            function startClock() {
+                function tick() { document.getElementById('topbarTime').textContent = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
+                tick(); setInterval(tick, 10000);
             }
 
-            const waLink = `https://wa.me/91${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
-            window.open(waLink, '_blank');
-        }
-
-        function deleteCoupon(code) {
-            db.collection('coupons').doc(code).delete()
-                .then(() => toast(`Coupon ${code} removed.`, 's'));
-        }
-
-        function deleteLead(id) {
-            if (!confirm('Permanently delete this lead?')) return;
-            db.collection('leads').doc(id).delete()
-                .then(() => toast('Lead removed', 's'))
-                .catch(e => toast('Error', 'e'));
-        }
-
-        function recoverLead(leadId) {
-            const l = adminLeads.find(x => x.id === leadId);
-            if (!l) return toast('Lead not found', 'e');
-
-            const phone = l.customer?.phone;
-            const name = l.customer?.name || 'there';
-            const city = l.customer?.city || '';
-            const item = (l.cart && l.cart[0]) ? l.cart[0].name : 'ECLIPSE gear';
-
-            let msg = `Hi ${name}! 🌑 I'm from ECLIPSE. I saw you were checking out the *${item}* earlier but didn't finish the order. \n\nWas there any technical issue? I'd love to help you get this to ${city}! \n\nAs a direct thank you, I can offer you *FREE SHIPPING* if you finish today. Let me know! 🚀`;
-
-            const waLink = `https://wa.me/91${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
-            window.open(waLink, '_blank');
-        }
-
-        // ===== AUTH =====
-        const ADMIN_PW_KEY = 'eclipse_admin_pw';
-        function getStoredPw() { return localStorage.getItem(ADMIN_PW_KEY) || 'eclipse2025'; }
-        function doLogin() {
-            const pw = document.getElementById('pwInput').value;
-            if (pw === getStoredPw()) {
-                sessionStorage.setItem('eclipse_admin_auth', '1');
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appShell').classList.add('visible');
-                loadAllData(); startClock();
-            } else {
-                document.getElementById('loginErr').textContent = '❌ Incorrect password.';
+            // ===== PANEL NAVIGATION =====
+            function showPanel(name, el) {
+                document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+                document.getElementById('panel-' + name).classList.add('active');
+                document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+                el.classList.add('active');
+                const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', customers: 'CUSTOMERS', leads: 'ABANDONED CARTS', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
+                document.getElementById('topbarTitle').textContent = titles[name] || name.toUpperCase();
             }
-        }
-        function doLogout() { sessionStorage.removeItem('eclipse_admin_auth'); location.reload(); }
-        function changePassword() {
-            const np = document.getElementById('newPw').value;
-            const nc = document.getElementById('newPwConfirm').value;
-            if (!np) { toast('Enter a new password.', 'e'); return; }
-            if (np !== nc) { toast('Passwords do not match.', 'e'); return; }
-            localStorage.setItem(ADMIN_PW_KEY, np);
-            toast('✅ Password updated!', 's');
-            document.getElementById('newPw').value = ''; document.getElementById('newPwConfirm').value = '';
-        }
-        // Auto-login if already authenticated
-        window.addEventListener('load', () => {
-            if (sessionStorage.getItem('eclipse_admin_auth') === '1') {
-                document.getElementById('loginScreen').style.display = 'none';
-                document.getElementById('appShell').classList.add('visible');
-                loadAllData(); startClock();
+
+            // ===== GLOBAL DATA STATE =====
+            let adminOrders = [];
+            let adminMessages = [];
+            let adminNotify = [];
+            let adminCoupons = {};
+            let adminUsers = [];
+            let adminLeads = [];
+            let unsubscribers = [];
+
+            function getOrders() { return adminOrders; }
+            function getMessages() { return adminMessages; }
+            function getNotify() { return adminNotify; }
+            function getCoupons() { return adminCoupons; }
+            function getUsers() { return adminUsers; }
+            function getLeads() { return adminLeads; }
+
+            // ===== LOAD ALL (FIRESTORE) =====
+            function loadAllData() {
+                // Unsubscribe existing listeners
+                unsubscribers.forEach(u => u());
+                unsubscribers = [];
+
+                // 1. Listen to Orders
+                unsubscribers.push(
+                    db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                        adminOrders = [];
+                        snap.forEach(doc => { adminOrders.push({ id: doc.id, ...doc.data() }) });
+                        updateDashboardAndRenders();
+                    })
+                );
+
+                // 2. Listen to Messages
+                unsubscribers.push(
+                    db.collection('messages').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                        adminMessages = [];
+                        snap.forEach(doc => { adminMessages.push({ id: doc.id, ...doc.data() }) });
+                        updateDashboardAndRenders();
+                    })
+                );
+
+                // 3. Listen to Notify List
+                unsubscribers.push(
+                    db.collection('notify').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                        adminNotify = [];
+                        snap.forEach(doc => { adminNotify.push({ id: doc.id, ...doc.data() }) });
+                        updateDashboardAndRenders();
+                    })
+                );
+
+                // 4. Listen to Coupons
+                unsubscribers.push(
+                    db.collection('coupons').onSnapshot(snap => {
+                        adminCoupons = {};
+                        snap.forEach(doc => { adminCoupons[doc.id] = doc.data(); });
+                        updateDashboardAndRenders();
+                    })
+                );
+
+                // 5. Listen to Users
+                unsubscribers.push(
+                    db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                        adminUsers = [];
+                        snap.forEach(doc => { adminUsers.push({ id: doc.id, ...doc.data() }); });
+                        updateDashboardAndRenders();
+                    })
+                );
+
+                // 6. Listen to Leads
+                unsubscribers.push(
+                    db.collection('leads').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                        adminLeads = [];
+                        snap.forEach(doc => { adminLeads.push({ id: doc.id, ...doc.data() }); });
+                        updateDashboardAndRenders();
+                    })
+                );
+
+                toast('Connected to Live Database 🟢', 's');
             }
-        });
 
-        // ===== CLOCK =====
-        function startClock() {
-            function tick() { document.getElementById('topbarTime').textContent = new Date().toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' }); }
-            tick(); setInterval(tick, 10000);
-        }
+            function updateDashboardAndRenders() {
+                const orders = getOrders();
+                const messages = getMessages();
+                const notify = getNotify();
+                const users = getUsers();
+                // Nav badges
+                document.getElementById('ordersCount').textContent = orders.length;
+                document.getElementById('messagesCount').textContent = messages.length;
+                document.getElementById('notifyCount').textContent = notify.length;
+                document.getElementById('customersCount').textContent = users.length;
+                // Dashboard stats
+                const pendingOrders = orders.filter(o => o.status === 'Pending');
+                const revenue = orders.filter(o => o.status !== 'Cancelled').reduce((acc, o) => acc + (o.finalPrice || o.mrp || 999), 0);
+                document.getElementById('s-orders').textContent = orders.length;
+                document.getElementById('s-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
+                document.getElementById('s-pending').textContent = pendingOrders.length;
+                document.getElementById('s-leads').textContent = adminLeads.length;
+                document.getElementById('leadsCount').textContent = adminLeads.length;
 
-        // ===== PANEL NAVIGATION =====
-        function showPanel(name, el) {
-            document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
-            document.getElementById('panel-' + name).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
-            el.classList.add('active');
-            const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', customers: 'CUSTOMERS', leads: 'ABANDONED CARTS', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
-            document.getElementById('topbarTitle').textContent = titles[name] || name.toUpperCase();
-        }
+                // Re-render Views
+                renderDashRecent(orders.slice(0, 5));
+                renderOrders();
+                renderMessages();
+                renderNotify();
+                renderCoupons();
+                renderUsers();
+                renderLeads();
+            }
 
-        // ===== GLOBAL DATA STATE =====
-        let adminOrders = [];
-        let adminMessages = [];
-        let adminNotify = [];
-        let adminCoupons = {};
-        let adminUsers = [];
-        let adminLeads = [];
-        let unsubscribers = [];
+            // ===== FORMAT DATE =====
+            function fmtDate(iso) {
+                if (!iso) return '—';
+                const d = new Date(iso);
+                return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
+            }
 
-        function getOrders() { return adminOrders; }
-        function getMessages() { return adminMessages; }
-        function getNotify() { return adminNotify; }
-        function getCoupons() { return adminCoupons; }
-        function getUsers() { return adminUsers; }
-        function getLeads() { return adminLeads; }
+            // ===== ORDER TABLE =====
+            function orderRow(o, showActions = true) {
+                const payBadge = o.paymentMethod === 'cod' ? '<span class="badge badge-cod">COD</span>' : '<span class="badge badge-online">Online</span>';
+                const statusBadge = `<span class="badge badge-${o.status?.toLowerCase() || 'pending'}">${o.status || 'Pending'}</span>`;
 
-        // ===== LOAD ALL (FIRESTORE) =====
-        function loadAllData() {
-            // Unsubscribe existing listeners
-            unsubscribers.forEach(u => u());
-            unsubscribers = [];
+                // Build actions based on current status
+                let actions = '';
+                if (showActions) {
+                    if (!o.status || o.status === 'Pending') {
+                        actions = `<div class="flex-r"><button class="btn-sm btn-outline" style="border-color:#60a5fa;color:#60a5fa;" onclick="updateOrderStatus('${o.id}','Processing')">⚙️ Process</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>`;
+                    } else if (o.status === 'Processing') {
+                        actions = `<div class="flex-r"><button class="btn-sm btn-outline" style="border-color:#c084fc;color:#c084fc;" onclick="updateOrderStatus('${o.id}','Shipped')">🚚 Ship</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>`;
+                    } else if (o.status === 'Shipped') {
+                        actions = `<div class="flex-r"><button class="btn-sm btn-fulfill" onclick="updateOrderStatus('${o.id}','Delivered')">✅ Deliver</button></div>`;
+                    } else {
+                        // It's Delivered or Cancelled, maybe allow reverting?
+                        actions = `<div style="font-size:11px;color:var(--grey);">-</div>`;
+                    }
 
-            // 1. Listen to Orders
-            unsubscribers.push(
-                db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snap => {
-                    adminOrders = [];
-                    snap.forEach(doc => { adminOrders.push({ id: doc.id, ...doc.data() }) });
-                    updateDashboardAndRenders();
-                })
-            );
+                    // Add WhatsApp Button to all rows with a phone number
+                    actions = `<button class="btn-sm" style="background:#25D366; color:white; border:none; margin-right:8px;" onclick="notifyOnWhatsApp('${o.id}')" title="WhatsApp Customer">💬</button>` + actions;
 
-            // 2. Listen to Messages
-            unsubscribers.push(
-                db.collection('messages').orderBy('timestamp', 'desc').onSnapshot(snap => {
-                    adminMessages = [];
-                    snap.forEach(doc => { adminMessages.push({ id: doc.id, ...doc.data() }) });
-                    updateDashboardAndRenders();
-                })
-            );
-
-            // 3. Listen to Notify List
-            unsubscribers.push(
-                db.collection('notify').orderBy('timestamp', 'desc').onSnapshot(snap => {
-                    adminNotify = [];
-                    snap.forEach(doc => { adminNotify.push({ id: doc.id, ...doc.data() }) });
-                    updateDashboardAndRenders();
-                })
-            );
-
-            // 4. Listen to Coupons
-            unsubscribers.push(
-                db.collection('coupons').onSnapshot(snap => {
-                    adminCoupons = {};
-                    snap.forEach(doc => { adminCoupons[doc.id] = doc.data(); });
-                    updateDashboardAndRenders();
-                })
-            );
-
-            // 5. Listen to Users
-            unsubscribers.push(
-                db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
-                    adminUsers = [];
-                    snap.forEach(doc => { adminUsers.push({ id: doc.id, ...doc.data() }); });
-                    updateDashboardAndRenders();
-                })
-            );
-
-            // 6. Listen to Leads
-            unsubscribers.push(
-                db.collection('leads').orderBy('timestamp', 'desc').onSnapshot(snap => {
-                    adminLeads = [];
-                    snap.forEach(doc => { adminLeads.push({ id: doc.id, ...doc.data() }); });
-                    updateDashboardAndRenders();
-                })
-            );
-
-            toast('Connected to Live Database 🟢', 's');
-        }
-
-        function updateDashboardAndRenders() {
-            const orders = getOrders();
-            const messages = getMessages();
-            const notify = getNotify();
-            const users = getUsers();
-            // Nav badges
-            document.getElementById('ordersCount').textContent = orders.length;
-            document.getElementById('messagesCount').textContent = messages.length;
-            document.getElementById('notifyCount').textContent = notify.length;
-            document.getElementById('customersCount').textContent = users.length;
-            // Dashboard stats
-            const pendingOrders = orders.filter(o => o.status === 'Pending');
-            const revenue = orders.filter(o => o.status !== 'Cancelled').reduce((acc, o) => acc + (o.finalPrice || o.mrp || 999), 0);
-            document.getElementById('s-orders').textContent = orders.length;
-            document.getElementById('s-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
-            document.getElementById('s-pending').textContent = pendingOrders.length;
-            document.getElementById('s-leads').textContent = adminLeads.length;
-            document.getElementById('leadsCount').textContent = adminLeads.length;
-
-            // Re-render Views
-            renderDashRecent(orders.slice(0, 5));
-            renderOrders();
-            renderMessages();
-            renderNotify();
-            renderCoupons();
-            renderUsers();
-            renderLeads();
-        }
-
-        // ===== FORMAT DATE =====
-        function fmtDate(iso) {
-            if (!iso) return '—';
-            const d = new Date(iso);
-            return d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' }) + ' ' + d.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit' });
-        }
-
-        // ===== ORDER TABLE =====
-        function orderRow(o, showActions = true) {
-            const payBadge = o.paymentMethod === 'cod' ? '<span class="badge badge-cod">COD</span>' : '<span class="badge badge-online">Online</span>';
-            const statusBadge = `<span class="badge badge-${o.status?.toLowerCase() || 'pending'}">${o.status || 'Pending'}</span>`;
-
-            // Build actions based on current status
-            let actions = '';
-            if (showActions) {
-                if (!o.status || o.status === 'Pending') {
-                    actions = `<div class="flex-r"><button class="btn-sm btn-outline" style="border-color:#60a5fa;color:#60a5fa;" onclick="updateOrderStatus('${o.id}','Processing')">⚙️ Process</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>`;
-                } else if (o.status === 'Processing') {
-                    actions = `<div class="flex-r"><button class="btn-sm btn-outline" style="border-color:#c084fc;color:#c084fc;" onclick="updateOrderStatus('${o.id}','Shipped')">🚚 Ship</button><button class="btn-sm btn-cancel" onclick="updateOrderStatus('${o.id}','Cancelled')">✕ Cancel</button></div>`;
-                } else if (o.status === 'Shipped') {
-                    actions = `<div class="flex-r"><button class="btn-sm btn-fulfill" onclick="updateOrderStatus('${o.id}','Delivered')">✅ Deliver</button></div>`;
-                } else {
-                    // It's Delivered or Cancelled, maybe allow reverting?
-                    actions = `<div style="font-size:11px;color:var(--grey);">-</div>`;
+                    // Add Delete Button to all orders for Admin cleanup
+                    actions += `<div style="margin-top:5px;"><button class="btn-sm btn-cancel" style="width:100%;" onclick="deleteOrder('${o.id}')">🗑️ Delete Order</button></div>`;
                 }
 
-                // Add WhatsApp Button to all rows with a phone number
-                actions = `<button class="btn-sm" style="background:#25D366; color:white; border:none; margin-right:8px;" onclick="notifyOnWhatsApp('${o.id}')" title="WhatsApp Customer">💬</button>` + actions;
-
-                // Add Delete Button to all orders for Admin cleanup
-                actions += `<div style="margin-top:5px;"><button class="btn-sm btn-cancel" style="width:100%;" onclick="deleteOrder('${o.id}')">🗑️ Delete Order</button></div>`;
-            }
-
-            return `<tr>
+                return `<tr>
       <td><span class="text-gold" style="font-size:11px;font-family:'Bebas Neue';letter-spacing:2px;">${o.id}</span></td>
       <td>${o.customer?.name || '—'}<br/><span style="font-size:11px;color:var(--grey)">${o.customer?.phone || ''}</span></td>
       <td>${o.product || 'Tee'}<br/><span style="font-size:11px;color:var(--grey)">Size: ${o.size || '—'}</span></td>
@@ -1435,110 +1455,116 @@
       <td style="font-size:11px;color:var(--grey)">${fmtDate(o.timestamp)}</td>
       ${showActions ? `<td>${actions}</td>` : ''}
     </tr>`;
-        }
-
-        function renderDashRecent(orders) {
-            const wrap = document.getElementById('dashRecentOrders');
-            if (!orders.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet. Once customers place orders, they\'ll appear here.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Address</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${orders.map(o => orderRow(o, true)).join('')}</tbody></table>`;
-        }
-
-        function renderOrders() {
-            const orders = getOrders();
-            const search = document.getElementById('orderSearch')?.value?.toLowerCase() || '';
-            const statusF = document.getElementById('orderStatusFilter')?.value || '';
-            const payF = document.getElementById('orderPayFilter')?.value || '';
-            let filtered = orders.filter(o => {
-                const matchSearch = !search || (o.id + o.customer?.name + o.customer?.phone).toLowerCase().includes(search);
-                const matchStatus = !statusF || o.status === statusF;
-                const matchPay = !payF || o.paymentMethod === payF;
-                return matchSearch && matchStatus && matchPay;
-            });
-            const wrap = document.getElementById('ordersTableWrap');
-            const totalEl = document.getElementById('ordersTotal');
-            if (totalEl) totalEl.textContent = `${filtered.length} of ${orders.length} orders`;
-            if (!filtered.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No matching orders found.</p></div>'; return; }
-            wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Address</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${filtered.map(o => orderRow(o, true)).join('')}</tbody></table></div>`;
-        }
-
-        async function updateOrderStatus(id, status) {
-            try {
-                const orderRef = db.collection('orders').doc(id);
-                const orderDoc = await orderRef.get();
-                if (!orderDoc.exists) return;
-                const order = orderDoc.data();
-
-                // If fulfilling COD order for registered user & not yet awarded
-                if (status === 'Delivered' && order.paymentMethod === 'cod' && order.userId && !order.pointsAwarded) {
-                    const batch = db.batch();
-                    batch.update(orderRef, { status: status, pointsAwarded: true, earnedPoints: 50 });
-                    batch.update(db.collection('users').doc(order.userId), {
-                        walletBalance: firebase.firestore.FieldValue.increment(50)
-                    });
-                    await batch.commit();
-                    toast(`Order ${status} & 50 Pts Auto-Awarded!`, 's');
-                } else {
-                    await orderRef.update({ status: status });
-                    toast(`Order ${status}!`, 's');
-                }
-            } catch (e) {
-                toast('Error updating order', 'e');
-                console.error(e);
             }
-        }
 
-        function exportOrders() {
-            const orders = getOrders();
-            if (!orders.length) { toast('No orders to export.', 'e'); return; }
-            const headers = ['Order ID', 'Name', 'Phone', 'Email', 'Address', 'City', 'PIN', 'State', 'Product', 'Size', 'MRP', 'Coupon', 'Final Price', 'Payment', 'UTR', 'Status', 'Date'];
-            const rows = orders.map(o => [o.id, o.customer?.name, o.customer?.phone, o.customer?.email, o.customer?.address?.replace(/,/g, ' '), o.customer?.city, o.customer?.pin, o.customer?.state, o.product, o.size, o.mrp, o.coupon, o.finalPrice, o.paymentMethod, o.utr, o.status, fmtDate(o.timestamp)].map(v => `"${v || ''}"`).join(','));
-            const csv = [headers.join(','), ...rows].join('\n');
-            const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
-            a.download = `eclipse-orders-${Date.now()}.csv`; a.click();
-            toast('✅ CSV exported!', 's');
-        }
+            function renderDashRecent(orders) {
+                const wrap = document.getElementById('dashRecentOrders');
+                if (!orders.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No orders yet. Once customers place orders, they\'ll appear here.</p></div>'; return; }
+                wrap.innerHTML = `<table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Address</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${orders.map(o => orderRow(o, true)).join('')}</tbody></table>`;
+            }
 
-        // ===== MESSAGES =====
-        function renderMessages() {
-            const msgs = getMessages();
-            const wrap = document.getElementById('messagesWrap');
-            if (!msgs.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✉️</div><p>No messages yet.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Contact</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>${msgs.map((m) => `<tr><td>${m.name}</td><td>${m.contact}</td><td style="max-width:320px;word-break:break-word;">${m.message}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(m.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteMessage('${m.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
-        }
-        // function deleteMessage(id) { ... moved up ... }
+            function renderOrders() {
+                const orders = getOrders();
+                const search = document.getElementById('orderSearch')?.value?.toLowerCase() || '';
+                const statusF = document.getElementById('orderStatusFilter')?.value || '';
+                const payF = document.getElementById('orderPayFilter')?.value || '';
+                let filtered = orders.filter(o => {
+                    const matchSearch = !search || (o.id + o.customer?.name + o.customer?.phone).toLowerCase().includes(search);
+                    const matchStatus = !statusF || o.status === statusF;
+                    const matchPay = !payF || o.paymentMethod === payF;
+                    return matchSearch && matchStatus && matchPay;
+                });
+                const wrap = document.getElementById('ordersTableWrap');
+                const totalEl = document.getElementById('ordersTotal');
+                if (totalEl) totalEl.textContent = `${filtered.length} of ${orders.length} orders`;
+                if (!filtered.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">📦</div><p>No matching orders found.</p></div>'; return; }
+                wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Order ID</th><th>Customer</th><th>Product</th><th>Address</th><th>Amount</th><th>Payment</th><th>Status</th><th>Date</th><th>Actions</th></tr></thead><tbody>${filtered.map(o => orderRow(o, true)).join('')}</tbody></table></div>`;
+            }
 
-        // ===== NOTIFY =====
-        function renderNotify() {
-            const list = getNotify();
-            const wrap = document.getElementById('notifyWrap');
-            if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p>No signups yet.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>Signed Up</th><th></th></tr></thead><tbody>${list.map((n, i) => `<tr><td>${i + 1}</td><td>${n.name}</td><td>${n.contact}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(n.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteNotify('${n.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
-        }
-        // function deleteNotify(id) { ... moved up ... }
+            async function updateOrderStatus(id, status) {
+                try {
+                    const orderRef = db.collection('orders').doc(id);
+                    const orderDoc = await orderRef.get();
+                    if (!orderDoc.exists) return;
+                    const order = orderDoc.data();
 
-        // ===== CUSTOMERS =====
-        function renderUsers() {
-            const list = getUsers();
-            const wrap = document.getElementById('customersWrap');
-            if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>No registered customers yet.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Wallet Balance</th><th>Affiliate Code</th><th>Referrals</th><th>Joined Date</th></tr></thead><tbody>${list.map((u) => `<tr>
+                    // If fulfilling COD order for registered user & not yet awarded
+                    if (status === 'Delivered' && order.paymentMethod === 'cod' && order.userId && !order.pointsAwarded) {
+                        const batch = db.batch();
+                        batch.update(orderRef, { status: status, pointsAwarded: true, earnedPoints: 50 });
+                        batch.update(db.collection('users').doc(order.userId), {
+                            walletBalance: firebase.firestore.FieldValue.increment(50)
+                        });
+                        await batch.commit();
+                        toast(`Order ${status} & 50 Pts Auto-Awarded!`, 's');
+                    } else {
+                        await orderRef.update({ status: status });
+                        toast(`Order ${status}!`, 's');
+                    }
+                } catch (e) {
+                    toast('Error updating order', 'e');
+                    console.error(e);
+                }
+            }
+
+            function exportOrders() {
+                const orders = getOrders();
+                if (!orders.length) { toast('No orders to export.', 'e'); return; }
+                const headers = ['Order ID', 'Name', 'Phone', 'Email', 'Address', 'City', 'PIN', 'State', 'Product', 'Size', 'MRP', 'Coupon', 'Final Price', 'Payment', 'UTR', 'Status', 'Date'];
+                const rows = orders.map(o => [o.id, o.customer?.name, o.customer?.phone, o.customer?.email, o.customer?.address?.replace(/,/g, ' '), o.customer?.city, o.customer?.pin, o.customer?.state, o.product, o.size, o.mrp, o.coupon, o.finalPrice, o.paymentMethod, o.utr, o.status, fmtDate(o.timestamp)].map(v => `"${v || ''}"`).join(','));
+                const csv = [headers.join(','), ...rows].join('\n');
+                const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+                a.download = `eclipse-orders-${Date.now()}.csv`; a.click();
+                toast('✅ CSV exported!', 's');
+            }
+
+            // ===== MESSAGES =====
+            function renderMessages() {
+                const msgs = getMessages();
+                const wrap = document.getElementById('messagesWrap');
+                if (!msgs.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">✉️</div><p>No messages yet.</p></div>'; return; }
+                wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Contact</th><th>Message</th><th>Date</th><th></th></tr></thead><tbody>${msgs.map((m) => `<tr><td>${m.name}</td><td>${m.contact}</td><td style="max-width:320px;word-break:break-word;">${m.message}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(m.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteMessage('${m.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
+            }
+            // function deleteMessage(id) { ... moved up ... }
+
+            // ===== NOTIFY =====
+            function renderNotify() {
+                const list = getNotify();
+                const wrap = document.getElementById('notifyWrap');
+                if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🔔</div><p>No signups yet.</p></div>'; return; }
+                wrap.innerHTML = `<table class="data-table"><thead><tr><th>#</th><th>Name</th><th>Contact</th><th>Signed Up</th><th></th></tr></thead><tbody>${list.map((n, i) => `<tr><td>${i + 1}</td><td>${n.name}</td><td>${n.contact}</td><td style="font-size:11px;color:var(--grey)">${fmtDate(n.timestamp)}</td><td><button class="btn-sm btn-delete" onclick="deleteNotify('${n.id}')">🗑</button></td></tr>`).join('')}</tbody></table>`;
+            }
+            // function deleteNotify(id) { ... moved up ... }
+
+            // ===== CUSTOMERS =====
+            function renderUsers() {
+                const list = getUsers();
+                const wrap = document.getElementById('customersWrap');
+                if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>No registered customers yet.</p></div>'; return; }
+                wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Wallet Balance</th><th>Affiliate Code</th><th>Referrals</th><th>Joined Date</th></tr></thead><tbody>${list.map((u) => `<tr>
                 <td style="font-weight:600;">${u.fullName || '—'}</td>
                 <td>${u.email}</td>
                 <td class="text-gold" style="font-weight:bold;font-size:16px;">₹${u.walletBalance || 0}</td>
                 <td style="font-family:monospace;letter-spacing:1px;">${u.affiliateCode || '—'}</td>
                 <td>${u.referralsCount || 0}</td>
                 <td style="font-size:11px;color:var(--grey)">${fmtDate(u.createdAt)}</td>
+                <td>
+                    <div class="flex-r">
+                        <button class="btn-sm" style="background:var(--gold);color:black;border:none;" onclick="openCreditModal('${u.id}', ${u.walletBalance || 0})">₹ Manage</button>
+                        <button class="btn-sm" style="background:var(--dark-bg);color:white;border-radius:4px;" onclick="showReferralDetail('${u.affiliateCode}', '${u.fullName || ''}')">👥 View Referrals</button>
+                    </div>
+                </td>
             </tr>`).join('')}</tbody></table>`;
-        }
+            }
 
-        // ===== LEADS =====
-        function renderLeads() {
-            const list = getLeads();
-            const wrap = document.getElementById('leadsWrap');
-            if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🛒</div><p>No abandoned carts found.</p></div>'; return; }
-            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Customer / Location</th><th>Items</th><th>Last Activity</th><th>Actions</th></tr></thead><tbody>${list.map((l) => {
-                const item = (l.cart && l.cart[0]) ? `${l.cart[0].name} (${l.cart[0].size})` : 'ECLIPSE Tee';
-                return `<tr>
+            // ===== LEADS =====
+            function renderLeads() {
+                const list = getLeads();
+                const wrap = document.getElementById('leadsWrap');
+                if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🛒</div><p>No abandoned carts found.</p></div>'; return; }
+                wrap.innerHTML = `<table class="data-table"><thead><tr><th>Customer / Location</th><th>Items</th><th>Last Activity</th><th>Actions</th></tr></thead><tbody>${list.map((l) => {
+                    const item = (l.cart && l.cart[0]) ? `${l.cart[0].name} (${l.cart[0].size})` : 'ECLIPSE Tee';
+                    return `<tr>
                     <td>
                         <strong style="display:block;">${l.customer?.name || 'Guest'}</strong>
                         <span style="font-size:11px;color:var(--grey);">${l.customer?.phone || ''} • ${l.customer?.city || '—'}</span>
@@ -1552,93 +1578,93 @@
                         </div>
                     </td>
                 </tr>`;
-            }).join('')}</tbody></table>`;
-        }
+                }).join('')}</tbody></table>`;
+            }
 
-        // ===== COUPONS =====
-        function renderCoupons() {
-            const coupons = getCoupons();
-            const grid = document.getElementById('couponGrid');
-            if (!Object.keys(coupons).length) { grid.innerHTML = '<p style="color:var(--grey);font-size:13px;">No coupons yet.</p>'; return; }
-            grid.innerHTML = Object.entries(coupons).map(([code, c]) => `
+            // ===== COUPONS =====
+            function renderCoupons() {
+                const coupons = getCoupons();
+                const grid = document.getElementById('couponGrid');
+                if (!Object.keys(coupons).length) { grid.innerHTML = '<p style="color:var(--grey);font-size:13px;">No coupons yet.</p>'; return; }
+                grid.innerHTML = Object.entries(coupons).map(([code, c]) => `
       <div class="coupon-card">
         <button class="coupon-del" onclick="deleteCoupon('${code}')">✕</button>
         <div class="coupon-code">${code}</div>
         <div class="coupon-info">${c.type === 'percent' ? c.discount + '% off' : '₹' + c.discount + ' flat off'} &nbsp;•&nbsp; ${c.label}</div>
         <span class="badge badge-fulfilled">Active</span>
       </div>`).join('');
-        }
-        function addCoupon() {
-            const code = document.getElementById('cpCode').value.trim().toUpperCase();
-            const type = document.getElementById('cpType').value;
-            const value = parseFloat(document.getElementById('cpValue').value);
-            const label = document.getElementById('cpLabel').value.trim();
-            if (!code || !value || !label) { toast('Fill in all coupon fields.', 'e'); return; }
-
-            db.collection('coupons').doc(code).set({ discount: value, type, label })
-                .then(() => {
-                    document.getElementById('cpCode').value = ''; document.getElementById('cpValue').value = ''; document.getElementById('cpLabel').value = '';
-                    toast(`✅ Coupon ${code} added!`, 's');
-                });
-        }
-        // function deleteCoupon(code) {
-        //     db.collection('coupons').doc(code).delete()
-        //         .then(() => toast(`Coupon ${code} removed.`, 's'));
-        // }
-
-        // ===== PRODUCTS =====
-        function updatePrice() {
-            const np = parseInt(document.getElementById('peNewPrice').value);
-            if (!np || np < 100) { toast('Enter a valid price.', 'e'); return; }
-            db.collection('settings').doc('store').set({ price: np }, { merge: true })
-                .then(() => {
-                    document.getElementById('peCurrent').textContent = '₹' + np;
-                    toast('✅ Price updated!', 's');
-                });
-        }
-        function updateMRP() {
-            const mrp = parseInt(document.getElementById('peMRP').value);
-            if (!mrp || mrp < 100) { toast('Enter a valid MRP.', 'e'); return; }
-            db.collection('settings').doc('store').set({ mrp: mrp }, { merge: true })
-                .then(() => toast('✅ MRP updated!', 's'));
-        }
-        function updateStock() {
-            const st = document.getElementById('peStock').value;
-            db.collection('settings').doc('store').set({ stock: st }, { merge: true })
-                .then(() => toast('✅ Stock status: ' + st, 's'));
-        }
-        function saveAnnouncement() {
-            const tag = document.getElementById('heroTagEdit').value.trim();
-            const sub = document.getElementById('heroSubEdit').value.trim();
-            db.collection('settings').doc('store').set({ heroTag: tag, heroSub: sub }, { merge: true })
-                .then(() => toast('✅ Announcement saved!', 's'));
-        }
-
-        // ===== CLEAR DATA =====
-        function clearData(key) {
-            alert('Bulk deletion is disabled in the Live Database. Manage directly in Firebase Console.');
-        }
-
-        // ===== TOAST =====
-        let tt;
-        function toast(msg, type = 's') {
-            const t = document.getElementById('adminToast');
-            t.textContent = msg; t.className = `show ${type}`;
-            clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 3000);
-        }
-
-        // Load product settings from Firebase
-        db.collection('settings').doc('store').onSnapshot(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                if (data.price) document.getElementById('peCurrent').textContent = '₹' + data.price;
-                if (data.stock) document.getElementById('peStock').value = data.stock;
-                if (data.heroTag) document.getElementById('heroTagEdit').value = data.heroTag;
-                if (data.heroSub) document.getElementById('heroSubEdit').value = data.heroSub;
             }
-        });
+            function addCoupon() {
+                const code = document.getElementById('cpCode').value.trim().toUpperCase();
+                const type = document.getElementById('cpType').value;
+                const value = parseFloat(document.getElementById('cpValue').value);
+                const label = document.getElementById('cpLabel').value.trim();
+                if (!code || !value || !label) { toast('Fill in all coupon fields.', 'e'); return; }
 
-    </script>
+                db.collection('coupons').doc(code).set({ discount: value, type, label })
+                    .then(() => {
+                        document.getElementById('cpCode').value = ''; document.getElementById('cpValue').value = ''; document.getElementById('cpLabel').value = '';
+                        toast(`✅ Coupon ${code} added!`, 's');
+                    });
+            }
+            // function deleteCoupon(code) {
+            //     db.collection('coupons').doc(code).delete()
+            //         .then(() => toast(`Coupon ${code} removed.`, 's'));
+            // }
+
+            // ===== PRODUCTS =====
+            function updatePrice() {
+                const np = parseInt(document.getElementById('peNewPrice').value);
+                if (!np || np < 100) { toast('Enter a valid price.', 'e'); return; }
+                db.collection('settings').doc('store').set({ price: np }, { merge: true })
+                    .then(() => {
+                        document.getElementById('peCurrent').textContent = '₹' + np;
+                        toast('✅ Price updated!', 's');
+                    });
+            }
+            function updateMRP() {
+                const mrp = parseInt(document.getElementById('peMRP').value);
+                if (!mrp || mrp < 100) { toast('Enter a valid MRP.', 'e'); return; }
+                db.collection('settings').doc('store').set({ mrp: mrp }, { merge: true })
+                    .then(() => toast('✅ MRP updated!', 's'));
+            }
+            function updateStock() {
+                const st = document.getElementById('peStock').value;
+                db.collection('settings').doc('store').set({ stock: st }, { merge: true })
+                    .then(() => toast('✅ Stock status: ' + st, 's'));
+            }
+            function saveAnnouncement() {
+                const tag = document.getElementById('heroTagEdit').value.trim();
+                const sub = document.getElementById('heroSubEdit').value.trim();
+                db.collection('settings').doc('store').set({ heroTag: tag, heroSub: sub }, { merge: true })
+                    .then(() => toast('✅ Announcement saved!', 's'));
+            }
+
+            // ===== CLEAR DATA =====
+            function clearData(key) {
+                alert('Bulk deletion is disabled in the Live Database. Manage directly in Firebase Console.');
+            }
+
+            // ===== TOAST =====
+            let tt;
+            function toast(msg, type = 's') {
+                const t = document.getElementById('adminToast');
+                t.textContent = msg; t.className = `show ${type}`;
+                clearTimeout(tt); tt = setTimeout(() => t.classList.remove('show'), 3000);
+            }
+
+            // Load product settings from Firebase
+            db.collection('settings').doc('store').onSnapshot(doc => {
+                if (doc.exists) {
+                    const data = doc.data();
+                    if (data.price) document.getElementById('peCurrent').textContent = '₹' + data.price;
+                    if (data.stock) document.getElementById('peStock').value = data.stock;
+                    if (data.heroTag) document.getElementById('heroTagEdit').value = data.heroTag;
+                    if (data.heroSub) document.getElementById('heroSubEdit').value = data.heroSub;
+                }
+            });
+
+        </script>
 </body>
 
 </html>
