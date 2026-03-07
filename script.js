@@ -620,7 +620,7 @@ function submitContactForm(e) {
 // ===== POLICY MODAL =====
 const policies = {
     shipping: `<h2>Shipping Policy</h2><h3>Processing Time</h3><p>Orders are processed within 1–2 business days after payment confirmation.</p><h3>Delivery Timeline</h3><p>Standard delivery takes 3–7 business days. Chennai orders: 1–3 days.</p><h3>Shipping Charges</h3><p>Free shipping on all orders.</p><h3>COD</h3><p>COD is available only within Chennai metropolitan region.</p>`,
-    returns: `<h2>Returns & Exchange Policy</h2><h3>7-Day Return Window</h3><p>Returns accepted within 7 days of delivery if unused and in original packaging.</p><h3>Exchange</h3><p>Size exchanges accepted. Contact us within 7 days.</p><h3>Refunds</h3><p>Approved refunds processed within 5–7 business days.</p>`,
+    returns: `<h2>Returns & Exchange Policy</h2><p style="color:var(--red); font-weight:bold; margin-bottom:15px;">DUE TO THE EXCLUSIVE NATURE OF OUR LIMITED DROPS, WE DO NOT ACCEPT RETURNS OR EXCHANGES.</p><p>Please refer to our <b>Size Guide</b> carefully before placing an order to ensure the perfect fit. All sales are final.</p>`,
     privacy: `<h2>Privacy Policy</h2><h3>Information We Collect</h3><p>Name, phone, email (optional), and delivery address for order processing.</p><h3>How We Use It</h3><p>Your data is used only to process and deliver your order.</p><h3>Payment Security</h3><p>We do not store payment details. UTR IDs stored only for order verification.</p>`
 };
 function showPolicy(type) { document.getElementById('policyContent').innerHTML = policies[type] || '<p>Not found.</p>'; openModal('policyModal'); }
