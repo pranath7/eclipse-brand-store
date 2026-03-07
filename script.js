@@ -132,6 +132,7 @@ let selectedSize = null;
 let selectedPayment = null;
 let deliveryData = {};
 let appliedCoupon = null;
+let currentLeadId = null; // Track active lead for abandonment recovery
 const BASE_PRICE = 999;
 
 let activeCoupons = {};
@@ -471,6 +472,22 @@ async function goToPayment() {
     const isChennai = city.toLowerCase().includes('chennai');
     codOption.style.opacity = isChennai ? '' : '0.4';
     codOption.style.pointerEvents = isChennai ? '' : 'none';
+
+    // Capture Lead for Abandoned Cart Recovery
+    try {
+        if (!currentLeadId) {
+            currentLeadId = 'LEAD-' + Date.now().toString().slice(-6) + Math.random().toString(36).substr(2, 4).toUpperCase();
+        }
+        await db.collection('leads').doc(currentLeadId).set({
+            id: currentLeadId,
+            customer: deliveryData,
+            cart: cart.length > 0 ? cart : [{ name: 'Karan Aujla Tee — 001', size: selectedSize, price: BASE_PRICE }],
+            timestamp: new Date().toISOString(),
+            status: 'Abandoned'
+        });
+    } catch (e) {
+        console.error("Lead capture failed:", e);
+    }
 }
 function goBackToDelivery() { document.getElementById('omStep2').classList.add('hidden'); document.getElementById('omStep1').classList.remove('hidden'); }
 function selectPayment(type) {
@@ -572,6 +589,13 @@ async function placeOrder() {
         if (waBtn) waBtn.href = waLink;
 
         closeModal('orderModal'); openModal('successModal');
+
+        // Remove Lead once order is completed
+        if (currentLeadId) {
+            db.collection('leads').doc(currentLeadId).delete().catch(e => console.error("Lead cleanup failed:", e));
+            currentLeadId = null;
+        }
+
         cart = []; updateCartCount();
         selectedSize = null; appliedCoupon = null;
         document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));

@@ -872,6 +872,8 @@
                     class="nav-badge" id="notifyCount">0</span></div>
             <div class="nav-item" onclick="showPanel('customers', this)"><span class="nav-icon">👥</span>Customers <span
                     class="nav-badge" id="customersCount">0</span></div>
+            <div class="nav-item" onclick="showPanel('leads', this)"><span class="nav-icon">🛒</span>Abandoned Carts
+                <span class="nav-badge" id="leadsCount" style="background:var(--red); color:white;">0</span></div>
             <div class="nav-item" onclick="showPanel('coupons', this)"><span class="nav-icon">🎟️</span>Coupons</div>
             <div class="nav-item" onclick="showPanel('products', this)"><span class="nav-icon">👕</span>Products</div>
             <div class="nav-item" onclick="showPanel('settings', this)"><span class="nav-icon">⚙️</span>Settings</div>
@@ -911,9 +913,9 @@
                             <div class="stat-sub">Awaiting fulfillment</div>
                         </div>
                         <div class="stat-card orange">
-                            <div class="stat-label">Messages</div>
-                            <div class="stat-value" id="s-messages">0</div>
-                            <div class="stat-sub">Customer inquiries</div>
+                            <div class="stat-label">Abandoned</div>
+                            <div class="stat-value" id="s-leads">0</div>
+                            <div class="stat-sub">Potential recovery</div>
                         </div>
                     </div>
                     <div class="section-card">
@@ -982,6 +984,21 @@
                             <div class="empty-state">
                                 <div class="empty-icon">👥</div>
                                 <p>No registered customers yet.</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ABANDONED CARTS -->
+                <div class="panel" id="panel-leads">
+                    <div class="section-card">
+                        <div class="section-card-header">
+                            <h3>Abandoned Carts / Leads</h3><span>Captured during checkout</span>
+                        </div>
+                        <div id="leadsWrap">
+                            <div class="empty-state">
+                                <div class="empty-icon">🛒</div>
+                                <p>No abandoned carts found.</p>
                             </div>
                         </div>
                     </div>
@@ -1195,6 +1212,28 @@
                 .then(() => toast(`Coupon ${code} removed.`, 's'));
         }
 
+        function deleteLead(id) {
+            if (!confirm('Permanently delete this lead?')) return;
+            db.collection('leads').doc(id).delete()
+                .then(() => toast('Lead removed', 's'))
+                .catch(e => toast('Error', 'e'));
+        }
+
+        function recoverLead(leadId) {
+            const l = adminLeads.find(x => x.id === leadId);
+            if (!l) return toast('Lead not found', 'e');
+
+            const phone = l.customer?.phone;
+            const name = l.customer?.name || 'there';
+            const city = l.customer?.city || '';
+            const item = (l.cart && l.cart[0]) ? l.cart[0].name : 'ECLIPSE gear';
+
+            let msg = `Hi ${name}! 🌑 I'm from ECLIPSE. I saw you were checking out the *${item}* earlier but didn't finish the order. \n\nWas there any technical issue? I'd love to help you get this to ${city}! \n\nAs a direct thank you, I can offer you *FREE SHIPPING* if you finish today. Let me know! 🚀`;
+
+            const waLink = `https://wa.me/91${phone.replace(/\D/g, '')}?text=${encodeURIComponent(msg)}`;
+            window.open(waLink, '_blank');
+        }
+
         // ===== AUTH =====
         const ADMIN_PW_KEY = 'eclipse_admin_pw';
         function getStoredPw() { return localStorage.getItem(ADMIN_PW_KEY) || 'eclipse2025'; }
@@ -1240,7 +1279,7 @@
             document.getElementById('panel-' + name).classList.add('active');
             document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
             el.classList.add('active');
-            const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', customers: 'CUSTOMERS', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
+            const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', customers: 'CUSTOMERS', leads: 'ABANDONED CARTS', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
             document.getElementById('topbarTitle').textContent = titles[name] || name.toUpperCase();
         }
 
@@ -1250,6 +1289,7 @@
         let adminNotify = [];
         let adminCoupons = {};
         let adminUsers = [];
+        let adminLeads = [];
         let unsubscribers = [];
 
         function getOrders() { return adminOrders; }
@@ -1257,6 +1297,7 @@
         function getNotify() { return adminNotify; }
         function getCoupons() { return adminCoupons; }
         function getUsers() { return adminUsers; }
+        function getLeads() { return adminLeads; }
 
         // ===== LOAD ALL (FIRESTORE) =====
         function loadAllData() {
@@ -1309,6 +1350,15 @@
                 })
             );
 
+            // 6. Listen to Leads
+            unsubscribers.push(
+                db.collection('leads').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                    adminLeads = [];
+                    snap.forEach(doc => { adminLeads.push({ id: doc.id, ...doc.data() }); });
+                    updateDashboardAndRenders();
+                })
+            );
+
             toast('Connected to Live Database 🟢', 's');
         }
 
@@ -1328,7 +1378,8 @@
             document.getElementById('s-orders').textContent = orders.length;
             document.getElementById('s-revenue').textContent = '₹' + revenue.toLocaleString('en-IN');
             document.getElementById('s-pending').textContent = pendingOrders.length;
-            document.getElementById('s-messages').textContent = messages.length;
+            document.getElementById('s-leads').textContent = adminLeads.length;
+            document.getElementById('leadsCount').textContent = adminLeads.length;
 
             // Re-render Views
             renderDashRecent(orders.slice(0, 5));
@@ -1337,6 +1388,7 @@
             renderNotify();
             renderCoupons();
             renderUsers();
+            renderLeads();
         }
 
         // ===== FORMAT DATE =====
@@ -1477,6 +1529,30 @@
                 <td>${u.referralsCount || 0}</td>
                 <td style="font-size:11px;color:var(--grey)">${fmtDate(u.createdAt)}</td>
             </tr>`).join('')}</tbody></table>`;
+        }
+
+        // ===== LEADS =====
+        function renderLeads() {
+            const list = getLeads();
+            const wrap = document.getElementById('leadsWrap');
+            if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">🛒</div><p>No abandoned carts found.</p></div>'; return; }
+            wrap.innerHTML = `<table class="data-table"><thead><tr><th>Customer / Location</th><th>Items</th><th>Last Activity</th><th>Actions</th></tr></thead><tbody>${list.map((l) => {
+                const item = (l.cart && l.cart[0]) ? `${l.cart[0].name} (${l.cart[0].size})` : 'ECLIPSE Tee';
+                return `<tr>
+                    <td>
+                        <strong style="display:block;">${l.customer?.name || 'Guest'}</strong>
+                        <span style="font-size:11px;color:var(--grey);">${l.customer?.phone || ''} • ${l.customer?.city || '—'}</span>
+                    </td>
+                    <td>${item}</td>
+                    <td style="font-size:11px;color:var(--grey)">${fmtDate(l.timestamp)}</td>
+                    <td>
+                        <div class="flex-r">
+                            <button class="btn-sm" style="background:#25D366; color:white; border:none;" onclick="recoverLead('${l.id}')">💬 Recover</button>
+                            <button class="btn-sm btn-delete" onclick="deleteLead('${l.id}')">🗑</button>
+                        </div>
+                    </td>
+                </tr>`;
+            }).join('')}</tbody></table>`;
         }
 
         // ===== COUPONS =====
