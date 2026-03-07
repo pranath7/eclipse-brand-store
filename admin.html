@@ -836,6 +836,80 @@
             color: var(--green);
             letter-spacing: 2px;
         }
+
+        /* ---- MODALS ---- */
+        .modal {
+            display: none;
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.85);
+            backdrop-filter: blur(8px);
+            z-index: 10100;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-lg);
+            width: 100%;
+            max-width: 600px;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            padding: 32px;
+            box-shadow: var(--shadow);
+            animation: modalSlide .3s ease-out;
+        }
+
+        @keyframes modalSlide {
+            from {
+                transform: translateY(20px);
+                opacity: 0;
+            }
+
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
+        .close {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            font-size: 24px;
+            color: var(--grey);
+            cursor: pointer;
+            transition: color .2s;
+            line-height: 1;
+        }
+
+        .close:hover {
+            color: var(--white);
+        }
+
+        #referralListWrap {
+            margin-top: 10px;
+        }
+
+        .empty-state {
+            padding: 40px;
+            text-align: center;
+            color: var(--grey);
+        }
+
+        .empty-icon {
+            font-size: 40px;
+            margin-bottom: 12px;
+            opacity: 0.5;
+        }
     </style>
 </head>
 
@@ -875,6 +949,7 @@
             <div class="nav-item" onclick="showPanel('leads', this)"><span class="nav-icon">🛒</span>Abandoned Carts
                 <span class="nav-badge" id="leadsCount" style="background:var(--red); color:white;">0</span>
             </div>
+            <div class="nav-item" onclick="showPanel('referrals', this)"><span class="nav-icon">🤝</span>Referrals</div>
             <div class="nav-item" onclick="showPanel('coupons', this)"><span class="nav-icon">🎟️</span>Coupons</div>
             <div class="nav-item" onclick="showPanel('products', this)"><span class="nav-icon">👕</span>Products</div>
             <div class="nav-item" onclick="showPanel('settings', this)"><span class="nav-icon">⚙️</span>Settings</div>
@@ -1299,7 +1374,7 @@
                 document.getElementById('panel-' + name).classList.add('active');
                 document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
                 el.classList.add('active');
-                const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', customers: 'CUSTOMERS', leads: 'ABANDONED CARTS', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
+                const titles = { dashboard: 'DASHBOARD', orders: 'ORDERS', messages: 'MESSAGES', notify: 'NOTIFY LIST', customers: 'CUSTOMERS', leads: 'ABANDONED CARTS', referrals: 'REFERRALS', coupons: 'COUPONS', products: 'PRODUCTS', settings: 'SETTINGS' };
                 document.getElementById('topbarTitle').textContent = titles[name] || name.toUpperCase();
             }
 
@@ -1409,6 +1484,35 @@
                 renderCoupons();
                 renderUsers();
                 renderLeads();
+                renderAllReferrals();
+            }
+
+            function renderAllReferrals() {
+                const users = getUsers();
+                // Find all users who were referred by someone
+                const referrals = users.filter(u => u.referredBy && u.referredBy !== '—');
+                const wrap = document.getElementById('referralAllWrap');
+
+                if (!referrals.length) {
+                    wrap.innerHTML = '<div class="empty-state"><p>No referral data found.</p></div>';
+                    return;
+                }
+
+                wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Referred User</th><th>Invited By (Code)</th><th>Joined Date</th></tr></thead><tbody>${referrals.map(r => {
+                    const referrer = users.find(u => u.affiliateCode === r.referredBy);
+                    const referrerName = referrer ? (referrer.fullName || referrer.email) : 'Unknown';
+                    return `<tr>
+                        <td>
+                            <strong>${r.fullName || '—'}</strong>
+                            <div style="font-size:11px;color:var(--grey)">${r.email}</div>
+                        </td>
+                        <td>
+                            <strong>${referrerName}</strong>
+                            <div style="font-size:10px;font-family:monospace;">${r.referredBy}</div>
+                        </td>
+                        <td style="font-size:11px;color:var(--grey)">${fmtDate(r.createdAt)}</td>
+                    </tr>`;
+                }).join('')}</tbody></table></div>`;
             }
 
             // ===== CREDIT & REFERRAL MANAGEMENT =====
@@ -1588,20 +1692,22 @@
                 const list = getUsers();
                 const wrap = document.getElementById('customersWrap');
                 if (!list.length) { wrap.innerHTML = '<div class="empty-state"><div class="empty-icon">👥</div><p>No registered customers yet.</p></div>'; return; }
-                wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Wallet Balance</th><th>Affiliate Code</th><th>Referrals</th><th>Joined Date</th></tr></thead><tbody>${list.map((u) => `<tr>
-                <td style="font-weight:600;">${u.fullName || '—'}</td>
-                <td>${u.email}</td>
-                <td class="text-gold" style="font-weight:bold;font-size:16px;">₹${u.walletBalance || 0}</td>
-                <td style="font-family:monospace;letter-spacing:1px;">${u.affiliateCode || '—'}</td>
+                wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Customer</th><th>Wallet</th><th>Code</th><th>Ref</th><th>Joined</th><th>Actions</th></tr></thead><tbody>${list.map((u) => `<tr>
+                <td>
+                    <strong style="display:block;">${u.fullName || '—'}</strong>
+                    <span style="font-size:11px;color:var(--grey);">${u.email}</span>
+                </td>
+                <td class="text-gold" style="font-weight:bold;">₹${u.walletBalance || 0}</td>
+                <td style="font-family:monospace;font-size:12px;">${u.affiliateCode || '—'}</td>
                 <td>${u.referralsCount || 0}</td>
                 <td style="font-size:11px;color:var(--grey)">${fmtDate(u.createdAt)}</td>
                 <td>
-                    <div class="flex-r">
-                        <button class="btn-sm" style="background:var(--gold);color:black;border:none;" onclick="openCreditModal('${u.id}', ${u.walletBalance || 0})">₹ Manage</button>
-                        <button class="btn-sm" style="background:var(--dark-bg);color:white;border-radius:4px;" onclick="showReferralDetail('${u.affiliateCode}', '${u.fullName || ''}')">👥 View Referrals</button>
+                    <div class="flex-r" style="gap:4px;">
+                        <button class="btn-sm" style="background:var(--gold);color:black;padding:4px 8px;font-size:11px;" onclick="openCreditModal('${u.id}', ${u.walletBalance || 0})">₹ Manage</button>
+                        <button class="btn-sm" style="background:var(--bg3);color:white;padding:4px 8px;font-size:11px;" onclick="showReferralDetail('${u.affiliateCode}', '${u.fullName || ''}')">👥 Details</button>
                     </div>
                 </td>
-            </tr>`).join('')}</tbody></table>`;
+            </tr>`).join('')}</tbody></table></div>`;
             }
 
             // ===== LEADS =====

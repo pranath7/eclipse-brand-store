@@ -408,10 +408,15 @@ async function applyCoupon() {
                 msgEl.textContent = '❌ You cannot use your own code.'; msgEl.className = 'coupon-msg error';
                 return;
             }
+            // Track referral without applying a coupon/discount
+            deliveryData.referredBy = code;
+            deliveryData.referrerId = referrerDoc.id;
+
             document.getElementById('referalStatus').innerHTML = '<span style="color:var(--green)">✨ Friends code used!</span>';
             document.getElementById('referalStatus').classList.remove('hidden');
             updateOrderSummary();
             showToast(`🎟️ Friends code used!`, 'success');
+            if (msgEl) { msgEl.textContent = `✅ Friends code used!`; msgEl.className = 'coupon-msg success'; }
         } else {
             appliedCoupon = null;
             if (msgEl) { msgEl.textContent = '❌ Invalid coupon or affiliate code.'; msgEl.className = 'coupon-msg error'; }
