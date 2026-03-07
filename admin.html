@@ -1410,6 +1410,20 @@
             function getUsers() { return adminUsers; }
             function getLeads() { return adminLeads; }
 
+            // ===== UTILS =====
+            function openModal(id) { document.getElementById(id).classList.add('active'); }
+            function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+            async function updateOrderStatus(id, newStatus) {
+                try {
+                    await db.collection('orders').doc(id).update({ status: newStatus });
+                    toast(`Order ${id} is now ${newStatus}`, 's');
+                } catch (e) {
+                    console.error("Update status error:", e);
+                    toast('Failed to update status', 'e');
+                }
+            }
+
             // ===== LOAD ALL (FIRESTORE) =====
             function loadAllData() {
                 // Unsubscribe existing listeners
@@ -1505,16 +1519,43 @@
 
             function renderAllReferrals() {
                 const users = getUsers();
-                // Find all users who were referred by someone
-                const referrals = users.filter(u => u.referredBy && u.referredBy !== '—');
+                const orders = getOrders();
                 const wrap = document.getElementById('referralAllWrap');
+
+                // 1. Get referrals from registered users
+                let referrals = users.filter(u => u.referredBy && u.referredBy !== '—').map(u => ({
+                    fullName: u.fullName,
+                    email: u.email,
+                    referredBy: u.referredBy,
+                    createdAt: u.createdAt,
+                    type: 'Registered'
+                }));
+
+                // 2. Get referrals from orders (includes Guests)
+                orders.forEach(o => {
+                    if (o.referredBy && o.referredBy !== '—') {
+                        // Avoid duplicates if user is registered but we track order-based too
+                        if (!referrals.find(r => r.email === (o.customer?.email || o.customer?.phone))) {
+                            referrals.push({
+                                fullName: o.customer?.name || 'Guest',
+                                email: o.customer?.email || o.customer?.phone || '—',
+                                referredBy: o.referredBy,
+                                createdAt: o.timestamp,
+                                type: 'Guest Order'
+                            });
+                        }
+                    }
+                });
 
                 if (!referrals.length) {
                     wrap.innerHTML = '<div class="empty-state"><p>No referral data found.</p></div>';
                     return;
                 }
 
-                wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Referred User</th><th>Invited By (Code)</th><th>Joined Date</th></tr></thead><tbody>${referrals.map(r => {
+                // Sort by date desc
+                referrals.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+                wrap.innerHTML = `<div style="overflow-x:auto"><table class="data-table"><thead><tr><th>Referred User</th><th>Invited By (Code)</th><th>Type</th><th>Date</th></tr></thead><tbody>${referrals.map(r => {
                     const referrer = users.find(u => u.affiliateCode === r.referredBy);
                     const referrerName = referrer ? (referrer.fullName || referrer.email) : 'Unknown';
                     return `<tr>
@@ -1526,6 +1567,7 @@
                             <strong>${referrerName}</strong>
                             <div style="font-size:10px;font-family:monospace;">${r.referredBy}</div>
                         </td>
+                        <td><span class="badge ${r.type === 'Registered' ? 'badge-fulfilled' : 'badge-online'}">${r.type}</span></td>
                         <td style="font-size:11px;color:var(--grey)">${fmtDate(r.createdAt)}</td>
                     </tr>`;
                 }).join('')}</tbody></table></div>`;
@@ -1561,7 +1603,29 @@
                 if (!affiliateCode || affiliateCode === '—') return toast('User has no affiliate code', 'e');
 
                 const allUsers = getUsers();
-                const referrals = allUsers.filter(u => u.referredBy === affiliateCode);
+                const allOrders = getOrders();
+
+                // 1. From Registered Users
+                let referrals = allUsers.filter(u => u.referredBy === affiliateCode).map(u => ({
+                    name: u.fullName || '—',
+                    email: u.email || '—',
+                    date: u.createdAt,
+                    type: 'Registered'
+                }));
+
+                // 2. From Orders (Guest)
+                allOrders.forEach(o => {
+                    if (o.referredBy === affiliateCode) {
+                        if (!referrals.find(r => r.email === (o.customer?.email || o.customer?.phone))) {
+                            referrals.push({
+                                name: o.customer?.name || 'Guest',
+                                email: o.customer?.email || o.customer?.phone || '—',
+                                date: o.timestamp,
+                                type: 'Guest Order'
+                            });
+                        }
+                    }
+                });
 
                 document.getElementById('referrerNameSub').textContent = `Showing all users referred by ${fullName || 'Guest'}`;
                 const wrap = document.getElementById('referralListWrap');
@@ -1569,10 +1633,11 @@
                 if (referrals.length === 0) {
                     wrap.innerHTML = '<div class="empty-state"><p>No referrals found for this user.</p></div>';
                 } else {
-                    wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead><tbody>${referrals.map(r => `<tr>
-                        <td>${r.fullName || '—'}</td>
-                        <td>${r.email}</td>
-                        <td style="font-size:11px;color:var(--grey)">${fmtDate(r.createdAt)}</td>
+                    referrals.sort((a, b) => new Date(b.date) - new Date(a.date));
+                    wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Status</th><th>Joined</th></tr></thead><tbody>${referrals.map(r => `<tr>
+                        <td><strong>${r.name}</strong><br/><span style="font-size:10px;color:var(--grey)">${r.email}</span></td>
+                        <td><span class="badge ${r.type === 'Registered' ? 'badge-fulfilled' : 'badge-online'}" style="font-size:9px;">${r.type}</span></td>
+                        <td style="font-size:11px;color:var(--grey)">${fmtDate(r.date)}</td>
                     </tr>`).join('')}</tbody></table>`;
                 }
                 openModal('referralModal');

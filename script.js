@@ -455,11 +455,12 @@ async function goToPayment() {
     if (!state) { showToast('Enter your state.', 'error'); document.getElementById('omState').focus(); return; }
 
     const deliveryEmail = document.getElementById('omEmailDelivery') ? document.getElementById('omEmailDelivery').value.trim() : '';
-    deliveryData = { name, phone, email: deliveryEmail, address, city, pin, state };
+    Object.assign(deliveryData, { name, phone, email: deliveryEmail, address, city, pin, state });
 
     const optIn = document.getElementById('createAccountCheck');
     if (optIn && optIn.checked && !currentUser) {
         const em = document.getElementById('omEmail').value.trim();
+        Object.assign(deliveryData, { email: em }); // Update email in deliveryData if account is being created
         const pwd = document.getElementById('omPwd').value;
         if (!em || pwd.length < 6) { showToast('Valid email and 6+ char password required to create account.', 'error'); return; }
         document.getElementById('omStep1').style.opacity = '0.5';
@@ -532,10 +533,8 @@ async function placeOrder() {
     const orderId = 'ECL' + Date.now().toString().slice(-8).toUpperCase();
     const utrStr = selectedPayment === 'online' ? document.getElementById('utrInput').value.trim() : '';
 
-    let referrerId = null;
-    if (appliedCoupon && activeCoupons[appliedCoupon] && activeCoupons[appliedCoupon].referrerId) {
-        referrerId = activeCoupons[appliedCoupon].referrerId;
-    }
+    let referrerId = deliveryData.referrerId || null;
+    const referralCode = deliveryData.referredBy || null;
 
     let earnedPts = 0;
     if (currentUser && selectedPayment === 'online') {
@@ -550,6 +549,8 @@ async function placeOrder() {
         size: selectedSize,
         mrp: BASE_PRICE,
         coupon: appliedCoupon || '',
+        referredBy: referralCode, // Explicitly track the code in the order
+        referrerId: referrerId,
         pointsUsed: pointsUsed,
         finalPrice,
         paymentMethod: selectedPayment,
@@ -557,7 +558,7 @@ async function placeOrder() {
         status: 'Pending',
         userId: currentUser ? currentUser.uid : null,
         earnedPoints: earnedPts,
-        pointsAwarded: (earnedPts > 0) // Track if wallet already credited automatically
+        pointsAwarded: (earnedPts > 0)
     };
 
     try {
@@ -575,15 +576,21 @@ async function placeOrder() {
             }
         }
 
-        // Handle Affiliate Bonus
+        // Handle Affiliate Bonus / Referral Count
         if (referrerId) {
             const refDoc = await db.collection('users').doc(referrerId).get();
             if (refDoc.exists) {
                 const refData = refDoc.data();
                 const newCount = (refData.referralsCount || 0) + 1;
                 const updates = { referralsCount: newCount };
-                if (newCount % 5 === 0) updates.walletBalance = firebase.firestore.FieldValue.increment(200);
+
+                // Bonus every 5 referrals (Optional: customize logic if needed)
+                if (newCount % 5 === 0) {
+                    updates.walletBalance = firebase.firestore.FieldValue.increment(200);
+                }
+
                 await db.collection('users').doc(referrerId).update(updates);
+                console.log(`Referral count updated for ${referrerId}`);
             }
         }
 
