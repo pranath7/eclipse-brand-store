@@ -1411,6 +1411,53 @@
                 renderLeads();
             }
 
+            // ===== CREDIT & REFERRAL MANAGEMENT =====
+            let activeUserId = null;
+            function openCreditModal(userId, currentBalance) {
+                activeUserId = userId;
+                document.getElementById('currentWalletVal').textContent = '₹' + currentBalance;
+                document.getElementById('creditAmount').value = '';
+                openModal('creditModal');
+            }
+
+            async function applyCreditChange(isAdding) {
+                const amt = parseInt(document.getElementById('creditAmount').value);
+                if (!amt || amt <= 0) return toast('Enter a valid amount', 'e');
+
+                try {
+                    const finalAmt = isAdding ? amt : -amt;
+                    await db.collection('users').doc(activeUserId).update({
+                        walletBalance: firebase.firestore.FieldValue.increment(finalAmt)
+                    });
+                    toast(`Wallet updated successfully 💎`, 's');
+                    closeModal('creditModal');
+                } catch (e) {
+                    console.error("Credit error:", e);
+                    toast('Failed to update wallet', 'e');
+                }
+            }
+
+            function showReferralDetail(affiliateCode, fullName) {
+                if (!affiliateCode || affiliateCode === '—') return toast('User has no affiliate code', 'e');
+
+                const allUsers = getUsers();
+                const referrals = allUsers.filter(u => u.referredBy === affiliateCode);
+
+                document.getElementById('referrerNameSub').textContent = `Showing all users referred by ${fullName || 'Guest'}`;
+                const wrap = document.getElementById('referralListWrap');
+
+                if (referrals.length === 0) {
+                    wrap.innerHTML = '<div class="empty-state"><p>No referrals found for this user.</p></div>';
+                } else {
+                    wrap.innerHTML = `<table class="data-table"><thead><tr><th>Name</th><th>Email</th><th>Joined</th></tr></thead><tbody>${referrals.map(r => `<tr>
+                        <td>${r.fullName || '—'}</td>
+                        <td>${r.email}</td>
+                        <td style="font-size:11px;color:var(--grey)">${fmtDate(r.createdAt)}</td>
+                    </tr>`).join('')}</tbody></table>`;
+                }
+                openModal('referralModal');
+            }
+
             // ===== FORMAT DATE =====
             function fmtDate(iso) {
                 if (!iso) return '—';
