@@ -385,21 +385,12 @@ function toggleCoupon() {
 async function applyCoupon() {
     const code = document.getElementById('couponInput').value.trim().toUpperCase();
     const msgEl = document.getElementById('couponMsg');
-    if (!code) { if (msgEl) { msgEl.textContent = 'Please enter a coupon code.'; msgEl.className = 'coupon-msg error'; } return; }
+    const refStat = document.getElementById('referalStatus');
 
-    // 1. Check Standard Coupons
-    const coupons = getCoupons();
-    if (coupons[code]) {
-        appliedCoupon = code;
-        const c = coupons[code];
-        if (msgEl) { msgEl.textContent = `✅ Coupon applied — ${c.label}!`; msgEl.className = 'coupon-msg success'; }
-        updateOrderSummary();
-        showToast(`🎟️ ${c.label} applied!`, 'success');
-        return;
-    }
+    if (!code) { if (msgEl) { msgEl.textContent = 'Please enter a code.'; msgEl.className = 'coupon-msg error'; } return; }
 
-    // 2. Check Affiliate Codes
-    msgEl.textContent = 'Checking code...'; msgEl.className = 'coupon-msg';
+    // 1. Check Affiliate / Referral Codes FIRST
+    msgEl.textContent = 'Verifying code...'; msgEl.className = 'coupon-msg';
     try {
         const snap = await db.collection('users').where('affiliateCode', '==', code).get();
         if (!snap.empty) {
@@ -408,23 +399,44 @@ async function applyCoupon() {
                 msgEl.textContent = '❌ You cannot use your own code.'; msgEl.className = 'coupon-msg error';
                 return;
             }
-            // Track referral without applying a coupon/discount
+
+            // PRIORITY: If it's a referral code, it VOIDS any coupon discount
+            appliedCoupon = null;
             deliveryData.referredBy = code;
             deliveryData.referrerId = referrerDoc.id;
 
-            document.getElementById('referalStatus').innerHTML = '<span style="color:var(--green)">✨ Friends code used!</span>';
-            document.getElementById('referalStatus').classList.remove('hidden');
+            if (refStat) {
+                refStat.innerHTML = '<span style="color:var(--green)">✅ Referral code applied</span>';
+                refStat.classList.remove('hidden');
+            }
+
             updateOrderSummary();
-            showToast(`🎟️ Friends code used!`, 'success');
-            if (msgEl) { msgEl.textContent = `✅ Friends code used!`; msgEl.className = 'coupon-msg success'; }
-        } else {
-            appliedCoupon = null;
-            if (msgEl) { msgEl.textContent = '❌ Invalid coupon or affiliate code.'; msgEl.className = 'coupon-msg error'; }
-            updateOrderSummary();
+            showToast(`🤝 Referral code applied!`, 'success');
+            if (msgEl) { msgEl.textContent = `✅ Referral code applied`; msgEl.className = 'coupon-msg success'; }
+            return;
         }
     } catch (e) {
-        msgEl.textContent = '❌ Database error verifying code.'; msgEl.className = 'coupon-msg error';
+        console.error("Affiliate check failed:", e);
     }
+
+    // 2. Check Standard Coupons ONLY if it's not a referral
+    const coupons = getCoupons();
+    if (coupons[code]) {
+        appliedCoupon = code;
+        const c = coupons[code];
+        if (msgEl) { msgEl.textContent = `✅ Coupon applied — ${c.label}!`; msgEl.className = 'coupon-msg success'; }
+        if (refStat) refStat.classList.add('hidden'); // Clear referral if a real coupon is used?
+        deliveryData.referredBy = null; deliveryData.referrerId = null; // User says "no 10% off if i use referral", implying exclusivity or priority
+
+        updateOrderSummary();
+        showToast(`🎟️ ${c.label} applied!`, 'success');
+        return;
+    }
+
+    // Not found in either
+    appliedCoupon = null;
+    if (msgEl) { msgEl.textContent = '❌ Invalid code.'; msgEl.className = 'coupon-msg error'; }
+    updateOrderSummary();
 }
 
 // ===== PAYMENT FLOW =====
