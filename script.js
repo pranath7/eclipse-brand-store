@@ -408,11 +408,10 @@ async function applyCoupon() {
                 msgEl.textContent = '❌ You cannot use your own code.'; msgEl.className = 'coupon-msg error';
                 return;
             }
-            appliedCoupon = code;
-            activeCoupons[code] = { discount: 10, type: 'percent', label: 'Affiliate Code (10% Off)', referrerId: referrerDoc.id };
-            if (msgEl) { msgEl.textContent = `✅ Friend's code applied (10% off)!`; msgEl.className = 'coupon-msg success'; }
+            document.getElementById('referalStatus').innerHTML = '<span style="color:var(--green)">✨ Friends code used!</span>';
+            document.getElementById('referalStatus').classList.remove('hidden');
             updateOrderSummary();
-            showToast(`🎟️ Affiliate applied!`, 'success');
+            showToast(`🎟️ Friends code used!`, 'success');
         } else {
             appliedCoupon = null;
             if (msgEl) { msgEl.textContent = '❌ Invalid coupon or affiliate code.'; msgEl.className = 'coupon-msg error'; }
