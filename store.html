@@ -54,12 +54,17 @@
           "https://eclipseclothingx.shop/tshirt-front.png",
           "https://eclipseclothingx.shop/tshirt-back.png"
         ],
-        "description": "The official Karan Aujla Signature Drop Tee by ECLIPSE. Premium 180 GSM heavyweight cotton, oversized fit, and durable puff print. Exclusive artist merchandise.",
+        "description": "Official Karan Aujla Signature Drop Tee by ECLIPSE. Heavyweight 180 GSM cotton, premium oversized fit, durable puff print graphic. High-end artist merchandise.",
         "sku": "ECL-KA-001",
+        "mpn": "ECL-KA-001-SG",
         "brand": {
           "@type": "Brand",
-          "name": "ECLIPSE"
+          "name": "ECLIPSE",
+          "logo": "https://eclipseclothingx.shop/assets/logo.png"
         },
+        "color": "Black",
+        "material": "180 GSM Heavyweight Cotton",
+        "size": "XS, S, M, L, XL, XXL",
         "offers": {
           "@type": "Offer",
           "url": "https://eclipseclothingx.shop/store.html",
@@ -67,7 +72,30 @@
           "price": "999",
           "priceValidUntil": "2027-12-31",
           "availability": "https://schema.org/InStock",
-          "itemCondition": "https://schema.org/NewCondition"
+          "itemCondition": "https://schema.org/NewCondition",
+          "shippingDetails": {
+            "@type": "OfferShippingDetails",
+            "shippingRate": {
+              "@type": "MonetaryAmount",
+              "value": "0",
+              "currency": "INR"
+            },
+            "deliveryTime": {
+              "@type": "ShippingDeliveryTime",
+              "handlingTime": {
+                "@type": "QuantitativeValue",
+                "minValue": "0",
+                "maxValue": "2",
+                "unitCode": "DAY"
+              },
+              "transitTime": {
+                "@type": "QuantitativeValue",
+                "minValue": "3",
+                "maxValue": "7",
+                "unitCode": "DAY"
+              }
+            }
+          }
         },
         "aggregateRating": {
           "@type": "AggregateRating",
