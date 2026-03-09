@@ -45,34 +45,59 @@
 
     <!-- Structured Data (JSON-LD) for Products -->
     <script type="application/ld+json">
-    {
-      "@context": "https://schema.org/",
-      "@type": "Product",
-      "name": "Karan Aujla Signature Drop Tee 001",
-      "image": [
-        "https://eclipseclothingx.shop/assets/product-front.jpg",
-        "https://eclipseclothingx.shop/assets/product-back.jpg"
-      ],
-      "description": "Exclusive Karan Aujla Signature Drop 001. 180 GSM Heavyweight cotton, oversized fit with high-fidelity puff print.",
-      "sku": "ECL-KA-001",
-      "brand": {
-        "@type": "Brand",
-        "name": "ECLIPSE"
+    [
+      {
+        "@context": "https://schema.org/",
+        "@type": "Product",
+        "name": "Karan Aujla Signature Drop Oversized Tshirt — 001",
+        "image": [
+          "https://eclipseclothingx.shop/tshirt-front.png",
+          "https://eclipseclothingx.shop/tshirt-back.png"
+        ],
+        "description": "The official Karan Aujla Signature Drop Tee by ECLIPSE. Premium 180 GSM heavyweight cotton, oversized fit, and durable puff print. Exclusive artist merchandise.",
+        "sku": "ECL-KA-001",
+        "brand": {
+          "@type": "Brand",
+          "name": "ECLIPSE"
+        },
+        "offers": {
+          "@type": "Offer",
+          "url": "https://eclipseclothingx.shop/store.html",
+          "priceCurrency": "INR",
+          "price": "999",
+          "priceValidUntil": "2027-12-31",
+          "availability": "https://schema.org/InStock",
+          "itemCondition": "https://schema.org/NewCondition"
+        },
+        "aggregateRating": {
+          "@type": "AggregateRating",
+          "ratingValue": "4.8",
+          "reviewCount": "50"
+        }
       },
-      "offers": {
-        "@type": "Offer",
-        "url": "https://eclipseclothingx.shop/store.html",
-        "priceCurrency": "INR",
-        "price": "999",
-        "availability": "https://schema.org/InStock",
-        "itemCondition": "https://schema.org/NewCondition"
-      },
-      "aggregateRating": {
-        "@type": "AggregateRating",
-        "ratingValue": "4.8",
-        "reviewCount": "127"
+      {
+        "@context": "https://schema.org",
+        "@type": "FAQPage",
+        "mainEntity": [
+          {
+            "@type": "Question",
+            "name": "Where can I buy the official Karan Aujla tshirt?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "You can buy the official Karan Aujla Signature Drop merchandise exclusively at the ECLIPSE store (eclipseclothingx.shop)."
+            }
+          },
+          {
+            "@type": "Question",
+            "name": "What is the quality of the Karan Aujla tee?",
+            "acceptedAnswer": {
+              "@type": "Answer",
+              "text": "The Karan Aujla tee by ECLIPSE is made of 180 GSM heavyweight premium cotton with an oversized fit and high-quality screen printing."
+            }
+          }
+        ]
       }
-    }
+    ]
     </script>
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
@@ -173,8 +198,10 @@
         </div>
         <div class="hero-product-float">
             <div class="tshirt-showcase">
-                <img src="tshirt-back.png" alt="Karan Aujla Tshirt Back" class="tshirt-img active" id="heroBack" />
-                <img src="tshirt-front.png" alt="Karan Aujla Tshirt Front" class="tshirt-img" id="heroFront" />
+                <img src="tshirt-back.png" alt="Karan Aujla Tshirt Back - It Was All A Dream Edition"
+                    class="tshirt-img active" id="heroBack" />
+                <img src="tshirt-front.png" alt="Karan Aujla Tshirt Front - Eclipse Official Merchandise"
+                    class="tshirt-img" id="heroFront" />
                 <button class="flip-btn" id="heroFlipBtn">Flip ↺</button>
             </div>
         </div>
@@ -199,7 +226,7 @@
         <div class="container">
             <div class="section-header">
                 <div class="section-tag">— LATEST DROP —</div>
-                <h2 class="section-title">THE COLLECTION</h2>
+                <h2 class="section-title">KARAN AUJLA OFFICIAL TEE COLLECTION</h2>
             </div>
             <div class="product-grid">
                 <div class="product-card" onclick="openProduct()">
@@ -214,7 +241,7 @@
                     </div>
                     <div class="product-info">
                         <div class="product-brand">ECLIPSE × KARAN AUJLA</div>
-                        <h3 class="product-name">Signature Drop Tee — 001</h3>
+                        <h3 class="product-name">Karan Aujla Signature Drop Tshirt — 001</h3>
                         <div class="product-price-row">
                             <span class="product-price">₹999</span>
                             <span class="product-old-price">₹1,299</span>
@@ -497,6 +524,22 @@
     </footer>
 
     <!-- ===== PRODUCT MODAL ===== -->
+    <!-- SEO SEMANTIC BLOCK -->
+    <div class="visually-hidden">
+        <h2>Official Karan Aujla Tshirt & Streetwear Store</h2>
+        <p>Experience the ultimate Karan Aujla merchandise at the ECLIPSE Official Store. Our 001 Signature Drop Tee
+            is the premium Karan Aujla tshirt you've been waiting for. Crafted with 180 GSM heavyweight cotton,
+            this oversized tee features the iconic 'It Was All A Dream' graphic. Perfect for fans looking for
+            authentic Karan Aujla clothing, oversized tshirts, and luxury streetwear in India. Join the ECLIPSE
+            movement today.</p>
+        <ul>
+            <li>Original Karan Aujla Merchandise</li>
+            <li>Premium Oversized Tshirts India</li>
+            <li>High-Quality Streetwear Tee</li>
+            <li>Limited Edition Artist Drop</li>
+        </ul>
+    </div>
+
     <div class="modal-overlay" id="productModal">
         <div class="modal product-modal-inner">
             <button class="modal-close" onclick="closeModal('productModal')">✕</button>
@@ -512,7 +555,7 @@
             </div>
             <div class="pm-details">
                 <div class="pm-brand">ECLIPSE × KARAN AUJLA</div>
-                <h2 class="pm-title">Signature Drop Tee — 001</h2>
+                <h2 class="pm-title">Karan Aujla Signature Drop Oversized Tshirt — 001</h2>
                 <div class="pm-price-row">
                     <span class="pm-price" id="pmDisplayPrice">₹999</span>
                     <span class="pm-old">₹1,299</span>
