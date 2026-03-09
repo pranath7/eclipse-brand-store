@@ -177,6 +177,7 @@ function calcFinalPrice() {
 window.addEventListener('load', () => {
     setTimeout(() => {
         initReveal();
+        initScarcityPulse();
     }, 300);
 });
 
@@ -823,5 +824,23 @@ async function submitReview(e) {
 }
 
 
+
+// ===== SCARCITY PULSE (FAKE LIVE VIEWERS) =====
+function initScarcityPulse() {
+    const scarcityEl = document.getElementById('scarcityText');
+    if (!scarcityEl) return;
+
+    function updateCount() {
+        // Random number between 3 and 12
+        const count = Math.floor(Math.random() * 10) + 3;
+        scarcityEl.textContent = `${count} people are viewing this live`;
+    }
+
+    // Initial update
+    updateCount();
+
+    // Update every 60 seconds
+    setInterval(updateCount, 60000);
+}
 
 console.log('%c ECLIPSE STORE v3 ', 'background:#c9a84c;color:#000;font-size:18px;font-weight:bold;padding:6px 16px;border-radius:4px;');

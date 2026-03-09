@@ -1126,6 +1126,50 @@ footer {
 }
 
 /* ---- MODALS ---- */
+/* Scarcity Pulse */
+.pm-scarcity {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  background: rgba(201, 168, 76, 0.05);
+  border: 1px solid rgba(201, 168, 76, 0.1);
+  padding: 10px 15px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 13px;
+  color: var(--grey);
+  animation: fadeIn 0.5s ease forwards;
+}
+
+.pulse-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--gold);
+  border-radius: 50%;
+  position: relative;
+}
+
+.pulse-dot::after {
+  content: '';
+  position: absolute;
+  inset: -4px;
+  border: 2px solid var(--gold);
+  border-radius: 50%;
+  animation: scarcityPulse 2s infinite;
+}
+
+@keyframes scarcityPulse {
+  0% {
+    transform: scale(0.5);
+    opacity: 1;
+  }
+
+  100% {
+    transform: scale(2.5);
+    opacity: 0;
+  }
+}
+
 .modal-overlay {
   position: fixed;
   inset: 0;
