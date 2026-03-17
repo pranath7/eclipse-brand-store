@@ -181,6 +181,33 @@ window.addEventListener('load', () => {
     }, 300);
 });
 
+
+// ===== NEWSLETTER =====
+async function submitNewsletter(e) {
+    e.preventDefault();
+    const email = document.getElementById('nlEmail').value.trim();
+    const status = document.getElementById('nlStatus');
+    if (!email) return;
+
+    status.textContent = 'Joining...';
+    status.style.color = 'var(--grey)';
+
+    try {
+        await db.collection('newsletter').add({
+            email,
+            timestamp: new Date().toISOString()
+        });
+        status.textContent = 'Welcome to the circle! 🌑';
+        status.style.color = 'var(--gold)';
+        document.getElementById('nlEmail').value = '';
+        showToast('Successfully joined the inner circle!', 'success');
+    } catch (err) {
+        console.error(err);
+        status.textContent = 'Error joining. Please try again.';
+        status.style.color = 'var(--red)';
+    }
+}
+
 // ===== CUSTOM CURSOR =====
 const cursor = document.getElementById('cursor');
 const cursorFollower = document.getElementById('cursorFollower');
@@ -401,8 +428,9 @@ async function applyCoupon() {
                 return;
             }
 
-            // PRIORITY: If it's a referral code, it VOIDS any coupon discount
-            appliedCoupon = null;
+            // If it's a referral code, track it and allow coupons to be applied alongside
+            deliveryData.referredBy = code;
+
             deliveryData.referredBy = code;
             deliveryData.referrerId = referrerDoc.id;
 
@@ -426,8 +454,9 @@ async function applyCoupon() {
         appliedCoupon = code;
         const c = coupons[code];
         if (msgEl) { msgEl.textContent = `✅ Coupon applied — ${c.label}!`; msgEl.className = 'coupon-msg success'; }
-        if (refStat) refStat.classList.add('hidden'); // Clear referral if a real coupon is used?
-        deliveryData.referredBy = null; deliveryData.referrerId = null; // User says "no 10% off if i use referral", implying exclusivity or priority
+        
+        updateOrderSummary();
+
 
         updateOrderSummary();
         showToast(`🎟️ ${c.label} applied!`, 'success');

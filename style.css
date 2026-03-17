@@ -24,7 +24,40 @@
   --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
   --shadow-gold: 0 0 40px rgba(201, 168, 76, 0.15);
   --transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  
+  /* ULTRA-GLASS - Extreme Edition */
+  --glass-bg: rgba(255, 255, 255, 0.12); 
+  --glass-surface: rgba(10, 10, 10, 0.8);
+  --glass-border: rgba(255, 255, 255, 0.25); 
+  --glass-blur: blur(100px); /* Massive frosting */
+  --glass-saturate: saturate(250%); /* Vivid colors */
+  --glass-shadow: 0 40px 80px -20px rgba(0, 0, 0, 0.95);
+  --glass-inner-glow: inset 0 1px 1px rgba(255, 255, 255, 0.18);
 }
+
+.glass-ultra {
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--glass-shadow), var(--glass-inner-glow);
+}
+
+
+.glass-card {
+  background: rgba(255, 255, 255, 0.02);
+  backdrop-filter: blur(15px);
+  -webkit-backdrop-filter: blur(15px);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: var(--radius-lg);
+  transition: var(--transition);
+}
+
+.glass-card:hover {
+  background: rgba(255, 255, 255, 0.04);
+  border-color: rgba(255, 255, 255, 0.15);
+}
+
 
 .visually-hidden {
   position: absolute;
@@ -49,10 +82,11 @@
 
 html {
   scroll-behavior: smooth;
+  background: var(--bg); /* Base background moved here */
 }
 
 body {
-  background: var(--bg);
+  background: transparent; /* Allow orbs at z-index -1 to show */
   color: var(--white);
   font-family: var(--font-body);
   font-size: 16px;
@@ -60,6 +94,7 @@ body {
   overflow-x: hidden;
   cursor: none;
 }
+
 
 img {
   max-width: 100%;
@@ -199,10 +234,14 @@ select {
 }
 
 #navbar.scrolled {
-  background: rgba(8, 8, 8, 0.92);
-  backdrop-filter: blur(20px);
-  border-bottom-color: var(--border);
+  background: rgba(10, 10, 10, 0.5); /* Semi-transparent base */
+  backdrop-filter: blur(50px) saturate(200%); /* Deep iOS blur */
+  -webkit-backdrop-filter: blur(50px) saturate(200%);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
 }
+
+
 
 .nav-inner {
   max-width: 1200px;
@@ -319,7 +358,9 @@ select {
 .mobile-menu {
   display: none;
   flex-direction: column;
-  background: rgba(8, 8, 8, 0.98);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
   padding: 20px 24px;
   border-top: 1px solid var(--border);
 }
@@ -735,20 +776,32 @@ select {
 }
 
 .product-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   overflow: hidden;
-  transition: transform var(--transition), box-shadow var(--transition), border-color var(--transition);
+  transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
   cursor: none;
   position: relative;
+  z-index: 1;
+  box-shadow: var(--glass-shadow);
 }
 
+
+
+
 .product-card:hover {
-  transform: translateY(-8px);
-  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.6), var(--shadow-gold);
-  border-color: rgba(201, 168, 76, 0.25);
+  transform: translateY(-12px) scale(1.02);
+  background: rgba(255, 255, 255, 0.15); /* More visible on hover */
+  backdrop-filter: var(--glass-blur) var(--glass-saturate); /* Reinforce blur */
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  box-shadow: var(--glass-shadow), 0 0 30px rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.4);
 }
+
+
 
 .product-badge {
   position: absolute;
@@ -792,6 +845,62 @@ select {
 
 .prod-front {
   opacity: 0;
+}
+
+/* ---- COUNTDOWN TIMER ---- */
+.countdown-timer {
+  display: flex;
+  gap: 15px;
+  background: rgba(0, 0, 0, 0.6);
+  backdrop-filter: blur(10px);
+  padding: 15px 25px;
+  border-radius: 15px;
+  border: 1px solid var(--border);
+  z-index: 5;
+}
+
+.cd-item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.cd-item span {
+  font-family: var(--font-display);
+  font-size: 28px;
+  line-height: 1;
+  color: var(--white);
+}
+
+.cd-item small {
+  font-size: 9px;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--gold);
+  margin-top: 4px;
+}
+
+.cd-live {
+  font-family: var(--font-display);
+  font-size: 24px;
+  letter-spacing: 2px;
+  color: var(--gold);
+  animation: pulse 2s infinite;
+}
+
+/* ---- NEWSLETTER ---- */
+.newsletter-form input:focus {
+  border-color: var(--gold);
+  background: rgba(255, 255, 255, 0.08);
+}
+
+@media (max-width: 600px) {
+  .newsletter-form {
+    flex-direction: column;
+  }
+  .newsletter-form input {
+    width: 100%;
+  }
 }
 
 .product-card:hover .prod-back {
@@ -1028,12 +1137,59 @@ select {
   margin: 0;
 }
 
+/* ---- ULTRA-VIBRANT BACKGROUND ORBS ---- */
+.orb-vibrant {
+  position: fixed;
+  width: 1000px;
+  height: 1000px;
+  border-radius: 50%;
+  filter: blur(160px);
+  pointer-events: none;
+  z-index: -1;
+  opacity: 0.45; /* Enhanced vividness for Ultra-Glass */
+  animation: orbFloat 40s infinite alternate cubic-bezier(0.45, 0, 0.55, 1);
+}
+
+.orb-gold {
+  background: radial-gradient(circle, #ffcc33 0%, transparent 60%);
+  top: -100px;
+  left: -300px;
+}
+
+.orb-purple {
+  background: radial-gradient(circle, #9d50bb 0%, transparent 60%);
+  bottom: 0%;
+  right: -300px;
+  animation-delay: -5s;
+}
+
+.orb-blue {
+  background: radial-gradient(circle, #6e8efb 0%, transparent 60%);
+  top: 40%;
+  left: 50%;
+  width: 800px;
+  height: 800px;
+  opacity: 0.4;
+  animation-duration: 30s;
+}
+
+@keyframes orbFloat {
+  0% { transform: translate(0, 0) scale(1); }
+  100% { transform: translate(150px, 150px) scale(1.1); }
+}
+
+
+
 .contact-form {
-  background: var(--surface);
-  border: 1px solid var(--border);
+  background: var(--glass-bg);
+  backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 36px;
+  box-shadow: var(--glass-shadow);
 }
+
 
 .contact-form h3 {
   font-size: 20px;
@@ -1060,21 +1216,25 @@ select {
 .form-group textarea,
 .form-group select {
   width: 100%;
-  background: var(--bg3);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.03);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: var(--radius);
   color: white;
   padding: 14px 16px;
   font-size: 14px;
-  transition: border-color var(--transition), box-shadow var(--transition);
+  transition: border-color var(--transition), box-shadow var(--transition), background var(--transition);
   outline: none;
 }
 
 .form-group input:focus,
 .form-group textarea:focus {
   border-color: var(--gold);
-  box-shadow: 0 0 0 3px rgba(201, 168, 76, 0.1);
+  background: rgba(255, 255, 255, 0.07);
+  box-shadow: 0 0 0 4px rgba(201, 168, 76, 0.15);
 }
+
 
 .form-group textarea {
   resize: vertical;
@@ -1186,8 +1346,8 @@ footer {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background: rgba(0, 0, 0, 0.85);
-  backdrop-filter: blur(8px);
+  background: rgba(0, 0, 0, 0.75);
+  backdrop-filter: blur(25px);
   display: flex;
   align-items: center;
   justify-content: center;
@@ -1203,8 +1363,10 @@ footer {
 }
 
 .modal {
-  background: var(--bg2);
-  border: 1px solid var(--border);
+  background: var(--glass-surface);
+  backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
+  border: 1px solid var(--glass-border);
   border-radius: var(--radius-lg);
   padding: 36px;
   position: relative;
@@ -1214,7 +1376,10 @@ footer {
   transition: transform var(--transition);
   scrollbar-width: thin;
   scrollbar-color: var(--gold) transparent;
+  box-shadow: var(--glass-shadow), var(--glass-inner-glow);
 }
+
+
 
 .modal-overlay.open .modal {
   transform: scale(1);
@@ -2422,17 +2587,20 @@ button,
 }
 
 .review-card {
-  background: var(--bg-alt);
-  border: 1px solid var(--border);
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(30px) saturate(150%);
+  -webkit-backdrop-filter: blur(30px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 16px;
   padding: 30px;
-  transition: transform 0.3s ease, border-color 0.3s ease;
+  transition: all 0.3s ease;
   display: flex;
   flex-direction: column;
   gap: 15px;
   position: relative;
   overflow: hidden;
 }
+
 
 .review-card:hover {
   transform: translateY(-5px);
