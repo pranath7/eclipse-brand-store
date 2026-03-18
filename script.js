@@ -1,4 +1,4 @@
-/* =====================================================
+﻿/* =====================================================
    ECLIPSE STORE — SCRIPT.JS  (v3 — Firebase Integrated)
    ===================================================== */
 
@@ -331,7 +331,7 @@ function openSizeGuide() { openModal('sizeModal'); }
 function addToCart() {
     if (!selectedSize) { const se = document.getElementById('sizeError'); if (se) se.classList.add('visible'); showToast('Please select a size first!', 'error'); return; }
     if (cart.find(i => i.size === selectedSize)) { showToast(`Size ${selectedSize} already in cart!`, 'error'); return; }
-    cart.push({ id: Date.now(), name: 'Karan Aujla Tee — 001', size: selectedSize, price: BASE_PRICE, img: 'tshirt-front.png' });
+    cart.push({ id: Date.now(), name: 'Karan Aujla Tee — 001', size: selectedSize, price: BASE_PRICE, img: 'karan-front.jpg' });
     updateCartCount(); showToast(`✅ Size ${selectedSize} added!`, 'success'); renderCart();
 }
 function updateCartCount() { const cc = document.getElementById('cartCount'); if (cc) cc.textContent = cart.length; }

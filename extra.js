@@ -1,4 +1,4 @@
-// 6. Lenis Smooth Scroll
+﻿// 6. Lenis Smooth Scroll
 if (typeof Lenis !== 'undefined') {
     const lenis = new Lenis({
         duration: 1.2,
@@ -218,3 +218,135 @@ document.addEventListener('touchstart', (e) => {
         modal.setAttribute('data-lenis-prevent', 'true');
     }
 }, { passive: true });
+
+// 12. Cart Multiplication Logic Fix
+window.addToCart = function() {
+    if (!selectedSize) { 
+        const se = document.getElementById('sizeError'); 
+        if (se) se.classList.add('visible'); 
+        showToast('Please select a size first!', 'error'); 
+        return; 
+    }
+    let existing = cart.find(i => i.size === selectedSize);
+    if (existing) {
+        existing.qty = (existing.qty || 1) + 1;
+        showToast(`✅ Added another Size ${selectedSize}!`, 'success');
+    } else {
+        cart.push({ id: Date.now(), name: 'Karan Aujla Tee — 001', size: selectedSize, price: BASE_PRICE, qty: 1, img: 'karan-front.jpg' });
+        showToast(`✅ Size ${selectedSize} added!`, 'success');
+    }
+    updateCartCount(); 
+    renderCart();
+};
+
+window.updateCartCount = function() { 
+    const cc = document.getElementById('cartCount'); 
+    if (cc) cc.textContent = cart.reduce((sum, item) => sum + (item.qty || 1), 0); 
+};
+
+window.getCartTotal = function() {
+    return cart.reduce((sum, item) => sum + (item.price * (item.qty || 1)), 0);
+};
+
+window.renderCart = function() {
+    const ie = document.getElementById('cartItems');
+    const ee = document.getElementById('cartEmpty');
+    const fe = document.getElementById('cartFooter');
+    if (!ie) return;
+    ie.innerHTML = '';
+    if (cart.length === 0) { if (ee) ee.classList.remove('hidden'); if (fe) fe.classList.add('hidden'); return; }
+    if (ee) ee.classList.add('hidden'); if (fe) fe.classList.remove('hidden');
+    let total = getCartTotal();
+    cart.forEach(item => {
+        const q = item.qty || 1;
+        const div = document.createElement('div'); div.className = 'cart-item';
+        div.innerHTML = `<img src="${item.img}" alt="${item.name}" class="cart-item-img" /><div class="cart-item-info"><div class="cart-item-name">${item.name} (x${q})</div><div class="cart-item-meta">Size: ${item.size}</div></div><div class="cart-item-price">₹${item.price * q}</div><button class="cart-item-remove" onclick="removeFromCart(${item.id})">×</button>`;
+        ie.appendChild(div);
+    });
+    const ct = document.getElementById('cartTotal'); if (ct) ct.textContent = `₹${total}`;
+};
+
+window.calcFinalPrice = function() {
+    let final = getCartTotal();
+    let pts = 0;
+    if (appliedCoupon) {
+        const c = getCoupons()[appliedCoupon];
+        if (c.type === 'percent') final -= Math.round(final * (c.discount / 100));
+        else final -= c.discount;
+    }
+    if (document.getElementById('useWalletPoints') && document.getElementById('useWalletPoints').checked && currentUser) {
+        pts = Math.min(currentUserData.walletBalance || 0, final - 100);
+        if (pts > 0) final -= pts;
+    }
+    return { finalPrice: Math.max(final, 0), pointsUsed: pts };
+};
+
+// Override updateOrderSummary heavily to fix "x 1" text issue and dynamically map cart contents in UI
+window.updateOrderSummary = function() {
+    const { finalPrice, pointsUsed } = calcFinalPrice();
+    const cartTotalItems = cart.reduce((s, i) => s + (i.qty || 1), 0);
+    const cartTotalPrice = getCartTotal();
+    
+    // 1. Render all cart items efficiently in Checkout Modal
+    const omHeader = document.querySelector('.om-header');
+    if (omHeader) {
+        let summaryContainer = omHeader.querySelector('.om-product-summary-container');
+        if (!summaryContainer) {
+            const oldSummary = omHeader.querySelector('.om-product-summary');
+            if (oldSummary) oldSummary.remove();
+            summaryContainer = document.createElement('div');
+            summaryContainer.className = 'om-product-summary-container';
+            omHeader.appendChild(summaryContainer);
+        }
+        
+        let html = '';
+        if (cart.length === 0) {
+            html += `<div class="om-product-summary" style="margin-top:10px;">
+                        <img src="karan-front.jpg" class="om-thumb" alt="Karan Aujla Tee"/>
+                        <div>
+                            <div class="om-pname">Karan Aujla Tee — 001</div>
+                            <div class="om-pdetail">Size: ${selectedSize || '—'} | ₹${BASE_PRICE}</div>
+                        </div>
+                     </div>`;
+        } else {
+            cart.forEach(item => {
+                const q = item.qty || 1;
+                html += `<div class="om-product-summary" style="margin-top:10px;">
+                            <img src="${item.img}" class="om-thumb" alt="${item.name}"/>
+                            <div>
+                                <div class="om-pname">${item.name} (x${q})</div>
+                                <div class="om-pdetail">Size: <strong>${item.size}</strong> &nbsp;|&nbsp; <span>₹${item.price * q}</span></div>
+                            </div>
+                         </div>`;
+            });
+        }
+        summaryContainer.innerHTML = html;
+    }
+
+    // 2. Adjust standard Checkout totals inside os-summary row mapping
+    const osSummaryRow = document.querySelector('.os-summary .os-row span');
+    if(osSummaryRow) {
+        osSummaryRow.innerText = cartTotalItems > 0 ? `Cart Items × ${cartTotalItems}` : `Karan Aujla Tee × 1`;
+        document.getElementById('osMRP').textContent = `₹${cartTotalPrice || BASE_PRICE}`;
+    }
+
+    const elTotal = document.getElementById('osTotal'); if (elTotal) elTotal.textContent = `₹${finalPrice}`;
+    const elDisc = document.getElementById('osDiscount');
+    const elDiscRow = document.getElementById('osDiscountRow');
+    const elUPIAmt = document.getElementById('upiAmountDisplay');
+    const elBuyNow = document.getElementById('buyNowPrice');
+
+    if (appliedCoupon) {
+        const c = getCoupons()[appliedCoupon];
+        let disc = 0;
+        if (c.type === 'percent') disc = Math.round(cartTotalPrice * (c.discount / 100));
+        else disc = c.discount;
+        if (elDisc) elDisc.textContent = `— ₹${disc}`;
+        if (elDiscRow) elDiscRow.classList.remove('hidden');
+    } else { if (elDiscRow) elDiscRow.classList.add('hidden'); }
+    
+    if (elUPIAmt) elUPIAmt.textContent = `₹${finalPrice}`;
+    
+    // Fix: The Product Modal's Buy Now button should always show the item's base price, not the cart total.
+    if (elBuyNow) elBuyNow.textContent = `₹${BASE_PRICE}`;
+};
