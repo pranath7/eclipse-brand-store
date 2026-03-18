@@ -178,6 +178,7 @@ window.addEventListener('load', () => {
     setTimeout(() => {
         initReveal();
         initScarcityPulse();
+        initTilt();
     }, 300);
 });
 
@@ -774,6 +775,42 @@ function togglePasswordVisibility(inputId, btnEl) {
         input.type = 'password';
         btnEl.textContent = 'SHOW';
         btnEl.classList.remove('active');
+    }
+}
+
+// ===== 3D TILT EFFECT =====
+function initTilt() {
+    if (typeof VanillaTilt !== 'undefined') {
+        const productCards = document.querySelectorAll('.product-card');
+        VanillaTilt.init(productCards, {
+            max: 12,
+            speed: 500,
+            glare: true,
+            "max-glare": 0.25,
+            scale: 1.02,
+            perspective: 1200,
+            gyroscope: true
+        });
+
+        const heroTshirt = document.querySelectorAll('.tshirt-showcase');
+        VanillaTilt.init(heroTshirt, {
+            max: 15,
+            speed: 600,
+            glare: true,
+            "max-glare": 0.3,
+            scale: 1.05,
+            perspective: 1500
+        });
+
+        const aboutImgs = document.querySelectorAll('.about-img');
+        VanillaTilt.init(aboutImgs, {
+            max: 8,
+            speed: 400,
+            glare: true,
+            "max-glare": 0.15
+        });
+        
+        console.log("3D Tilt initialized 🌑");
     }
 }
 

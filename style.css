@@ -787,13 +787,10 @@ select {
   position: relative;
   z-index: 1;
   box-shadow: var(--glass-shadow);
+  transform-style: preserve-3d;
 }
 
-
-
-
 .product-card:hover {
-  transform: translateY(-12px) scale(1.02);
   background: rgba(255, 255, 255, 0.15); /* More visible on hover */
   backdrop-filter: var(--glass-blur) var(--glass-saturate); /* Reinforce blur */
   -webkit-backdrop-filter: var(--glass-blur) var(--glass-saturate);
