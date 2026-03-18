@@ -910,3 +910,88 @@ function initScarcityPulse() {
 }
 
 console.log('%c ECLIPSE STORE v3 ', 'background:#c9a84c;color:#000;font-size:18px;font-weight:bold;padding:6px 16px;border-radius:4px;');
+
+// ===== ULTRA PREMIUM ENHANCEMENTS =====
+
+// 1. Magnetic Buttons
+document.querySelectorAll('.btn, .nav-link').forEach(btn => {
+    btn.addEventListener('mousemove', (e) => {
+        const rect = btn.getBoundingClientRect();
+        const x = e.clientX - rect.left - rect.width / 2;
+        const y = e.clientY - rect.top - rect.height / 2;
+        btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
+    });
+    btn.addEventListener('mouseleave', () => {
+        btn.style.transform = `translate(0px, 0px)`;
+    });
+});
+
+// 2. Click Ripples
+document.addEventListener('mousedown', (e) => {
+    const ripple = document.createElement('div');
+    ripple.className = 'click-ripple';
+    ripple.style.left = `${e.clientX - 10}px`;
+    ripple.style.top = `${e.clientY - 10}px`;
+    ripple.style.width = '20px';
+    ripple.style.height = '20px';
+    document.body.appendChild(ripple);
+    setTimeout(() => ripple.remove(), 600);
+});
+
+// 3. Dynamic Scroll-Velocity Marquee
+let lastScrollY = window.scrollY;
+const mqTrack = document.querySelector('.marquee-track');
+window.addEventListener('scroll', () => {
+    if (!mqTrack) return;
+    const delta = Math.abs(window.scrollY - lastScrollY);
+    lastScrollY = window.scrollY;
+    
+    // Increase speed based on scroll speed (lower duration = faster)
+    let newSpeed = Math.max(5, 20 - delta * 0.1);
+    mqTrack.style.animationDuration = `${newSpeed}s`;
+    
+    clearTimeout(window.mqTimeout);
+    window.mqTimeout = setTimeout(() => {
+        mqTrack.style.animationDuration = `20s`;
+    }, 150);
+});
+
+// 4. Scramble Text Effect (Tags only to protect HTML)
+const scrambleChars = '!<>-_\\\\/[]{}—=+*^?#________';
+function scrambleEffect(el) {
+    if(!el.dataset.origText) el.dataset.origText = el.innerText;
+    const originalText = el.dataset.origText;
+    let iterations = 0;
+    const interval = setInterval(() => {
+        el.innerText = originalText.split('').map((letter, index) => {
+            if(index < iterations || letter === ' ') return originalText[index];
+            return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
+        }).join('');
+        if(iterations >= originalText.length) {
+            clearInterval(interval);
+            el.innerText = originalText;
+        }
+        iterations += 1/3;
+    }, 30);
+}
+
+const scrambleObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+        if(entry.isIntersecting) {
+            scrambleEffect(entry.target);
+            scrambleObserver.unobserve(entry.target);
+        }
+    });
+}, { threshold: 0.8 });
+document.querySelectorAll('.section-tag, .hero-tag').forEach(h => scrambleObserver.observe(h));
+
+// 5. Cinematic Preloader
+window.addEventListener('load', () => {
+    const loaderCustom = document.getElementById('loader');
+    if(loaderCustom) {
+        setTimeout(() => {
+            loaderCustom.classList.remove('hidden');
+            loaderCustom.classList.add('hidden-snap');
+        }, 50); 
+    }
+});

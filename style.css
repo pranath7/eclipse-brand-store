@@ -2213,13 +2213,13 @@ footer {
 
 .reveal {
   opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
+  transform: translateY(40px) scale(0.96);
+  transition: opacity 1s cubic-bezier(0.175, 0.885, 0.32, 1.275), transform 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
 .reveal.visible {
   opacity: 1;
-  transform: translateY(0);
+  transform: translateY(0) scale(1);
 }
 
 /* ---- COUPON SECTION ---- */
@@ -2691,4 +2691,250 @@ button,
   .reviews-grid {
     grid-template-columns: 1fr;
   }
+}
+
+/* ===== LENIS SCROLL ===== */
+html.lenis, html.lenis body {
+  height: auto;
+}
+.lenis.lenis-smooth {
+  scroll-behavior: auto !important;
+}
+.lenis.lenis-smooth [data-lenis-prevent] {
+  overscroll-behavior: contain;
+}
+.lenis.lenis-stopped {
+  overflow: hidden;
+}
+.lenis.lenis-scrolling iframe {
+  pointer-events: none;
+}
+
+/* ===== FLASHLIGHT SPOTLIGHT ===== */
+#flashlight {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  z-index: 9995;
+  background: radial-gradient(circle 500px at var(--cursor-x, 50vw) var(--cursor-y, 50vh), rgba(201, 168, 76, 0.08) 0%, transparent 100%);
+  will-change: background;
+  transition: opacity 0.3s ease;
+}
+
+.hero-title {
+  will-change: transform, letter-spacing, opacity;
+}
+
+/* ===== ULTRA PREMIUM UI ENHANCEMENTS ===== */
+.text-gradient-gold, .section-title, .hero-line1, .hero-line2 {
+  background: linear-gradient(135deg, #f0ca6e 0%, #c9a84c 40%, #ffffff 50%, #c9a84c 60%, #8a6d2b 100%);
+  background-size: 200% auto;
+  color: transparent !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  animation: shineGold 4s linear infinite;
+}
+@keyframes shineGold {
+  to { background-position: 200% center; }
+}
+
+.product-card:hover .product-img {
+  transform: scale(1.08) !important;
+}
+.product-img {
+  transition: transform 0.8s cubic-bezier(0.165, 0.84, 0.44, 1) !important;
+}
+
+.btn-primary {
+  position: relative;
+  overflow: hidden;
+  z-index: 1;
+}
+.btn-primary::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -150%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.4) 50%, rgba(255,255,255,0) 100%);
+  transform: skewX(-25deg);
+  animation: btnShimmer 4s infinite 2s;
+  z-index: -1;
+  pointer-events: none;
+}
+@keyframes btnShimmer {
+  0% { left: -150%; }
+  20% { left: 200%; }
+  100% { left: 200%; }
+}
+
+.hero-grain {
+  animation: grainNoise 0.3s steps(2) infinite;
+  opacity: 0.15;
+}
+@keyframes grainNoise {
+  0%, 100% { background-position: 0 0; }
+  25% { background-position: 20px -20px; }
+  50% { background-position: -20px 20px; }
+  75% { background-position: 10px 10px; }
+}
+
+.click-ripple {
+  position: fixed;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.5);
+  transform: scale(0);
+  animation: rippleAnim 0.6s cubic-bezier(0.165, 0.84, 0.44, 1) forwards;
+  pointer-events: none;
+  z-index: 999999;
+}
+@keyframes rippleAnim {
+  to {
+    transform: scale(6);
+    opacity: 0;
+  }
+}
+
+.btn, .nav-link {
+  transition: transform 0.1s ease-out, background var(--transition), border-color var(--transition), color var(--transition);
+}
+
+#loader {
+  transition: transform 0.8s cubic-bezier(0.86, 0, 0.07, 1), opacity 0.8s ease;
+}
+#loader.hidden-snap {
+  transform: translateY(-100%);
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* ===== TRACK TIMELINE ===== */
+.track-timeline {
+    display: flex;
+    justify-content: space-between;
+    position: relative;
+    margin-top: 20px;
+}
+.track-timeline::before {
+    content: '';
+    position: absolute;
+    top: 14px;
+    left: 20px;
+    right: 20px;
+    height: 2px;
+    background: var(--border);
+    z-index: 1;
+}
+.timeline-step {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 8px;
+    text-align: center;
+    width: 60px;
+}
+.ts-icon {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background: var(--bg);
+    border: 2px solid var(--border);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    color: var(--grey);
+    transition: all var(--transition);
+}
+.timeline-step.done .ts-icon {
+    background: var(--gold);
+    border-color: var(--gold);
+    color: #000;
+}
+.timeline-step.current .ts-icon {
+    box-shadow: 0 0 15px var(--gold);
+}
+.ts-text {
+    font-size: 12px;
+    color: var(--grey);
+    font-weight: 600;
+}
+.timeline-step.done .ts-text {
+    color: var(--white);
+}
+
+/* ===== TRUCK ANIMATION ===== */
+#truckAnimModal {
+   background: rgba(10, 10, 10, 0.98);
+}
+.truck-anim-container {
+   position: relative;
+   width: 100vw;
+   height: 200px;
+   display: flex;
+   align-items: center;
+   justify-content: center;
+   overflow: hidden;
+}
+.truck-svg {
+   font-size: 80px;
+   position: absolute;
+   left: -150px;
+   bottom: 40px;
+   z-index: 2;
+}
+.truck-svg.drive {
+   animation: driveTruck 3.5s cubic-bezier(0.25, 1, 0.5, 1) forwards;
+}
+.package-svg {
+   font-size: 40px;
+   position: absolute;
+   left: 50%;
+   bottom: 40px;
+   opacity: 0;
+   transform: translate(-50%, -50%) scale(0);
+   z-index: 1;
+}
+.package-svg.drop {
+   animation: dropPackage 1s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+.road-line {
+   position: absolute;
+   bottom: 40px;
+   width: 100%;
+   height: 2px;
+   background: repeating-linear-gradient(90deg, var(--gold) 0, var(--gold) 20px, transparent 20px, transparent 40px);
+   animation: roadMove 1s linear infinite;
+}
+.truck-msg {
+   text-align: center;
+   font-family: var(--font-display);
+   color: var(--gold);
+   font-size: 32px;
+   letter-spacing: 2px;
+   margin-top: 20px;
+   animation: scaleIn 0.5s ease;
+}
+
+@keyframes driveTruck {
+    0% { left: -150px; }
+    30% { left: 50%; transform: translateX(-50%); }
+    60% { left: 50%; transform: translateX(-50%); }
+    100% { left: 100vw; transform: translateX(100px); }
+}
+@keyframes dropPackage {
+    0% { opacity: 0; transform: translate(-50%, -50%) scale(0.5) rotate(0deg); }
+    50% { opacity: 1; transform: translate(-50%, -20px) scale(1) rotate(-180deg); }
+    100% { opacity: 1; transform: translate(-50%, 0px) scale(1) rotate(-360deg); }
+}
+@keyframes roadMove {
+    from { background-position: 0 0; }
+    to { background-position: -40px 0; }
 }

@@ -146,10 +146,23 @@
         rel="stylesheet" />
 
 
+    <script src="https://unpkg.com/@studio-freight/lenis@1.0.34/dist/lenis.min.js"></script>
     <link rel="stylesheet" href="style.css" />
 </head>
 
 <body>
+
+    <!-- ===== CSS LAVA/LIQUID FILTER ===== -->
+    <svg style="width:0;height:0;position:absolute;z-index:-1;">
+        <filter id="liquid">
+            <feGaussianBlur in="SourceGraphic" stdDeviation="20" result="blur" />
+            <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 30 -15" result="liquid" />
+            <feComposite in="SourceGraphic" in2="liquid" operator="atop"/>
+        </filter>
+    </svg>
+
+    <!-- ===== FLASHLIGHT OVERLAY ===== -->
+    <div id="flashlight"></div>
 
     <!-- ===== CURSOR ===== -->
     <div class="cursor" id="cursor"></div>
@@ -177,6 +190,7 @@
             <ul class="nav-links">
                 <li><a href="#hero" class="nav-link">Home</a></li>
                 <li><a href="#products" class="nav-link">Shop</a></li>
+                <li><a href="#track" class="nav-link">Track</a></li>
                 <li><a href="#custom" class="nav-link">Custom</a></li>
                 <li><a href="#reviews" class="nav-link">Reviews</a></li>
                 <li><a href="#about" class="nav-link">About</a></li>
@@ -208,6 +222,7 @@
         <div class="mobile-menu" id="mobileMenu">
             <a href="#hero" class="mobile-link">Home</a>
             <a href="#products" class="mobile-link">Shop</a>
+            <a href="#track" class="mobile-link">Track</a>
             <a href="#custom" class="mobile-link">Custom</a>
             <a href="#reviews" class="mobile-link">Reviews</a>
             <a href="#about" class="mobile-link">About</a>
@@ -314,6 +329,27 @@
                         <button class="btn btn-ghost" onclick="openNotifyModal()">Notify Me</button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ===== TRACK ORDER ===== -->
+    <section id="track" style="padding: 100px 0; background: var(--bg2);">
+        <div class="container">
+            <div class="section-header">
+                <div class="section-tag">— STAY UPDATED —</div>
+                <h2 class="section-title" style="margin-bottom: 20px;">TRACK YOUR ORDER</h2>
+                <p style="color:var(--grey); max-width:500px; margin:0 auto 40px;">Enter your Order ID below to view live tracking status and timeline.</p>
+            </div>
+            <div class="track-box" style="max-width: 600px; margin: 0 auto; background: var(--bg3); padding: 40px; border-radius: var(--radius-lg); border: 1px solid var(--border);">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label>Order ID (e.g., ECL12345678)</label>
+                    <div style="display:flex; gap:10px; margin-top: 10px;">
+                        <input type="text" id="trackIdInput" placeholder="ECL..." style="flex:1; padding: 14px 16px; background: rgba(255, 255, 255, 0.05); border: 1px solid var(--border); border-radius: 8px; color: white; outline: none; text-transform: uppercase;" />
+                        <button class="btn btn-primary" onclick="trackOrder()">Track</button>
+                    </div>
+                </div>
+                <div id="trackResult" class="hidden" style="margin-top: 30px; border-top: 1px solid var(--border); padding-top: 20px;"></div>
             </div>
         </div>
     </section>
@@ -1067,7 +1103,18 @@
     <script src="https://www.gstatic.com/firebasejs/10.9.0/firebase-firestore-compat.js"></script>
     <!-- Vanilla Tilt -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+    <!-- ===== TRUCK ANIMATION MODAL ===== -->
+    <div class="modal-overlay" id="truckAnimModal">
+        <div class="truck-anim-container">
+            <div class="truck-svg" id="truckSprite">🚐</div>
+            <div class="package-svg" id="packageSprite">📦</div>
+            <div class="road-line"></div>
+        </div>
+        <h2 class="truck-msg hidden" id="truckMsg">Order Placed! Dispatching...</h2>
+    </div>
+
     <script src="script.js?v=3"></script>
+    <script src="extra.js"></script>
 </body>
 
 </html>
