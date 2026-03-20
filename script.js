@@ -1,4 +1,4 @@
-﻿/* =====================================================
+/* =====================================================
    ECLIPSE STORE — SCRIPT.JS  (v3 — Firebase Integrated)
    ===================================================== */
 
@@ -382,25 +382,67 @@ function resetOrderModal() {
     updateOrderSummary();
 }
 function updateOrderSummary() {
-    const { finalPrice, pointsUsed } = calcFinalPrice();
-    const elMRP = document.getElementById('osMRP'); if (elMRP) elMRP.textContent = `₹${BASE_PRICE}`;
-    const elTotal = document.getElementById('osTotal'); if (elTotal) elTotal.textContent = `₹${finalPrice}`;
-    const elDisc = document.getElementById('osDiscount');
+    let mrp = 0;
+    
+    // Ensure accurate base via real cart array state
+    if (cart.length > 0) {
+        cart.forEach(item => { mrp += item.price * item.qty; });
+    } else {
+        mrp = BASE_PRICE; // Fallback for 1-click Buy Now sequence
+    }
+    
+    let currentTotal = mrp;
+    
+    // Apply Active Coupons
     const elDiscRow = document.getElementById('osDiscountRow');
-    const elUPIAmt = document.getElementById('upiAmountDisplay');
-    const elOmPrice = document.getElementById('omPriceDisplay');
-    const elBuyNow = document.getElementById('buyNowPrice');
+    const elDisc = document.getElementById('osDiscount');
+    let couponDeduction = 0;
+    
     if (appliedCoupon) {
         const c = getCoupons()[appliedCoupon];
-        let disc = 0;
-        if (c.type === 'percent') disc = Math.round(BASE_PRICE * (c.discount / 100));
-        else disc = c.discount;
-        if (elDisc) elDisc.textContent = `— ₹${Math.min(disc, BASE_PRICE)}`;
-        if (elDiscRow) elDiscRow.classList.remove('hidden');
-    } else { if (elDiscRow) elDiscRow.classList.add('hidden'); }
-    if (elUPIAmt) elUPIAmt.textContent = `₹${finalPrice}`;
-    if (elOmPrice) elOmPrice.textContent = `₹${finalPrice}`;
-    if (elBuyNow) elBuyNow.textContent = `₹${finalPrice}`;
+        if (c) {
+            if (c.type === 'percent') {
+                couponDeduction = Math.round(currentTotal * (c.discount / 100));
+            } else {
+                couponDeduction = c.discount;
+            }
+            couponDeduction = Math.min(couponDeduction, currentTotal); // Never discount below zero
+            currentTotal -= couponDeduction;
+            
+            if (elDisc) elDisc.textContent = `— ₹${couponDeduction}`;
+            if (elDiscRow) elDiscRow.classList.remove('hidden');
+        }
+    } else {
+        if (elDiscRow) elDiscRow.classList.add('hidden');
+    }
+
+    // Apply Live Wallet Points offset
+    const uwc = document.getElementById('useWalletCheck');
+    const wvr = document.getElementById('osWalletValRow');
+    const wu = document.getElementById('osWalletUsed');
+    let pointsUsed = 0;
+
+    // Safety checking integer conversions
+    let activeWalletInt = parseInt(currentWallet) || 0;
+    
+    if (uwc && uwc.checked && activeWalletInt > 0) {
+        pointsUsed = Math.min(currentTotal, activeWalletInt);
+        currentTotal -= pointsUsed;
+        
+        if (wvr && wu) { 
+            wvr.classList.remove('hidden'); 
+            wu.textContent = `— ₹${pointsUsed}`; 
+        }
+    } else {
+        if (wvr) wvr.classList.add('hidden');
+    }
+
+    // Distribute verified final totals to DOM mappings
+    const elMRP = document.getElementById('osMRP'); if (elMRP) elMRP.textContent = `₹${mrp}`;
+    const elTotal = document.getElementById('osTotal'); if (elTotal) elTotal.textContent = `₹${currentTotal}`;
+    const elUPIAmt = document.getElementById('upiAmountDisplay'); if (elUPIAmt) elUPIAmt.textContent = `₹${currentTotal}`;
+    const elOmPrice = document.getElementById('omPriceDisplay'); if (elOmPrice) elOmPrice.textContent = `₹${currentTotal}`;
+    const elBuyNow = document.getElementById('buyNowPrice'); if (elBuyNow) elBuyNow.textContent = `₹${currentTotal}`;
 }
 
 // ===== COUPON =====
