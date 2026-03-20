@@ -1,4 +1,4 @@
-﻿// 6. Lenis Smooth Scroll
+// 6. Lenis Smooth Scroll
 if (typeof Lenis !== 'undefined') {
     const lenis = new Lenis({
         duration: 1.2,
@@ -268,14 +268,25 @@ window.renderCart = function() {
 
 window.calcFinalPrice = function() {
     let final = getCartTotal();
+
+    // Fallback for 1-click buy flow when cart is empty
+    if (final === 0 && cart.length === 0) {
+        final = BASE_PRICE;
+    }
+
     let pts = 0;
     if (appliedCoupon) {
         const c = getCoupons()[appliedCoupon];
-        if (c.type === 'percent') final -= Math.round(final * (c.discount / 100));
-        else final -= c.discount;
+        if (c) {
+            if (c.type === 'percent') final -= Math.round(final * (c.discount / 100));
+            else final -= c.discount;
+        }
     }
-    if (document.getElementById('useWalletPoints') && document.getElementById('useWalletPoints').checked && currentUser) {
-        pts = Math.min(currentUserData.walletBalance || 0, final - 100);
+
+    const uwc = document.getElementById('useWalletCheck');
+    if (uwc && uwc.checked && currentUser) {
+        // Use currentWallet (defined in script.js) instead of undefined currentUserData
+        pts = Math.min(currentWallet || 0, Math.max(0, final - 100));
         if (pts > 0) final -= pts;
     }
     return { finalPrice: Math.max(final, 0), pointsUsed: pts };
@@ -327,7 +338,12 @@ window.updateOrderSummary = function() {
     const osSummaryRow = document.querySelector('.os-summary .os-row span');
     if(osSummaryRow) {
         osSummaryRow.innerText = cartTotalItems > 0 ? `Cart Items × ${cartTotalItems}` : `Karan Aujla Tee × 1`;
-        document.getElementById('osMRP').textContent = `₹${cartTotalPrice || BASE_PRICE}`;
+    }
+    
+    // MRP Display
+    const elMRP = document.getElementById('osMRP');
+    if (elMRP) {
+        elMRP.textContent = `₹${cartTotalPrice || BASE_PRICE}`;
     }
 
     const elTotal = document.getElementById('osTotal'); if (elTotal) elTotal.textContent = `₹${finalPrice}`;
@@ -338,12 +354,25 @@ window.updateOrderSummary = function() {
 
     if (appliedCoupon) {
         const c = getCoupons()[appliedCoupon];
-        let disc = 0;
-        if (c.type === 'percent') disc = Math.round(cartTotalPrice * (c.discount / 100));
-        else disc = c.discount;
-        if (elDisc) elDisc.textContent = `— ₹${disc}`;
-        if (elDiscRow) elDiscRow.classList.remove('hidden');
+        if (c) {
+            let disc = 0;
+            const baseForDisc = cartTotalPrice || BASE_PRICE;
+            if (c.type === 'percent') disc = Math.round(baseForDisc * (c.discount / 100));
+            else disc = c.discount;
+            if (elDisc) elDisc.textContent = `— ₹${disc}`;
+            if (elDiscRow) elDiscRow.classList.remove('hidden');
+        }
     } else { if (elDiscRow) elDiscRow.classList.add('hidden'); }
+
+    // Wallet Discount Display
+    const osWalletValRow = document.getElementById('osWalletValRow');
+    const osWalletUsed = document.getElementById('osWalletUsed');
+    if (pointsUsed > 0) {
+        if (osWalletValRow) osWalletValRow.classList.remove('hidden');
+        if (osWalletUsed) osWalletUsed.textContent = `— ₹${pointsUsed}`;
+    } else {
+        if (osWalletValRow) osWalletValRow.classList.add('hidden');
+    }
     
     if (elUPIAmt) elUPIAmt.textContent = `₹${finalPrice}`;
     
