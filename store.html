@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -316,7 +316,28 @@
                         <div class="product-brand">ECLIPSE</div>
                         <h3 class="product-name">Next Drop — 002</h3>
                         <div class="product-price-row"><span class="product-price">TBA</span></div>
-                        <button class="btn btn-ghost" onclick="openNotifyModal()">Notify Me</button>
+                        
+                        <!-- COUNTDOWN TIMER -->
+                        <div class="countdown-container" id="dropCountdown">
+                            <div class="countdown-box">
+                                <span class="countdown-value" id="days">00</span>
+                                <span class="countdown-label">Days</span>
+                            </div>
+                            <div class="countdown-box">
+                                <span class="countdown-value" id="hours">00</span>
+                                <span class="countdown-label">Hrs</span>
+                            </div>
+                            <div class="countdown-box">
+                                <span class="countdown-value" id="minutes">00</span>
+                                <span class="countdown-label">Min</span>
+                            </div>
+                            <div class="countdown-box">
+                                <span class="countdown-value" id="seconds">00</span>
+                                <span class="countdown-label">Sec</span>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-ghost" onclick="openNotifyModal()" style="width:100%;">Notify Me</button>
                     </div>
                 </div>
             </div>
