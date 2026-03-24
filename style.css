@@ -3071,6 +3071,71 @@ html.lenis, html.lenis body {
     margin-top: -12px;
 }
 
+/* ---- ANNOUNCEMENT BAR ---- */
+.announcement-bar {
+    background: rgba(201, 168, 76, 0.1);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+    padding: 10px 0;
+    text-align: center;
+    position: relative;
+    z-index: 1001;
+}
+
+.announcement-text {
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    color: var(--gold);
+    animation: pulseGlow 2s infinite ease-in-out;
+}
+
+@keyframes pulseGlow {
+    0%, 100% { opacity: 0.8; text-shadow: 0 0 5px rgba(201, 168, 76, 0); }
+    50% { opacity: 1; text-shadow: 0 0 15px rgba(201, 168, 76, 0.5); }
+}
+
+/* ---- DROP 2 SPECIFIC ---- */
+.drop2-tag {
+    display: inline-block;
+    font-size: 9px;
+    background: #d8308b; /* Magenta from previously generated crops */
+    color: white;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 800;
+    margin-bottom: 8px;
+    letter-spacing: 1px;
+}
+
+.hero-teaser {
+    margin-top: 15px;
+    font-size: 13px;
+    font-weight: 600;
+    color: #d8308b;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.hero-teaser::before {
+    content: '';
+    width: 8px;
+    height: 8px;
+    background: #d8308b;
+    border-radius: 50%;
+    animation: pulsePing 1.5s infinite;
+}
+
+@keyframes pulsePing {
+    0% { transform: scale(1); opacity: 1; }
+    100% { transform: scale(3); opacity: 0; }
+}
+
 .coming-soon-card .product-info {
     padding: 24px !important;
 }
