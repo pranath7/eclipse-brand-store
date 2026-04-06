@@ -1032,18 +1032,18 @@ function initTilt() {
 
 // ===== CUSTOMER REVIEWS =====
 const STAGED_REVIEWS = [
-    { name: "Aman Sharma", rating: 5, text: "The quality of the 180 GSM cotton is mental. Best oversized fit I've found in India so far. 🌑✨", date: "2 days ago" },
-    { name: "Sanya Malhotra", rating: 5, text: "Bought the Karan Aujla tee and the print is so premium. It doesn't fade after wash. Highly recommend! 🖤", date: "5 days ago" },
-    { name: "Rohan Verma", rating: 4, text: "Love the design. The delivery was a bit late but the product is worth the wait. Proper street vibes. 🤟", date: "1 week ago" },
-    { name: "Priya Patel", rating: 5, text: "The fabric is so soft yet heavy. Perfect for the 'It Was All A Dream' aesthetic. Will definitely buy again. 🔥", date: "1 week ago" },
-    { name: "Ishaan Gupta", rating: 5, text: "Finally an Indian brand doing oversized right. The drop shoulder is perfect. Karan Aujla fans, don't miss this! 🎤", date: "2 weeks ago" },
-    { name: "Ananya Iyer", rating: 5, text: "Exceptional quality. The packaging was also very clean. Five stars to Eclipse! ⭐🌕", date: "2 weeks ago" },
-    { name: "Vikram Singh", rating: 4, text: "The fit is amazing. I suggest sizing down if you want a regular fit. Great heavyweight feel. 👍", date: "3 weeks ago" },
-    { name: "Mehak Kaur", rating: 5, text: "Just received my order. The black is deep and the gold accents look so rich. Worth every rupee. 💰✨", date: "3 weeks ago" },
-    { name: "Kabir Khan", rating: 5, text: "Top notch streetwear. Can't wait for Drop 002 now! Great job team. 🚀", date: "1 month ago" },
-    { name: "Riya Sen", rating: 5, text: "The best birthday gift for my brother. He loves it! The quality is better than many international brands. 🎁🖤", date: "1 month ago" },
-    { name: "Arjun Reddy", rating: 4, text: "Cool designs and solid fabric. A bit pricey but definitely premium quality. No complaints. 💯", date: "1 month ago" },
-    { name: "Zoya Ahmed", rating: 5, text: "Obsessed with the Eclipse logo and the oversized cut. It's my new favorite tee for outings. 🌑🔥", date: "2 months ago" }
+    { name: "Aman Sharma", rating: 5, text: "Initial thoughts: fabric is heavy, definitely feels high-end. The Karan Aujla graphic is clean, didn't crack after the first wash which is rare for most local brands. 10/10 vibes. 🌑✨", date: "2 days ago" },
+    { name: "Sanya Malhotra", rating: 5, text: "Bought this for the concert and honestly, the fit is exactly what I wanted. It's properly oversized, not just 'big'. Best RS.999 spent on streetwear recently. 🖤", date: "5 days ago" },
+    { name: "Rohan Verma", rating: 5, text: "The Signature 001 tee is a banger. The drop shoulder sits perfectly. Took about 4 days to reach Mumbai, packaging was sick too. Proper street vibes. 🤟", date: "1 week ago" },
+    { name: "Priya Patel", rating: 5, text: "Quality is actually crazy for the price. I've bought international brands that feel thinner than this. Eclipse is definitely on to something with this 180GSM cotton. 🔥", date: "1 week ago" },
+    { name: "Ishaan Gupta", rating: 5, text: "Wait was worth it. Delivery was smooth and the support on WhatsApp is super helpful. The Aujla print is subtle but elite. Desi streetwear is evolving! 🎤", date: "2 weeks ago" },
+    { name: "Ananya Iyer", rating: 5, text: "Exceptional quality. The packaging was also very clean. Five stars to Eclipse! The oversized cut is perfect for the aesthetic. ⭐🌕", date: "2 weeks ago" },
+    { name: "Vikram Singh", rating: 4, text: "The fit is amazing. I suggest sizing down if you want a regular fit, but the oversized look is where it's at. Heavyweight feel is legit. 👍", date: "3 weeks ago" },
+    { name: "Mehak Kaur", rating: 5, text: "Just received my order. The black is deep and the gold accents on the signature tee look so rich. Worth every Rupee. 💰✨", date: "3 weeks ago" },
+    { name: "Kabir Khan", rating: 5, text: "Finally an Indian brand doing oversized right. Can't wait for Drop 002 now! Aujla fans, you guys need this in your wardrobe. 🚀", date: "1 month ago" },
+    { name: "Riya Sen", rating: 5, text: "Best birthday gift for my brother. He's a huge Karan Aujla fan and he's obsessed with the quality. Better than many mall brands. 🎁🖤", date: "1 month ago" },
+    { name: "Arjun Reddy", rating: 5, text: "Minimalist yet bold. The fabric is soft yet keeps its shape. Definitely a premium feel. No complaints. 💯", date: "1 month ago" },
+    { name: "Zoya Ahmed", rating: 5, text: "Obsessed with the Eclipse logo and the relaxed cut. It's my new favorite tee for outings. Hits different. 🌑🔥", date: "2 months ago" }
 ];
 
 function renderReviews(liveReviews = []) {
