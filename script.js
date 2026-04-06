@@ -173,14 +173,46 @@ function calcFinalPrice() {
     return { finalPrice: p, pointsUsed };
 }
 
-// ===== LOADER =====
+// ===== GLOBAL INITIALIZATION =====
+let ticking = false;
 window.addEventListener('load', () => {
-    setTimeout(() => {
-        initReveal();
-        initScarcityPulse();
-        initTilt();
-    }, 300);
+    // Initial Reveal & Scarcity
+    initReveal();
+    initScarcityPulse();
+    initTilt();
+    initCountdown();
+    
+    // Custom Cursor Lifecycle
+    if (typeof initCustomCursor === 'function') initCustomCursor();
 });
+
+// Throttled Scroll Manager
+window.addEventListener('scroll', () => {
+    if (!ticking) {
+        window.requestAnimationFrame(() => {
+            handleScrollEffects();
+            ticking = false;
+        });
+        ticking = true;
+    }
+}, { passive: true });
+
+function handleScrollEffects() {
+    const nav = document.getElementById('navbar');
+    if (!nav) return;
+    
+    const cur = window.scrollY;
+    // Direct transform for top-tier smoothness
+    if (cur > 100 && cur > lastScrollY) {
+        nav.style.transform = 'translateY(-100%)';
+    } else {
+        nav.style.transform = 'translateY(0)';
+    }
+    
+    // Background shift
+    nav.style.background = cur > 50 ? 'rgba(14, 10, 12, 0.95)' : 'rgba(14, 10, 12, 0.5)';
+    lastScrollY = cur;
+}
 
 
 // ===== NEWSLETTER =====
@@ -209,23 +241,7 @@ async function submitNewsletter(e) {
     }
 }
 
-// ===== CUSTOM CURSOR =====
-const cursor = document.getElementById('cursor');
-const cursorFollower = document.getElementById('cursorFollower');
-let mouseX = 0, mouseY = 0, followerX = 0, followerY = 0;
-document.addEventListener('mousemove', (e) => {
-    mouseX = e.clientX; mouseY = e.clientY;
-    if (cursor) { cursor.style.left = mouseX + 'px'; cursor.style.top = mouseY + 'px'; }
-});
-function animateFollower() {
-    followerX += (mouseX - followerX) * 0.12;
-    followerY += (mouseY - followerY) * 0.12;
-    if (cursorFollower) { cursorFollower.style.left = followerX + 'px'; cursorFollower.style.top = followerY + 'px'; }
-    requestAnimationFrame(animateFollower);
-}
-animateFollower();
-document.addEventListener('mouseover', (e) => { if (e.target.closest('a,button,[onclick],.product-card,.payment-option,.size-btn')) { if (cursor) cursor.classList.add('hover'); if (cursorFollower) cursorFollower.classList.add('hover'); } });
-document.addEventListener('mouseout', (e) => { if (e.target.closest('a,button,[onclick],.product-card,.payment-option,.size-btn')) { if (cursor) cursor.classList.remove('hover'); if (cursorFollower) cursorFollower.classList.remove('hover'); } });
+// ===== CUSTOM CURSOR (MOVED TO EXTRA.JS FOR PERFORMANCE) =====
 
 // ===== NAVBAR =====
 window.addEventListener('scroll', () => {
@@ -307,12 +323,170 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { const o = document.querySelectorAll('.modal-overlay.open'); if (o.length > 0) { o[o.length - 1].classList.remove('open'); if (document.querySelectorAll('.modal-overlay.open').length === 0) document.body.style.overflow = ''; } }
 });
 
-// ===== PRODUCT MODAL =====
-function openProduct() { openModal('productModal'); }
-function switchPmImg(el, src) {
-    document.getElementById('pmMainImg').src = src;
-    document.querySelectorAll('.pm-thumb').forEach(t => t.classList.remove('active'));
-    el.classList.add('active');
+// ===== PRODUCT DATA (DROP 002) =====
+const PRODUCTS = [
+  {
+    id: 0, name: 'Hibiscus', type: 'Baby Crop Tee · White',
+    img: 'product-hibiscus.png', price: 800,
+    desc: 'A bold pink hibiscus bloom on premium soft cotton. Wear it with denim for an effortless aesthetic look.',
+    sizes: ['XS','S','M','L','XL']
+  },
+  {
+    id: 1, name: 'Just A Girl', type: 'Baby Crop Tee · White',
+    img: 'product-just-a-girl.png', price: 800,
+    desc: '"i am literally just a girl" — with a pink bow and sparkles. The most relatable tee of the season.',
+    sizes: ['XS','S','M','L','XL']
+  },
+  {
+    id: 2, name: 'Kiss Love', type: 'Baby Crop Tee · White',
+    img: 'product-kiss-love.png', price: 800,
+    desc: 'Bold red lip print with Kiss Love script and a tiny heart. Edgy, feminine, unforgettable.',
+    sizes: ['XS','S','M','L','XL']
+  },
+  {
+    id: 3, name: 'Cherry Bow', type: 'Baby Crop Top · White',
+    img: 'product-cherry-bow.png', price: 800,
+    desc: '3D glossy pink cherries with a satin bow ribbon. The Y2K dream piece — styled by the baddies.',
+    sizes: ['XS','S','M','L','XL']
+  },
+  {
+    id: 4, name: 'Signature Tee 001', type: 'Oversized Tee · 180 GSM',
+    img: 'karan-front.jpg', price: 999,
+    desc: 'Drop 001 — Eclipse\'s debut heavyweight oversized tee. Premium 180 GSM cotton, double-stitched for life.',
+    sizes: ['XS','S','M','L','XL','XXL'],
+    accent: '#c9a84c'
+  }
+];
+
+let activeProductId = 0;
+let productQty = 1;
+
+// Global openProduct (overrides any other definition)
+window.openProduct = function(id) {
+    try {
+        activeProductId = id;
+        selectedSize = null; 
+        productQty = 1;
+        const p = PRODUCTS[id];
+        if (!p) return;
+        
+        const pmImg = document.getElementById('pmImg');
+        if (pmImg) { pmImg.src = p.img; pmImg.alt = p.name; }
+        
+        const pmName = document.getElementById('pmName');
+        if (pmName) pmName.textContent = p.name;
+        
+        const pmType = document.getElementById('pmType');
+        if (pmType) pmType.textContent = p.type;
+        
+        const pmDesc = document.getElementById('pmDesc');
+        if (pmDesc) pmDesc.textContent = p.desc;
+        
+        const pmPrice = document.getElementById('pmPrice');
+        if (pmPrice) {
+            pmPrice.textContent = '\u20b9' + p.price;
+            pmPrice.style.color = p.accent || 'var(--pink)';
+        }
+        
+        const qtyVal = document.getElementById('qtyVal');
+        if (qtyVal) qtyVal.textContent = 1;
+        
+        const so = document.getElementById('sizeOptions');
+        if (so) {
+            so.innerHTML = p.sizes.map(s =>
+                `<div class="size-opt" onclick="pickSize('${s}', this)">${s}</div>`
+            ).join('');
+        }
+        openModal('productModal');
+    } catch(e) { console.error("Modal error:", e); }
+};
+
+window.pickSize = function(size, el) {
+    selectedSize = size;
+    document.querySelectorAll('.size-opt').forEach(o => o.classList.remove('selected'));
+    if (el) el.classList.add('selected');
+};
+
+window.changeQty = function(delta) {
+    productQty = Math.max(1, productQty + delta);
+    const qv = document.getElementById('qtyVal');
+    if (qv) qv.textContent = productQty;
+};
+
+window.addToCartFromModal = function() {
+    if (!selectedSize) { showToast('Please select a size', 'error'); return; }
+    const p = PRODUCTS[activeProductId];
+    for (let i = 0; i < productQty; i++) {
+        cart.push({ id: Date.now() + i, name: p.name, size: selectedSize, price: p.price, img: p.img });
+    }
+    updateCartCount();
+    renderCart();
+    
+    const btn = document.getElementById('pmBuyBtn');
+    if(btn) {
+        const oldText = btn.innerHTML;
+        btn.innerHTML = '✓ ADDED';
+        btn.classList.add('btn-added');
+        showToast('✅ Added to your cart!', 'success');
+        setTimeout(() => {
+            btn.innerHTML = oldText;
+            btn.classList.remove('btn-added');
+            closeModal('productModal');
+        }, 1000);
+    } else { 
+        showToast('✅ Added to your cart!', 'success');
+        closeModal('productModal'); 
+    }
+};
+
+window.buyNowFromModal = function() {
+    if (!selectedSize) { showToast('Please select a size', 'error'); return; }
+    window.addToCartFromModal();
+    setTimeout(() => { 
+        openModal('orderModal'); 
+        if (typeof updateOrderSummary === 'function') updateOrderSummary(); 
+    }, 1200);
+};
+
+// ===== PREMIUM CUSTOM CURSOR (lerp) =====
+function initCustomCursor() {
+    const cursorDot = document.getElementById('cursorDot');
+    const cursorRing = document.getElementById('cursorRing');
+    if (!cursorDot || !cursorRing) return;
+    
+    document.body.classList.add('custom-cursor-active');
+    let mX = window.innerWidth / 2, mY = window.innerHeight / 2;
+    let rX = mX, rY = mY;
+    
+    document.addEventListener('mousemove', e => { 
+        mX = e.clientX; 
+        mY = e.clientY; 
+        if (cursorDot.style.opacity !== '1') {
+            cursorDot.style.opacity = '1';
+            cursorRing.style.opacity = '1';
+        }
+    }, { passive: true });
+    
+    const tick = () => {
+        // Snappier lerp (0.25) for high-end fluidity
+        rX += (mX - rX) * 0.25;
+        rY += (mY - rY) * 0.25;
+        
+        if (cursorDot) cursorDot.style.transform = `translate3d(${mX}px, ${mY}px, 0)`;
+        if (cursorRing) cursorRing.style.transform = `translate3d(${rX}px, ${rY}px, 0)`;
+        
+        requestAnimationFrame(tick);
+    }
+    requestAnimationFrame(tick);
+    
+    document.addEventListener('mouseover', e => {
+        const target = e.target.closest('a, button, .product-card, .size-opt');
+        if (target) cursorRing.classList.add('hovering');
+    });
+    document.addEventListener('mouseout', e => {
+        const target = e.target.closest('a, button, .product-card, .size-opt');
+        if (target) cursorRing.classList.remove('hovering');
+    });
 }
 
 // ===== SIZE =====
@@ -334,7 +508,7 @@ function addToCart() {
     cart.push({ id: Date.now(), name: 'Karan Aujla Tee — 001', size: selectedSize, price: BASE_PRICE, img: 'karan-front.jpg' });
     updateCartCount(); showToast(`✅ Size ${selectedSize} added!`, 'success'); renderCart();
 }
-function updateCartCount() { const cc = document.getElementById('cartCount'); if (cc) cc.textContent = cart.length; }
+function updateCartCount() { const cc = document.getElementById('cartCountBadge'); if (cc) cc.textContent = cart.length; }
 function renderCart() {
     const ie = document.getElementById('cartItems');
     const ee = document.getElementById('cartEmpty');
@@ -386,7 +560,7 @@ function updateOrderSummary() {
     
     // Ensure accurate base via real cart array state
     if (cart.length > 0) {
-        cart.forEach(item => { mrp += item.price * item.qty; });
+        cart.forEach(item => { mrp += item.price * (item.qty || 1); });
     } else {
         mrp = BASE_PRICE; // Fallback for 1-click Buy Now sequence
     }
@@ -955,77 +1129,7 @@ console.log('%c ECLIPSE STORE v3 ', 'background:#c9a84c;color:#000;font-size:18p
 
 // ===== ULTRA PREMIUM ENHANCEMENTS =====
 
-// 1. Magnetic Buttons
-document.querySelectorAll('.btn, .nav-link').forEach(btn => {
-    btn.addEventListener('mousemove', (e) => {
-        const rect = btn.getBoundingClientRect();
-        const x = e.clientX - rect.left - rect.width / 2;
-        const y = e.clientY - rect.top - rect.height / 2;
-        btn.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
-    });
-    btn.addEventListener('mouseleave', () => {
-        btn.style.transform = `translate(0px, 0px)`;
-    });
-});
-
-// 2. Click Ripples
-document.addEventListener('mousedown', (e) => {
-    const ripple = document.createElement('div');
-    ripple.className = 'click-ripple';
-    ripple.style.left = `${e.clientX - 10}px`;
-    ripple.style.top = `${e.clientY - 10}px`;
-    ripple.style.width = '20px';
-    ripple.style.height = '20px';
-    document.body.appendChild(ripple);
-    setTimeout(() => ripple.remove(), 600);
-});
-
-// 3. Dynamic Scroll-Velocity Marquee
-let lastScrollY = window.scrollY;
-const mqTrack = document.querySelector('.marquee-track');
-window.addEventListener('scroll', () => {
-    if (!mqTrack) return;
-    const delta = Math.abs(window.scrollY - lastScrollY);
-    lastScrollY = window.scrollY;
-    
-    // Increase speed based on scroll speed (lower duration = faster)
-    let newSpeed = Math.max(5, 20 - delta * 0.1);
-    mqTrack.style.animationDuration = `${newSpeed}s`;
-    
-    clearTimeout(window.mqTimeout);
-    window.mqTimeout = setTimeout(() => {
-        mqTrack.style.animationDuration = `20s`;
-    }, 150);
-});
-
-// 4. Scramble Text Effect (Tags only to protect HTML)
-const scrambleChars = '!<>-_\\\\/[]{}—=+*^?#________';
-function scrambleEffect(el) {
-    if(!el.dataset.origText) el.dataset.origText = el.innerText;
-    const originalText = el.dataset.origText;
-    let iterations = 0;
-    const interval = setInterval(() => {
-        el.innerText = originalText.split('').map((letter, index) => {
-            if(index < iterations || letter === ' ') return originalText[index];
-            return scrambleChars[Math.floor(Math.random() * scrambleChars.length)];
-        }).join('');
-        if(iterations >= originalText.length) {
-            clearInterval(interval);
-            el.innerText = originalText;
-        }
-        iterations += 1/3;
-    }, 30);
-}
-
-const scrambleObserver = new IntersectionObserver((entries) => {
-    entries.forEach(entry => {
-        if(entry.isIntersecting) {
-            scrambleEffect(entry.target);
-            scrambleObserver.unobserve(entry.target);
-        }
-    });
-}, { threshold: 0.8 });
-document.querySelectorAll('.section-tag, .hero-tag').forEach(h => scrambleObserver.observe(h));
+// (Effects removed for maximum performance)
 
 // 5. Cinematic Preloader
 window.addEventListener('load', () => {
@@ -1071,4 +1175,4 @@ function initCountdown() {
     updateTimer();
     setInterval(updateTimer, 1000);
 }
-initCountdown();
+// (initCountdown moved to global load block at top)
