@@ -26,6 +26,62 @@
 
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="stylesheet" href="style.css?v=3" />
+    <style>
+        html.time-gated, body.time-gated { overflow: hidden !important; }
+        #hype-overlay {
+            position: fixed; inset: 0; background: #000; z-index: 9999999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            color: white; font-family: 'Bebas Neue', sans-serif; text-align: center;
+        }
+        #hype-overlay h1 { font-size: 48px; letter-spacing: 6px; margin-bottom: 20px; color: #e63946; }
+        #hype-overlay p { font-size: 24px; letter-spacing: 3px; color: #a08890; margin-bottom: 40px; font-family: 'Inter', sans-serif; text-transform: uppercase; }
+        .hype-timer { display: flex; gap: 20px; font-size: 64px; }
+        .hype-box { display: flex; flex-direction: column; }
+        .hype-label { font-size: 14px; color: #e63946; letter-spacing: 2px; }
+    </style>
+    <script>
+        (function() {
+            const launchTime = new Date('2026-05-15T04:00:00+05:30').getTime();
+            if (Date.now() < launchTime) {
+                document.documentElement.className += ' time-gated';
+                document.addEventListener("DOMContentLoaded", function() {
+                    document.body.classList.add('time-gated');
+                    const overlay = document.createElement('div');
+                    overlay.id = 'hype-overlay';
+                    overlay.innerHTML = `
+                        <h1>DROP 003: THE JOGGER</h1>
+                        <p>UNLOCKS AT 4:00 AM</p>
+                        <div class="hype-timer" id="hypeTimer">
+                            <div class="hype-box"><span id="ht-h">00</span><span class="hype-label">HRS</span></div>
+                            <div>:</div>
+                            <div class="hype-box"><span id="ht-m">00</span><span class="hype-label">MIN</span></div>
+                            <div>:</div>
+                            <div class="hype-box"><span id="ht-s">00</span><span class="hype-label">SEC</span></div>
+                        </div>
+                    `;
+                    document.body.prepend(overlay);
+
+                    const updateTimer = setInterval(() => {
+                        const now = Date.now();
+                        const diff = launchTime - now;
+                        if (diff <= 0) {
+                            clearInterval(updateTimer);
+                            overlay.remove();
+                            document.body.classList.remove('time-gated');
+                            document.documentElement.className = document.documentElement.className.replace(' time-gated', '');
+                        } else {
+                            const h = Math.floor((diff % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                            const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                            const s = Math.floor((diff % (1000 * 60)) / 1000);
+                            document.getElementById('ht-h').textContent = h.toString().padStart(2, '0');
+                            document.getElementById('ht-m').textContent = m.toString().padStart(2, '0');
+                            document.getElementById('ht-s').textContent = s.toString().padStart(2, '0');
+                        }
+                    }, 1000);
+                });
+            }
+        })();
+    </script>
 </head>
 <body>
 <div id="cursorDot" class="custom-cursor-dot"></div>
