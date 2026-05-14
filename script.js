@@ -133,7 +133,7 @@ let selectedPayment = null;
 let deliveryData = {};
 let appliedCoupon = null;
 let currentLeadId = null; // Track active lead for abandonment recovery
-const BASE_PRICE = 999;
+const BASE_PRICE = 1199;
 
 let activeCoupons = {};
 db.collection('coupons').onSnapshot(snap => {
@@ -323,34 +323,40 @@ document.addEventListener('keydown', (e) => {
     if (e.key === 'Escape') { const o = document.querySelectorAll('.modal-overlay.open'); if (o.length > 0) { o[o.length - 1].classList.remove('open'); if (document.querySelectorAll('.modal-overlay.open').length === 0) document.body.style.overflow = ''; } }
 });
 
-// ===== PRODUCT DATA (DROP 002) =====
+// ===== PRODUCT DATA (DROP 003 & Legacy) =====
 const PRODUCTS = [
   {
-    id: 0, name: 'Hibiscus', type: 'Baby Crop Tee · White',
+    id: 0, name: 'Eclipse Signature Jogger', type: 'Relaxed Fit · Black',
+    img: 'eclipse-jogger-1.jpg', price: 1199,
+    desc: 'Drop 003 — The Ultimate Jogger. Premium streetwear sweatpants. Heavyweight 300+ GSM cotton blend, built for structure and extreme comfort.',
+    sizes: ['S','M','L','XL','XXL']
+  },
+  {
+    id: 1, name: 'Hibiscus', type: 'Baby Crop Tee · White',
     img: 'product-hibiscus.png', price: 800,
-    desc: 'A bold pink hibiscus bloom on premium soft cotton. Wear it with denim for an effortless aesthetic look.',
+    desc: 'A bold hibiscus bloom on premium soft cotton. Wear it with denim for an effortless aesthetic look.',
     sizes: ['XS','S','M','L','XL']
   },
   {
-    id: 1, name: 'Just A Girl', type: 'Baby Crop Tee · White',
+    id: 2, name: 'Just A Girl', type: 'Baby Crop Tee · White',
     img: 'product-just-a-girl.png', price: 800,
-    desc: '"i am literally just a girl" — with a pink bow and sparkles. The most relatable tee of the season.',
+    desc: '"i am literally just a girl" — with a bow and sparkles. The most relatable tee of the season.',
     sizes: ['XS','S','M','L','XL']
   },
   {
-    id: 2, name: 'Kiss Love', type: 'Baby Crop Tee · White',
+    id: 3, name: 'Kiss Love', type: 'Baby Crop Tee · White',
     img: 'product-kiss-love.png', price: 800,
     desc: 'Bold red lip print with Kiss Love script and a tiny heart. Edgy, feminine, unforgettable.',
     sizes: ['XS','S','M','L','XL']
   },
   {
-    id: 3, name: 'Cherry Bow', type: 'Baby Crop Top · White',
+    id: 4, name: 'Cherry Bow', type: 'Baby Crop Top · White',
     img: 'product-cherry-bow.png', price: 800,
-    desc: '3D glossy pink cherries with a satin bow ribbon. The Y2K dream piece — styled by the baddies.',
+    desc: '3D glossy cherries with a satin bow ribbon. The Y2K dream piece — styled by the baddies.',
     sizes: ['XS','S','M','L','XL']
   },
   {
-    id: 4, name: 'Signature Tee 001', type: 'Oversized Tee · 180 GSM',
+    id: 5, name: 'Signature Tee 001', type: 'Oversized Tee · 180 GSM',
     img: 'karan-front.jpg', price: 999,
     desc: 'Drop 001 — Eclipse\'s debut heavyweight oversized tee. Premium 180 GSM cotton, double-stitched for life.',
     sizes: ['XS','S','M','L','XL','XXL'],
@@ -489,7 +495,6 @@ function initCustomCursor() {
     });
 }
 
-// ===== SIZE =====
 function selectSize(btn) {
     document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
     btn.classList.add('selected');
@@ -501,11 +506,27 @@ function selectSize(btn) {
 }
 function openSizeGuide() { openModal('sizeModal'); }
 
+// ===== POLICIES =====
+window.openPolicyModal = function(type) {
+    const pc = document.getElementById('policyContent');
+    if (!pc) return;
+    let content = '';
+    if (type === 'refund') {
+        content = '<h2>Return & Refund Policy</h2><p>Since every piece is crafted in limited batches, all sales are final. We do not accept returns or exchanges for sizing issues. Please refer to our size guide carefully before ordering.</p><p>If you receive a defective or damaged product, please contact us within 24 hours of delivery with unboxing photos.</p>';
+    } else if (type === 'shipping') {
+        content = '<h2>Shipping Policy</h2><p>All orders are processed within 2-3 business days. Delivery within Chennai takes 1-2 days, while pan-India shipping takes 4-7 business days.</p><p>You will receive a tracking link via email or SMS once your order is dispatched.</p>';
+    } else if (type === 'privacy') {
+        content = '<h2>Privacy Policy</h2><p>We value your privacy. Your data (name, address, contact details) is securely stored and only used for order fulfillment and our own communication.</p><p>We will never sell or share your personal information with third parties.</p>';
+    }
+    pc.innerHTML = content;
+    openModal('policyModal');
+};
+
 // ===== CART =====
 function addToCart() {
     if (!selectedSize) { const se = document.getElementById('sizeError'); if (se) se.classList.add('visible'); showToast('Please select a size first!', 'error'); return; }
     if (cart.find(i => i.size === selectedSize)) { showToast(`Size ${selectedSize} already in cart!`, 'error'); return; }
-    cart.push({ id: Date.now(), name: 'Karan Aujla Tee — 001', size: selectedSize, price: BASE_PRICE, img: 'karan-front.jpg' });
+    cart.push({ id: Date.now(), name: 'Eclipse Signature Jogger', size: selectedSize, price: BASE_PRICE, img: 'eclipse-jogger-1.jpg' });
     updateCartCount(); showToast(`✅ Size ${selectedSize} added!`, 'success'); renderCart();
 }
 function updateCartCount() { const cc = document.getElementById('cartCountBadge'); if (cc) cc.textContent = cart.length; }
@@ -745,7 +766,7 @@ async function goToPayment() {
         await db.collection('leads').doc(currentLeadId).set({
             id: currentLeadId,
             customer: deliveryData,
-            cart: cart.length > 0 ? cart : [{ name: 'Karan Aujla Tee — 001', size: selectedSize, price: BASE_PRICE }],
+            cart: cart.length > 0 ? cart : [{ name: 'Eclipse Signature Jogger', size: selectedSize, price: BASE_PRICE }],
             timestamp: new Date().toISOString(),
             status: 'Abandoned'
         });
@@ -792,7 +813,7 @@ async function placeOrder() {
         id: orderId,
         timestamp: new Date().toISOString(),
         customer: deliveryData,
-        product: 'Karan Aujla Tee — 001',
+        product: 'Eclipse Signature Jogger',
         size: selectedSize,
         mrp: BASE_PRICE,
         coupon: appliedCoupon || '',

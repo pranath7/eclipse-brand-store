@@ -969,6 +969,10 @@
                 </div>
             </div>
             <div class="content-scroll">
+                <div style="background:rgba(255,255,255,0.05); padding:10px 15px; border-radius:8px; display:flex; align-items:center; gap:10px; margin-bottom:20px; font-size:12px; border:1px solid var(--border);">
+                    <div id="fbStatusDot" style="width:10px; height:10px; border-radius:50%; background:var(--grey);"></div>
+                    <span id="fbStatusText">Checking Firebase Connection...</span>
+                </div>
 
                 <!-- DASHBOARD -->
                 <div class="panel active" id="panel-dashboard">
@@ -1369,13 +1373,26 @@
                 toast('✅ Password updated!', 's');
                 document.getElementById('newPw').value = ''; document.getElementById('newPwConfirm').value = '';
             }
-            // Auto-login if already authenticated
+            // Auto-login or check auth
             window.addEventListener('load', () => {
                 if (sessionStorage.getItem('eclipse_admin_auth') === '1') {
                     document.getElementById('loginScreen').style.display = 'none';
                     document.getElementById('appShell').classList.add('visible');
                     loadAllData(); startClock();
                 }
+                
+                // Monitor Firebase Auth State
+                firebase.auth().onAuthStateChanged(user => {
+                    const statusDot = document.getElementById('fbStatusDot');
+                    const statusText = document.getElementById('fbStatusText');
+                    if (user) {
+                        if (statusDot) statusDot.style.background = 'var(--green)';
+                        if (statusText) statusText.textContent = 'Authenticated: ' + (user.email || 'Admin');
+                    } else {
+                        if (statusDot) statusDot.style.background = 'var(--red)';
+                        if (statusText) statusText.textContent = 'Unauthenticated (Sign in to Store first)';
+                    }
+                });
             });
 
             // ===== CLOCK =====
@@ -1432,19 +1449,30 @@
 
                 // 1. Listen to Orders
                 unsubscribers.push(
-                    db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                    db.collection('orders').onSnapshot(snap => {
                         adminOrders = [];
                         snap.forEach(doc => { adminOrders.push({ id: doc.id, ...doc.data() }) });
+                        // Sort in JS instead of Firestore to handle missing timestamps
+                        adminOrders.sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
                         updateDashboardAndRenders();
+                    }, err => {
+                        console.error("Orders Listener Error:", err);
+                        if (err.code === 'permission-denied') {
+                            toast('Permission Denied: Update Firebase Rules!', 'e');
+                        }
                     })
                 );
 
                 // 2. Listen to Messages
                 unsubscribers.push(
-                    db.collection('messages').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                    db.collection('messages').onSnapshot(snap => {
                         adminMessages = [];
                         snap.forEach(doc => { adminMessages.push({ id: doc.id, ...doc.data() }) });
+                        adminMessages.sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
                         updateDashboardAndRenders();
+                    }, err => {
+                        console.error("Messages Listener Error:", err);
+                        if (err.code === 'permission-denied') toast('Permission Denied for Messages', 'e');
                     })
                 );
 
@@ -1454,6 +1482,8 @@
                         adminNotify = [];
                         snap.forEach(doc => { adminNotify.push({ id: doc.id, ...doc.data() }) });
                         updateDashboardAndRenders();
+                    }, err => {
+                        console.error("Notify Listener Error:", err);
                     })
                 );
 
@@ -1468,19 +1498,25 @@
 
                 // 5. Listen to Users
                 unsubscribers.push(
-                    db.collection('users').orderBy('createdAt', 'desc').onSnapshot(snap => {
+                    db.collection('users').onSnapshot(snap => {
                         adminUsers = [];
                         snap.forEach(doc => { adminUsers.push({ id: doc.id, ...doc.data() }); });
+                        adminUsers.sort((a,b) => new Date(b.createdAt || 0) - new Date(a.createdAt || 0));
                         updateDashboardAndRenders();
+                    }, err => {
+                        console.error("Users Listener Error:", err);
                     })
                 );
 
                 // 6. Listen to Leads
                 unsubscribers.push(
-                    db.collection('leads').orderBy('timestamp', 'desc').onSnapshot(snap => {
+                    db.collection('leads').onSnapshot(snap => {
                         adminLeads = [];
                         snap.forEach(doc => { adminLeads.push({ id: doc.id, ...doc.data() }); });
+                        adminLeads.sort((a,b) => new Date(b.timestamp || 0) - new Date(a.timestamp || 0));
                         updateDashboardAndRenders();
+                    }, err => {
+                        console.error("Leads Listener Error:", err);
                     })
                 );
 
