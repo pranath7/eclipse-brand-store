@@ -488,17 +488,29 @@ img {
   white-space: nowrap;
   background: var(--dark);
   color: #ffffff;
-  padding: 14px 0;
+  padding: 16px 0;
   margin: 30px 0 60px;
   font-family: var(--font-tech);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.15em;
+  border-top: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .marquee-track {
   display: inline-block;
-  animation: marqueeScroll 25s linear infinite;
+  animation: marqueeScroll 36s linear infinite;
+  will-change: transform;
+}
+
+.marquee-track span {
+  display: inline-block;
+  margin: 0 20px;
+}
+
+.marquee-track span:nth-child(even) {
+  color: #cbb493; /* Luxury Mocha Tan accent */
 }
 
 @keyframes marqueeScroll {
@@ -1565,4 +1577,142 @@ img {
   object-fit: cover !important;
   object-position: center 20% !important;
   transition: transform 0.5s ease !important;
+}
+
+/* ==========================================================================
+   INTERACTIVE STUDIO SIZE SELECTOR & FIT FINDER
+   ========================================================================== */
+
+.studio-size-row {
+  display: flex;
+  gap: 8px;
+  margin-top: 8px;
+  flex-wrap: wrap;
+}
+
+.size-btn-pill {
+  flex: 1;
+  min-width: 44px;
+  padding: 10px 0;
+  text-align: center;
+  background: #f1f3f5;
+  border: 1.5px solid transparent;
+  border-radius: var(--radius-sm);
+  font-family: var(--font-tech);
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--dark);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+
+.size-btn-pill:hover {
+  border-color: #cbd5e1;
+  background: #e9ecef;
+}
+
+.size-btn-pill.active {
+  background: var(--dark);
+  color: #ffffff;
+  border-color: var(--dark);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+}
+
+.size-guide-link {
+  font-size: 11px;
+  font-family: var(--font-tech);
+  color: #a17846;
+  font-weight: 700;
+  text-decoration: underline;
+  cursor: pointer;
+  background: none;
+  border: none;
+  margin-left: auto;
+}
+
+/* Scarcity Pill */
+.scarcity-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: #fff1f2;
+  border: 1px solid #fecdd3;
+  color: #e11d48;
+  font-family: var(--font-tech);
+  font-size: 11px;
+  font-weight: 800;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  margin-bottom: 12px;
+  letter-spacing: 0.04em;
+}
+
+/* Floating WhatsApp Concierge Pill */
+.floating-wa-pill {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 999;
+  background: #25D366;
+  color: #ffffff;
+  border-radius: var(--radius-full);
+  padding: 12px 20px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  text-decoration: none;
+  font-family: var(--font-tech);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.05em;
+  box-shadow: 0 8px 24px rgba(37, 211, 102, 0.4);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.floating-wa-pill:hover {
+  background: #20bd5a;
+  transform: translateY(-3px) scale(1.03);
+  box-shadow: 0 12px 30px rgba(37, 211, 102, 0.55);
+}
+
+.wa-live-dot {
+  width: 8px;
+  height: 8px;
+  background: #ffffff;
+  border-radius: 50%;
+  animation: waPulse 1.8s infinite;
+}
+
+@keyframes waPulse {
+  0% { transform: scale(0.9); opacity: 1; }
+  50% { transform: scale(1.5); opacity: 0.5; }
+  100% { transform: scale(0.9); opacity: 1; }
+}
+
+/* Calculator Modal Styles */
+.calculator-card {
+  background: #ffffff;
+  border-radius: var(--radius-lg);
+  padding: 30px;
+  max-width: 440px;
+  width: 100%;
+  box-shadow: 0 24px 60px rgba(0, 0, 0, 0.25);
+  animation: modalPop 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.calc-select {
+  width: 100%;
+  padding: 11px 14px;
+  border: 1.5px solid #e2e8f0;
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-size: 13px;
+  outline: none;
+  background: #f8fafc;
+}
+
+.calc-select:focus {
+  border-color: var(--dark);
+  background: #fff;
 }

@@ -96,6 +96,7 @@ function openProductTryOn(productId, initialView) {
   state.activeLook = {
     color: prod.defaultColor,
     fit: prod.defaultFit,
+    size: 'L',
     view: viewToUse,
     mood: (productId === 'karan-001' && viewToUse === 'Back') ? 'Back Artwork' : prod.moods[0].id
   };
@@ -172,6 +173,62 @@ function setStudioFit(fitName, el) {
   showToast(`Fit: ${fitName}`);
 }
 
+function setStudioSize(sizeName, el) {
+  state.activeLook.size = sizeName;
+  const disp = document.getElementById('studioSizeDisplay');
+  if (disp) disp.textContent = sizeName;
+  document.querySelectorAll('.size-btn-pill').forEach(b => b.classList.remove('active'));
+  if (el) el.classList.add('active');
+  updateStudioSummary();
+  showToast(`Size: ${sizeName}`);
+}
+
+function openSizeCalculator() {
+  document.getElementById('sizeCalculatorModal')?.classList.add('active');
+  runFitCalc();
+}
+
+function closeSizeCalculator() {
+  document.getElementById('sizeCalculatorModal')?.classList.remove('active');
+}
+
+function runFitCalc() {
+  const height = parseFloat(document.getElementById('calcHeight')?.value || '5.10');
+  const build = document.getElementById('calcBuild')?.value || 'athletic';
+  const pref = document.getElementById('calcFitPref')?.value || 'oversized';
+
+  let rec = 'L';
+  let desc = 'Authentic drop-shoulder streetwear drape with ample chest volume.';
+
+  if (height <= 5.6) {
+    rec = (build === 'heavy' || pref === 'oversized') ? 'M' : 'S';
+    desc = 'Balanced oversized silhouette without overwhelming length.';
+  } else if (height <= 5.9) {
+    rec = (build === 'heavy') ? 'XL' : (pref === 'oversized' ? 'L' : 'M');
+    desc = 'Perfect signature Karan Aujla oversized fit.';
+  } else if (height <= 6.1) {
+    rec = (build === 'heavy' || pref === 'oversized') ? 'XL' : 'L';
+    desc = 'Clean boxy drape with extended elbow-length sleeve line.';
+  } else {
+    rec = 'XXL';
+    desc = 'Maximum heavyweight silhouette for taller frames.';
+  }
+
+  const recEl = document.getElementById('calcRecommendedSize');
+  const expEl = document.getElementById('calcExplanation');
+  if (recEl) recEl.textContent = `SIZE ${rec}`;
+  if (expEl) expEl.textContent = desc;
+  state.tempCalcSize = rec;
+}
+
+function applyCalculatedSize() {
+  const size = state.tempCalcSize || 'L';
+  const btn = document.querySelector(`.size-btn-pill[data-size="${size}"]`);
+  setStudioSize(size, btn);
+  closeSizeCalculator();
+  showToast(`✦ Applied AI Recommended Size: ${size}`);
+}
+
 function setStudioView(viewName, el) {
   state.activeLook.view = viewName;
   document.getElementById('studioViewDisplay').textContent = viewName;
@@ -208,7 +265,7 @@ function renderStudioModel() {
 function updateStudioSummary() {
   const summary = document.getElementById('studioLookSummary');
   if (summary && state.activeLook) {
-    summary.textContent = `${state.activeLook.color} · ${state.activeLook.fit} · ${state.activeLook.view} · ${state.activeLook.mood}`;
+    summary.textContent = `${state.activeLook.color} · ${state.activeLook.fit} · Size ${state.activeLook.size || 'L'} · ${state.activeLook.view}`;
   }
 }
 
@@ -218,11 +275,12 @@ function addStudioLookToCart() {
 
   const colorViews = prod.views[state.activeLook.color] || prod.views[prod.defaultColor];
   const imgSrc = colorViews[state.activeLook.view] || colorViews['Front'];
+  const size = state.activeLook.size || 'L';
 
   addToCart({
-    id: `${prod.id}-${state.activeLook.color}-${state.activeLook.fit}`.toLowerCase().replace(/\s+/g, '-'),
+    id: `${prod.id}-${state.activeLook.color}-${state.activeLook.fit}-${size}`.toLowerCase().replace(/\s+/g, '-'),
     name: prod.name,
-    meta: `${state.activeLook.color} · ${state.activeLook.fit}`,
+    meta: `${state.activeLook.color} · ${state.activeLook.fit} · Size ${size}`,
     price: prod.price,
     img: imgSrc,
     qty: 1
@@ -230,7 +288,7 @@ function addStudioLookToCart() {
 
   closeProductTryOn();
   openCartDrawer();
-  showToast(`✦ Added ${prod.name} to Bag!`);
+  showToast(`✦ Added ${prod.name} (Size ${size}) to Bag!`);
 }
 
 // ==========================================================================
@@ -408,20 +466,11 @@ function openVideoModal() {
 
 function triggerCheckout() {
   if (state.cart.length === 0) {
-    showToast('Your cart is empty!');
+    showToast('Your bag is empty! Add an item to proceed.');
     return;
   }
-  const total = state.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-  const orderId = 'ECL' + Math.floor(100000 + Math.random() * 900000);
-  const confirmed = confirm(`Proceed to Checkout for ₹${total}?\n\nOrder Ref: ${orderId}\nPayment: 1-Click UPI / COD Pan-India`);
-  if (confirmed) {
-    state.cart = [];
-    saveCart();
-    renderCart();
-    updateCartBadge();
-    closeCartDrawer();
-    alert(`🎉 Order Placed Successfully!\n\nOrder ID: ${orderId}\nAUJLA SZN 1 order confirmed.`);
-  }
+  // Navigate directly to dedicated WhatsApp Checkout Page
+  window.location.href = 'checkout.html';
 }
 
 window.addEventListener('keydown', (e) => {

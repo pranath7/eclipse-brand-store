@@ -111,11 +111,23 @@
             <span>TWITTER</span>
         </div>
 
-        <!-- Continuous Running Marquee Strip -->
+        <!-- Continuous Running Marquee Strip with High-Value Drop Info -->
         <div class="marquee-strip">
             <div class="marquee-track">
-                ✦ AUJLA SZN 1 OFFICIAL DROP ✦ ECLIPSE STREETWEAR ✦ HEAVYWEIGHT 240 GSM ✦ EMBROIDERED KA MONOGRAM ✦ LAMBORGHINI ESTATE ART ✦ PAN-INDIA EXPRESS DELIVERY ✦ DROP 001 · DROP 003 ✦
-                ✦ AUJLA SZN 1 OFFICIAL DROP ✦ ECLIPSE STREETWEAR ✦ HEAVYWEIGHT 240 GSM ✦ EMBROIDERED KA MONOGRAM ✦ LAMBORGHINI ESTATE ART ✦ PAN-INDIA EXPRESS DELIVERY ✦ DROP 001 · DROP 003 ✦
+                <span>✦ FABRIC: 100% FRENCH TERRY 240+ GSM COMBED COTTON</span>
+                <span>✦ EMBROIDERED KA MONOGRAM & HIGH-DENSITY ESTATE ART</span>
+                <span>✦ LIMITED DROP: 500 PIECES GLOBALLY · NO RESTOCKS</span>
+                <span>✦ DISPATCH: 24–48 HRS VIA BLUE DART & DTDC EXPRESS</span>
+                <span>✦ FREE EXPRESS SHIPPING ALL-INDIA OVER ₹1,499</span>
+                <span>✦ 7-DAY HASSLE-FREE DOORSTEP SIZE EXCHANGES</span>
+                <span>✦ DIRECT WHATSAPP CHECKOUT & 1-CLICK ORDER CONFIRMATION</span>
+                <span>✦ FABRIC: 100% FRENCH TERRY 240+ GSM COMBED COTTON</span>
+                <span>✦ EMBROIDERED KA MONOGRAM & HIGH-DENSITY ESTATE ART</span>
+                <span>✦ LIMITED DROP: 500 PIECES GLOBALLY · NO RESTOCKS</span>
+                <span>✦ DISPATCH: 24–48 HRS VIA BLUE DART & DTDC EXPRESS</span>
+                <span>✦ FREE EXPRESS SHIPPING ALL-INDIA OVER ₹1,499</span>
+                <span>✦ 7-DAY HASSLE-FREE DOORSTEP SIZE EXCHANGES</span>
+                <span>✦ DIRECT WHATSAPP CHECKOUT & 1-CLICK ORDER CONFIRMATION</span>
             </div>
         </div>
 
@@ -319,6 +331,7 @@
             <!-- Left Column: Product Info & Customizers -->
             <div class="studio-col-left">
                 <div>
+                    <div class="scarcity-pill">🔥 ONLY 14 PIECES REMAINING // AUJLA SZN 1</div>
                     <div class="studio-product-tag" id="studioProductTag">OFFICIAL DROP · AUJLA SZN 1</div>
                     <h2 class="studio-main-title" id="studioMainTitle">AUJLA SZN 1 Signature Tee</h2>
                     <p class="studio-desc" id="studioDesc">
@@ -342,6 +355,22 @@
                         <span class="control-val" id="studioFitDisplay">Oversized</span>
                     </div>
                     <div class="studio-fit-toggle" id="studioFitContainer"></div>
+                </div>
+
+                <!-- 03 SIZE (WITH INTERACTIVE FIT FINDER) -->
+                <div class="studio-control-block">
+                    <div class="control-header-row">
+                        <span class="control-label">03 SIZE</span>
+                        <span class="control-val" id="studioSizeDisplay">L</span>
+                        <button type="button" class="size-guide-link" onclick="openSizeCalculator()">📏 Fit Finder</button>
+                    </div>
+                    <div class="studio-size-row">
+                        <button type="button" class="size-btn-pill" data-size="S" onclick="setStudioSize('S', this)">S</button>
+                        <button type="button" class="size-btn-pill" data-size="M" onclick="setStudioSize('M', this)">M</button>
+                        <button type="button" class="size-btn-pill active" data-size="L" onclick="setStudioSize('L', this)">L</button>
+                        <button type="button" class="size-btn-pill" data-size="XL" onclick="setStudioSize('XL', this)">XL</button>
+                        <button type="button" class="size-btn-pill" data-size="XXL" onclick="setStudioSize('XXL', this)">XXL</button>
+                    </div>
                 </div>
             </div>
 
@@ -420,10 +449,67 @@
         </div>
     </div>
 
+    <!-- AI Fit & Size Finder Modal -->
+    <div class="modal-overlay" id="sizeCalculatorModal">
+        <div class="calculator-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="font-family: var(--font-hero); font-size:18px; font-weight:800;">📏 AI Size & Fit Finder</h3>
+                <button type="button" onclick="closeSizeCalculator()" style="background:none;border:none;font-size:18px;cursor:pointer;">✕</button>
+            </div>
+            <p style="font-size:12px; color:var(--text-muted); margin-bottom:16px;">
+                Calculate your authentic drop-shoulder silhouette for the AUJLA SZN 1 drop.
+            </p>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:10px; font-weight:700; font-family:var(--font-tech); display:block; margin-bottom:6px; color:#555;">YOUR HEIGHT</label>
+                <select id="calcHeight" class="calc-select" onchange="runFitCalc()">
+                    <option value="5.4">5'4" (162 cm)</option>
+                    <option value="5.6">5'6" (168 cm)</option>
+                    <option value="5.8">5'8" (173 cm)</option>
+                    <option value="5.10" selected>5'10" (178 cm)</option>
+                    <option value="6.0">6'0" (183 cm)</option>
+                    <option value="6.2">6'2" (188 cm)</option>
+                    <option value="6.4">6'4"+ (193 cm)</option>
+                </select>
+            </div>
+            <div style="margin-bottom:12px;">
+                <label style="font-size:10px; font-weight:700; font-family:var(--font-tech); display:block; margin-bottom:6px; color:#555;">YOUR BUILD</label>
+                <select id="calcBuild" class="calc-select" onchange="runFitCalc()">
+                    <option value="slim">Slim / Lean</option>
+                    <option value="athletic" selected>Athletic / Medium</option>
+                    <option value="heavy">Broad / Heavy</option>
+                </select>
+            </div>
+            <div style="margin-bottom:16px;">
+                <label style="font-size:10px; font-weight:700; font-family:var(--font-tech); display:block; margin-bottom:6px; color:#555;">FIT PREFERENCE</label>
+                <select id="calcFitPref" class="calc-select" onchange="runFitCalc()">
+                    <option value="oversized" selected>Oversized Streetwear Drape (Recommended)</option>
+                    <option value="regular">Tailored Regular Fit</option>
+                </select>
+            </div>
+            <div id="calcResultBox" style="background:#f7efe4; border:1px solid #dcc6a8; border-radius:12px; padding:14px; text-align:center; margin-bottom:18px;">
+                <div style="font-size:10px; font-family:var(--font-tech); color:#8d6837; font-weight:800; letter-spacing:0.1em;">RECOMMENDED SIZE</div>
+                <div style="font-size:24px; font-weight:800; font-family:var(--font-hero); color:#0b0d10; margin:4px 0;" id="calcRecommendedSize">SIZE L</div>
+                <div style="font-size:12px; color:#5c4728;" id="calcExplanation">
+                    Authentic drop-shoulder streetwear drape with ample chest volume.
+                </div>
+            </div>
+            <button type="button" onclick="applyCalculatedSize()" class="btn-tryon-card" style="width:100%; border-radius:var(--radius-md); font-size:13px; padding:12px;">
+                Apply Recommended Size →
+            </button>
+        </div>
+    </div>
+
+    <!-- Floating WhatsApp Concierge Pill -->
+    <a href="checkout.html" class="floating-wa-pill" title="Instant Order via WhatsApp">
+        <span class="wa-live-dot"></span>
+        <span style="font-size: 16px;">💬</span>
+        <span>Order on WhatsApp</span>
+    </a>
+
     <!-- Toast Notification -->
     <div class="toast-msg" id="toastMsg">✦ Notification</div>
 
     <!-- Script -->
-    <script src="script.js?v=40"></script>
+    <script src="script.js?v=42"></script>
 </body>
 </html>
