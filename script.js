@@ -269,6 +269,52 @@ function quickAddToCart(productId) {
   showToast(`✦ Added ${prod.name} to Bag!`);
 }
 
+const bundleSelectionState = {
+  teeSize: 'L',
+  joggerSize: 'M'
+};
+
+function selectBundleSize(type, size, buttonEl) {
+  if (type === 'tee') {
+    bundleSelectionState.teeSize = size;
+    const labelEl = document.getElementById('selectedTeeSizeLabel');
+    if (labelEl) {
+      const fitNote = (size === 'L' || size === 'XL' || size === 'XXL') ? 'Oversized' : 'Standard Fit';
+      labelEl.textContent = `${size} (${fitNote})`;
+    }
+    document.querySelectorAll('#bundleTeeChips .bundle-size-chip').forEach(btn => btn.classList.remove('active'));
+    if (buttonEl) buttonEl.classList.add('active');
+  } else if (type === 'jogger') {
+    bundleSelectionState.joggerSize = size;
+    const labelEl = document.getElementById('selectedJoggerSizeLabel');
+    if (labelEl) {
+      const fitNote = (size === 'M' || size === 'L') ? 'Relaxed' : 'Comfort Fit';
+      labelEl.textContent = `${size} (${fitNote})`;
+    }
+    document.querySelectorAll('#bundleJoggerChips .bundle-size-chip').forEach(btn => btn.classList.remove('active'));
+    if (buttonEl) buttonEl.classList.add('active');
+  }
+}
+
+function buyFullBundle() {
+  const teeSize = bundleSelectionState.teeSize || 'L';
+  const joggerSize = bundleSelectionState.joggerSize || 'M';
+  const bundleId = `bundle-szn1-tee-${teeSize}-jogger-${joggerSize}`.toLowerCase();
+  
+  addToCart({
+    id: bundleId,
+    name: 'AUJLA SZN 1 Uniform Set',
+    meta: `Tee: Mocha Tan (Size ${teeSize}) + Jogger: Obsidian Black (Size ${joggerSize})`,
+    price: 1999,
+    img: 'karan-szn1-card.jpg',
+    qty: 1,
+    isBundle: true
+  });
+  
+  openCartDrawer();
+  showToast(`⚡ AUJLA SZN 1 Set (Tee: ${teeSize} + Jogger: ${joggerSize}) Added to Bag!`);
+}
+
 function addToCart(product) {
   const existing = state.cart.find(item => item.id === product.id);
   if (existing) {
@@ -358,14 +404,28 @@ function renderCart() {
     `;
   }).join('');
 
-  if (subtotalEl) subtotalEl.textContent = `₹${subtotal}`;
+  // Auto Bundle Savings if customer added 1 Tee & 1 Jogger individually
+  const teesCount = state.cart.filter(i => (i.id.includes('karan-001') || i.name.toLowerCase().includes('tee')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
+  const joggersCount = state.cart.filter(i => (i.id.includes('jogger-003') || i.name.toLowerCase().includes('jogger')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
+  const bundlePairs = Math.min(teesCount, joggersCount);
+  const bundleDiscount = bundlePairs * 199;
+  const netSubtotal = Math.max(0, subtotal - bundleDiscount);
+
+  if (subtotalEl) {
+    if (bundleDiscount > 0) {
+      subtotalEl.innerHTML = `₹${netSubtotal} <span style="font-size: 12px; color: #16a34a; font-weight: 700; display: block;">⚡ Saved ₹${bundleDiscount} (Bundle Deal ₹1,999)</span>`;
+    } else {
+      subtotalEl.textContent = `₹${subtotal}`;
+    }
+  }
+
   const freeThreshold = 1499;
-  if (subtotal >= freeThreshold) {
+  if (netSubtotal >= freeThreshold) {
     if (meterText) meterText.innerHTML = `🎉 <strong>Congratulations!</strong> You unlocked Free Express Shipping!`;
     if (meterFill) meterFill.style.width = '100%';
   } else {
-    const diff = freeThreshold - subtotal;
-    const pct = Math.min(100, Math.round((subtotal / freeThreshold) * 100));
+    const diff = freeThreshold - netSubtotal;
+    const pct = Math.min(100, Math.round((netSubtotal / freeThreshold) * 100));
     if (meterText) meterText.innerHTML = `Add <strong>₹${diff}</strong> more to unlock <strong>Free Express Shipping</strong>`;
     if (meterFill) meterFill.style.width = `${pct}%`;
   }

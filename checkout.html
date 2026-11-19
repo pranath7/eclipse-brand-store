@@ -944,6 +944,11 @@
                         </span>
                     </div>
 
+                    <div class="calc-row" id="bundleDiscountRow" style="display: none; color: #16a34a; font-weight: 700;">
+                        <span>⚡ Bundle Deal Savings</span>
+                        <span id="calcBundleDiscount" style="font-family: var(--font-tech);">-₹0</span>
+                    </div>
+
                     <div class="calc-row" id="discountRow" style="display: none; color: #16a34a;">
                         <span>VIP Drop Discount</span>
                         <span id="calcDiscount" style="font-family: var(--font-tech); font-weight: 700;">-₹0</span>
@@ -1040,9 +1045,14 @@
                         <div class="empty-cart-icon">🛍️</div>
                         <p style="font-size: 14px; font-weight: 700; margin-bottom: 6px;">Your Bag is currently empty</p>
                         <p style="font-size: 12px; color: var(--text-muted); margin-bottom: 14px;">Select the AUJLA SZN 1 Drop to complete your order.</p>
-                        <button type="button" onclick="addSampleDrop()" style="background: var(--dark); color: #fff; border:none; padding: 8px 16px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700; cursor: pointer;">
-                            + Add AUJLA SZN 1 Tee (₹999)
-                        </button>
+                        <div style="display: flex; gap: 8px; justify-content: center; flex-wrap: wrap;">
+                            <button type="button" onclick="addSampleDrop()" style="background: var(--dark); color: #fff; border:none; padding: 8px 14px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700; cursor: pointer;">
+                                + Add Tee (₹999)
+                            </button>
+                            <button type="button" onclick="addBundleDrop()" style="background: var(--dark-soft); border: 1px solid rgba(255,255,255,0.2); color: #fff; padding: 8px 14px; border-radius: var(--radius-full); font-size: 12px; font-weight: 700; cursor: pointer;">
+                                ⚡ Add 2-Piece Uniform (₹1,999)
+                            </button>
+                        </div>
                     </div>
                 `;
                 countEl.textContent = '0 ITEMS';
@@ -1078,10 +1088,29 @@
 
             subtotalEl.textContent = `₹${subtotal}`;
 
+            // Auto Bundle Savings if customer added 1 Tee & 1 Jogger individually
+            const teesCount = cart.filter(i => (i.id.includes('karan-001') || i.name.toLowerCase().includes('tee')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
+            const joggersCount = cart.filter(i => (i.id.includes('jogger-003') || i.name.toLowerCase().includes('jogger')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
+            const bundlePairs = Math.min(teesCount, joggersCount);
+            const autoBundleDiscount = bundlePairs * 199;
+
+            const bundleRowEl = document.getElementById('bundleDiscountRow');
+            const bundleDiscValEl = document.getElementById('calcBundleDiscount');
+            if (bundleRowEl && bundleDiscValEl) {
+                if (autoBundleDiscount > 0) {
+                    bundleRowEl.style.display = 'flex';
+                    bundleDiscValEl.textContent = `-₹${autoBundleDiscount}`;
+                } else {
+                    bundleRowEl.style.display = 'none';
+                }
+            }
+
+            const netBeforeShipping = Math.max(0, subtotal - autoBundleDiscount);
+
             // Free shipping threshold ₹1,499
             const freeThreshold = 1499;
             let shipping = 0;
-            if (subtotal >= freeThreshold) {
+            if (netBeforeShipping >= freeThreshold) {
                 shippingEl.innerHTML = `<span class="free-shipping-tag">FREE SHIPPING</span>`;
                 shipping = 0;
             } else {
@@ -1089,7 +1118,7 @@
                 shippingEl.innerHTML = `<span style="font-family: var(--font-tech); font-weight: 700;">₹99</span>`;
             }
 
-            const finalTotal = Math.max(0, subtotal + shipping - discount);
+            const finalTotal = Math.max(0, netBeforeShipping + shipping - discount);
             totalEl.textContent = `₹${finalTotal}`;
         }
 
@@ -1113,6 +1142,20 @@
                 price: 999,
                 img: 'karan-szn1-back.png',
                 qty: 1
+            }];
+            localStorage.setItem('eclipse_cart_v2', JSON.stringify(cart));
+            renderSummary();
+        }
+
+        function addBundleDrop() {
+            cart = [{
+                id: 'bundle-szn1-tee-l-jogger-m',
+                name: 'AUJLA SZN 1 Uniform Set (Tee + Jogger)',
+                meta: 'Tee: Mocha Tan (Size L) + Jogger: Obsidian Black (Size M)',
+                price: 1999,
+                img: 'karan-szn1-card.jpg',
+                qty: 1,
+                isBundle: true
             }];
             localStorage.setItem('eclipse_cart_v2', JSON.stringify(cart));
             renderSummary();
@@ -1174,8 +1217,16 @@
             const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'WhatsApp Direct Order';
 
             const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
-            const shipping = subtotal >= 1499 ? 0 : 99;
-            const finalTotal = Math.max(0, subtotal + shipping - discount);
+            
+            // Auto Bundle Savings if customer added 1 Tee & 1 Jogger individually
+            const teesCount = cart.filter(i => (i.id.includes('karan-001') || i.name.toLowerCase().includes('tee')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
+            const joggersCount = cart.filter(i => (i.id.includes('jogger-003') || i.name.toLowerCase().includes('jogger')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
+            const bundlePairs = Math.min(teesCount, joggersCount);
+            const autoBundleDiscount = bundlePairs * 199;
+
+            const netBeforeShipping = Math.max(0, subtotal - autoBundleDiscount);
+            const shipping = netBeforeShipping >= 1499 ? 0 : 99;
+            const finalTotal = Math.max(0, netBeforeShipping + shipping - discount);
 
             const orderId = 'ECL-AUJLA-' + Math.floor(100000 + Math.random() * 900000);
             const dateStr = new Date().toLocaleDateString('en-IN', {
@@ -1214,7 +1265,7 @@ ${itemsText}
 ══════════════════════
 💰 *PAYMENT SUMMARY*
 • *Items Subtotal:* ₹${subtotal}
-• *Express Shipping:* ${shipping === 0 ? 'FREE Express Delivery' : `₹${shipping}`}
+${autoBundleDiscount > 0 ? `• *Set Savings:* -₹${autoBundleDiscount} (Coordinated Uniform Deal)\n` : ''}• *Express Shipping:* ${shipping === 0 ? 'FREE Express Delivery' : `₹${shipping}`}
 ${discount > 0 ? `• *VIP Discount:* -₹${discount}\n` : ''}• *TOTAL TO PAY:* ₹${finalTotal}
 • *Payment Preference:* ${paymentMethod}
 ${notes ? `\n📝 *Customer Note:* ${notes}\n` : ''}
