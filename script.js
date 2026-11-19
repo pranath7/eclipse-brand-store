@@ -124,18 +124,11 @@ function openProductTryOn(productId, initialView) {
             onclick="setStudioFit('${f}', this)">${f}</button>
   `).join('');
 
-  // Moods
-  const moodContainer = document.getElementById('studioMoodContainer');
-  const activeMoodObj = prod.moods.find(m => m.id === state.activeLook.mood) || prod.moods[0];
-  document.getElementById('studioMoodDisplay').textContent = activeMoodObj.label;
-  moodContainer.innerHTML = prod.moods.map(m => `
-    <div class="studio-mood-card ${m.id === state.activeLook.mood ? 'active' : ''}" onclick="setStudioMood('${m.id}', this)">
-      <div class="studio-mood-thumb">
-        <img src="${m.img}" alt="${m.label}" />
-      </div>
-      <span class="studio-mood-label">${m.label}</span>
-    </div>
-  `).join('');
+  // Size reset
+  document.querySelectorAll('.size-btn-pill').forEach(b => b.classList.remove('active'));
+  document.querySelector('.size-btn-pill[data-size="L"]')?.classList.add('active');
+  const sizeDisp = document.getElementById('studioSizeDisplay');
+  if (sizeDisp) sizeDisp.textContent = 'L';
 
   // View reset
   document.querySelectorAll('.view-btn-pill').forEach(b => b.classList.remove('active'));
@@ -183,66 +176,12 @@ function setStudioSize(sizeName, el) {
   showToast(`Size: ${sizeName}`);
 }
 
-function openSizeCalculator() {
-  document.getElementById('sizeCalculatorModal')?.classList.add('active');
-  runFitCalc();
-}
-
-function closeSizeCalculator() {
-  document.getElementById('sizeCalculatorModal')?.classList.remove('active');
-}
-
-function runFitCalc() {
-  const height = parseFloat(document.getElementById('calcHeight')?.value || '5.10');
-  const build = document.getElementById('calcBuild')?.value || 'athletic';
-  const pref = document.getElementById('calcFitPref')?.value || 'oversized';
-
-  let rec = 'L';
-  let desc = 'Authentic drop-shoulder streetwear drape with ample chest volume.';
-
-  if (height <= 5.6) {
-    rec = (build === 'heavy' || pref === 'oversized') ? 'M' : 'S';
-    desc = 'Balanced oversized silhouette without overwhelming length.';
-  } else if (height <= 5.9) {
-    rec = (build === 'heavy') ? 'XL' : (pref === 'oversized' ? 'L' : 'M');
-    desc = 'Perfect signature Karan Aujla oversized fit.';
-  } else if (height <= 6.1) {
-    rec = (build === 'heavy' || pref === 'oversized') ? 'XL' : 'L';
-    desc = 'Clean boxy drape with extended elbow-length sleeve line.';
-  } else {
-    rec = 'XXL';
-    desc = 'Maximum heavyweight silhouette for taller frames.';
-  }
-
-  const recEl = document.getElementById('calcRecommendedSize');
-  const expEl = document.getElementById('calcExplanation');
-  if (recEl) recEl.textContent = `SIZE ${rec}`;
-  if (expEl) expEl.textContent = desc;
-  state.tempCalcSize = rec;
-}
-
-function applyCalculatedSize() {
-  const size = state.tempCalcSize || 'L';
-  const btn = document.querySelector(`.size-btn-pill[data-size="${size}"]`);
-  setStudioSize(size, btn);
-  closeSizeCalculator();
-  showToast(`✦ Applied AI Recommended Size: ${size}`);
-}
-
 function setStudioView(viewName, el) {
   state.activeLook.view = viewName;
   document.getElementById('studioViewDisplay').textContent = viewName;
   document.querySelectorAll('.view-btn-pill').forEach(b => b.classList.remove('active'));
   if (el) el.classList.add('active');
   renderStudioModel();
-  updateStudioSummary();
-}
-
-function setStudioMood(moodId, el) {
-  state.activeLook.mood = moodId;
-  document.getElementById('studioMoodDisplay').textContent = moodId;
-  document.querySelectorAll('.studio-mood-card').forEach(c => c.classList.remove('active'));
-  if (el) el.classList.add('active');
   updateStudioSummary();
 }
 
