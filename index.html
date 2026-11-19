@@ -9,10 +9,10 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Syncopate:wght@700&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=40">
+    <link rel="stylesheet" href="style.css?v=48">
 </head>
 <body>
 
@@ -21,6 +21,13 @@
          ========================================== -->
     <header class="header-wrapper">
         <nav class="navbar">
+            <!-- Mobile Hamburger Toggle Button -->
+            <button class="mobile-nav-toggle" id="mobileNavToggle" onclick="toggleMobileNav()" aria-label="Toggle Navigation Menu">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+
             <div class="nav-group-left">
                 <a href="#collection" class="nav-link">Collection</a>
                 <a href="#products" class="nav-link">Shop</a>
@@ -36,13 +43,41 @@
 
             <div class="nav-group-right">
                 <button class="nav-link" onclick="openProductTryOn('karan-001', 'Back')" style="background:none;border:none;cursor:pointer;font-weight:700;">Studio Try-On ✦</button>
-                <button class="btn-sign" onclick="scrollToSection('newsletter')">AUJLA SZN 1</button>
+                <a href="checkout.html" class="btn-sign" style="text-decoration:none;">AUJLA SZN 1</a>
                 <button class="cart-icon-btn" onclick="openCartDrawer()" aria-label="Open Shopping Bag">
                     🛍️
                     <span class="cart-badge" id="cartBadgeCount" style="display: none;">0</span>
                 </button>
             </div>
         </nav>
+
+        <!-- Slide-In Mobile Navigation Drawer -->
+        <div class="mobile-nav-drawer" id="mobileNavDrawer">
+            <div class="mobile-nav-inner">
+                <div class="mobile-nav-top">
+                    <span class="mobile-nav-brand">ECLIPSE<span class="dot"></span></span>
+                    <button type="button" class="mobile-nav-close" onclick="toggleMobileNav()">✕</button>
+                </div>
+                <div class="mobile-nav-links">
+                    <a href="#hero" onclick="toggleMobileNav()">✦ HOME</a>
+                    <a href="#collection" onclick="toggleMobileNav()">✦ OUR COLLECTION</a>
+                    <a href="#products" onclick="toggleMobileNav()">✦ THE CATALOG</a>
+                    <a href="#essentials" onclick="toggleMobileNav()">✦ STREET ESSENTIALS</a>
+                    <a href="javascript:void(0)" onclick="toggleMobileNav(); openProductTryOn('karan-001', 'Back')">✦ VIRTUAL TRY-ON STUDIO</a>
+                    <a href="checkout.html" onclick="toggleMobileNav()">✦ WHATSAPP CHECKOUT</a>
+                    <a href="javascript:void(0)" onclick="toggleMobileNav(); openSizeCalculator()">✦ AI SIZE FINDER</a>
+                    <a href="#newsletter" onclick="toggleMobileNav()">✦ VIP INNER CIRCLE</a>
+                </div>
+                <div class="mobile-nav-footer">
+                    <div style="font-size: 11px; font-family: var(--font-tech); color: #94a3b8; margin-bottom: 12px; letter-spacing: 0.1em;">
+                        AUJLA SZN 1 · LIMITED 500 UNITS
+                    </div>
+                    <a href="checkout.html" class="btn-mobile-checkout">
+                        Proceed to WhatsApp Checkout 💬
+                    </a>
+                </div>
+            </div>
+        </div>
     </header>
 
     <!-- ==========================================

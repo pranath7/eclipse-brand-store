@@ -473,10 +473,24 @@ function triggerCheckout() {
   window.location.href = 'checkout.html';
 }
 
+function toggleMobileNav() {
+  const drawer = document.getElementById('mobileNavDrawer');
+  const toggleBtn = document.getElementById('mobileNavToggle');
+  if (drawer) {
+    const isActive = drawer.classList.toggle('active');
+    if (toggleBtn) toggleBtn.classList.toggle('open', isActive);
+    document.body.style.overflow = isActive ? 'hidden' : 'auto';
+  }
+}
+
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeProductTryOn();
     closeCartDrawer();
+    const drawer = document.getElementById('mobileNavDrawer');
+    if (drawer && drawer.classList.contains('active')) {
+      toggleMobileNav();
+    }
   }
 });
 

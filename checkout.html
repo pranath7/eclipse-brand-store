@@ -9,7 +9,7 @@
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Syncopate:wght@700&family=Unbounded:wght@700;800;900&display=swap" rel="stylesheet">
 
     <style>
         :root {
@@ -30,7 +30,8 @@
             --radius-full: 9999px;
             --font-body: 'Plus Jakarta Sans', -apple-system, sans-serif;
             --font-tech: 'Space Grotesk', monospace;
-            --font-hero: 'Syne', sans-serif;
+            --font-hero: 'Unbounded', sans-serif;
+            --font-logo: 'Unbounded', 'Syncopate', sans-serif;
             --shadow-subtle: 0 4px 20px rgba(0, 0, 0, 0.04);
             --shadow-elevated: 0 12px 36px rgba(0, 0, 0, 0.08);
         }
@@ -86,18 +87,20 @@
         }
 
         .checkout-brand {
-            font-family: var(--font-hero);
-            font-size: 22px;
-            font-weight: 800;
-            letter-spacing: 0.12em;
+            font-family: var(--font-logo);
+            font-size: 20px;
+            font-weight: 900;
+            letter-spacing: 0.14em;
             text-decoration: none;
             color: var(--dark);
+            display: inline-flex;
+            align-items: center;
         }
 
         .checkout-brand .dot {
             display: inline-block;
-            width: 7px;
-            height: 7px;
+            width: 6px;
+            height: 6px;
             background: var(--accent-gold);
             border-radius: 50%;
             margin-left: 2px;
@@ -130,6 +133,24 @@
         @media (max-width: 960px) {
             .checkout-wrapper {
                 grid-template-columns: 1fr;
+                gap: 24px;
+                margin: 20px auto 40px;
+                padding: 0 16px;
+            }
+            .checkout-card {
+                padding: 24px 18px !important;
+                border-radius: var(--radius-md) !important;
+            }
+            .form-input, .form-select, .form-textarea, .phone-input-wrap input {
+                font-size: 16px !important; /* Prevents auto-zoom on mobile Safari */
+            }
+            .checkout-brand {
+                font-size: 17px !important;
+                letter-spacing: 0.1em !important;
+            }
+            .security-badge {
+                font-size: 10px !important;
+                padding: 4px 10px !important;
             }
         }
 
@@ -736,7 +757,7 @@
                             <label class="form-label" for="custPhone">WhatsApp Mobile Number *</label>
                             <div class="phone-input-wrap">
                                 <span class="phone-prefix">🇮🇳 +91</span>
-                                <input type="tel" id="custPhone" placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10" required />
+                                <input type="tel" id="custPhone" inputmode="numeric" placeholder="10-digit mobile number" pattern="[0-9]{10}" maxlength="10" required />
                             </div>
                         </div>
                     </div>
@@ -808,7 +829,7 @@
 
                         <div class="form-group">
                             <label class="form-label" for="custPin">PIN Code *</label>
-                            <input type="text" id="custPin" class="form-input" placeholder="6-digit PIN code" pattern="[0-9]{6}" maxlength="6" required />
+                            <input type="text" id="custPin" inputmode="numeric" class="form-input" placeholder="6-digit PIN code" pattern="[0-9]{6}" maxlength="6" required />
                         </div>
                     </div>
                 </div>
