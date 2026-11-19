@@ -3,37 +3,57 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECLIPSE | Signature Streetwear & Try-On Studio</title>
-    <meta name="description" content="Official ECLIPSE Store — Karan Aujla Signature Drop Oversized Tees and Drop 003 Streetwear Joggers. Interactive Virtual Try-On Studio.">
-    <meta name="keywords" content="karan aujla tee, eclipse clothing, streetwear india, oversized t-shirt, streetwear joggers, virtual try on">
+    <title>ECLIPSE | Signature Streetwear & Studio</title>
+    <meta name="description" content="Official ECLIPSE Store — Signature Streetwear Drops, Karan Aujla Editions, and Heavyweight Joggers.">
     
-    <!-- OpenGraph Meta -->
-    <meta property="og:title" content="ECLIPSE | Signature Streetwear & Try-On Studio">
-    <meta property="og:description" content="Shop the Karan Aujla Signature Drop. Experience the interactive Try-On Studio. Limited Edition Drops.">
-    <meta property="og:image" content="karan-front.jpg">
-    <meta property="og:type" content="website">
-
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=10">
+    <link rel="stylesheet" href="style.css?v=25">
 </head>
 <body>
 
     <!-- ==========================================
-         VEXO HERO SECTION (IMAGE 1 EXACT REPLICA)
+         GLASSMORPHISM NAVBAR (HOME PAGE)
+         ========================================== -->
+    <header class="header-wrapper">
+        <nav class="navbar">
+            <div class="nav-group-left">
+                <a href="#products" class="nav-link">Shop</a>
+                <a href="#collection" class="nav-link">Collection</a>
+                <a href="#essentials" class="nav-link">Essentials</a>
+                <a href="#newsletter" class="nav-link">Drops</a>
+            </div>
+
+            <div class="brand-center">
+                <a href="#" class="brand-logo">
+                    ECLIPSE<span class="dot"></span>
+                </a>
+            </div>
+
+            <div class="nav-group-right">
+                <a href="#newsletter" class="nav-link">Inner Circle</a>
+                <button class="btn-sign" onclick="scrollToSection('newsletter')">Sign In / Up</button>
+                <button class="cart-icon-btn" onclick="openCartDrawer()" aria-label="Open Shopping Bag">
+                    🛍️
+                    <span class="cart-badge" id="cartBadgeCount" style="display: none;">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ==========================================
+         HERO SECTION (VEXO REFERENCE)
          ========================================== -->
     <section class="hero-section" id="hero">
-        <!-- Symmetrical Perspective Rays (Vexo Reference) -->
+        <!-- Symmetrical Perspective Guide Rays -->
         <svg class="hero-perspective-svg" viewBox="0 0 1440 850" fill="none" preserveAspectRatio="none">
-            <!-- Left rays radiating outward from center behind model neck -->
             <line x1="720" y1="460" x2="60" y2="40" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
             <line x1="720" y1="460" x2="0" y2="220" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
             <line x1="720" y1="460" x2="0" y2="440" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
-            <!-- Right rays radiating outward from center behind model neck -->
             <line x1="720" y1="460" x2="1380" y2="40" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
             <line x1="720" y1="460" x2="1440" y2="220" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
             <line x1="720" y1="460" x2="1440" y2="440" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
@@ -46,13 +66,13 @@
             </h1>
             <div class="hero-cta-pills">
                 <button class="btn-hero-primary" onclick="scrollToSection('products')">Shop Now</button>
-                <button class="btn-hero-secondary" onclick="scrollToSection('tryon')">Explore All</button>
+                <button class="btn-hero-secondary" onclick="scrollToSection('collection')">Explore All</button>
             </div>
         </div>
 
-        <!-- Center Model Stance - Pure Cutout with ZERO white box! -->
+        <!-- Center Cutout Model -->
         <div class="hero-center-stage">
-            <div class="hero-model-wrap" onclick="scrollToSection('tryon')">
+            <div class="hero-model-wrap" onclick="openProductTryOn('karan-001')">
                 <img src="hero-model-cutout.png" alt="Karan Aujla Signature Streetwear Drop" class="hero-model-img" />
             </div>
         </div>
@@ -80,239 +100,102 @@
     </section>
 
     <!-- ==========================================
-         INTERACTIVE "TRY IT ON" STUDIO (IMAGE 2 REFERENCE)
-         ========================================== -->
-    <section class="tryon-section" id="tryon">
-        <div class="container">
-            <div class="tryon-top-header">
-                <div class="tryon-badge-pill">
-                    <span>✦</span>
-                    <span>VIRTUAL TRY-ON STUDIO · SIGNATURE DROP 001</span>
-                </div>
-                <div style="font-family: var(--font-tech); font-size: 13px; font-weight: 700; color: var(--text-muted);">
-                    PRESS [SPACE] OR DRAG TO ROTATE
-                </div>
-            </div>
-
-            <div class="tryon-grid">
-                <!-- Left Column: Specs & Controls -->
-                <div class="tryon-col-left">
-                    <div>
-                        <div class="tryon-subtitle">AI Influencer / Concept 01</div>
-                        <h2 class="tryon-title">TRY IT ON</h2>
-                        <p class="tryon-desc">
-                            One tee on our studio muse. Change the colour, fit or angle and he moves with it. Pick a mood and watch his stance.
-                        </p>
-                    </div>
-
-                    <!-- 01 COLOUR -->
-                    <div class="control-block">
-                        <div class="control-header">
-                            <span class="control-label">01 COLOUR</span>
-                            <span class="control-val-display" id="colorValDisplay">Vintage Black</span>
-                        </div>
-                        <div class="swatch-group">
-                            <button class="color-swatch-btn swatch-black active" onclick="setTryOnColor('Vintage Black', this)" aria-label="Select Vintage Black"></button>
-                            <button class="color-swatch-btn swatch-white" onclick="setTryOnColor('Bone White', this)" aria-label="Select Bone White"></button>
-                        </div>
-                    </div>
-
-                    <!-- 02 FIT -->
-                    <div class="control-block">
-                        <div class="control-header">
-                            <span class="control-label">02 FIT</span>
-                            <span class="control-val-display" id="fitValDisplay">Oversized</span>
-                        </div>
-                        <div class="fit-toggle-group">
-                            <button class="fit-btn" onclick="setTryOnFit('Regular', this)">↑ Regular</button>
-                            <button class="fit-btn active" onclick="setTryOnFit('Oversized', this)">👕 Oversized</button>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Center Stage: Virtual Model Display -->
-                <div class="tryon-stage">
-                    <div class="stage-model-container">
-                        <img id="stageModelImg" src="karan-front.jpg" alt="Virtual Model - Karan Aujla Signature Tee" class="stage-img" />
-                    </div>
-                </div>
-
-                <!-- Right Column: View & Mood & Look Summary -->
-                <div class="tryon-col-right">
-                    <!-- 03 VIEW -->
-                    <div class="control-block" style="border-top: none; padding-top: 0;">
-                        <div class="control-header">
-                            <span class="control-label">03 VIEW</span>
-                            <span class="control-val-display" id="viewValDisplay">Front</span>
-                        </div>
-                        <div class="view-pill-group">
-                            <button class="view-btn active" onclick="setTryOnView('Front', this)">Front</button>
-                            <button class="view-btn" onclick="setTryOnView('Side', this)">Side</button>
-                            <button class="view-btn" onclick="setTryOnView('Back', this)">Back</button>
-                        </div>
-                    </div>
-
-                    <!-- 04 MOOD -->
-                    <div class="control-block">
-                        <div class="control-header">
-                            <span class="control-label">04 MOOD</span>
-                            <span class="control-val-display" id="moodValDisplay">Deadpan</span>
-                        </div>
-                        <div class="mood-cards-row">
-                            <div class="mood-card active" onclick="setTryOnMood('Deadpan', this)">
-                                <div class="mood-thumb">
-                                    <img src="karan-front.jpg" alt="Deadpan Stance" />
-                                </div>
-                                <span class="mood-label">Deadpan</span>
-                            </div>
-                            <div class="mood-card" onclick="setTryOnMood('Street Stance', this)">
-                                <div class="mood-thumb">
-                                    <img src="karan-side.jpg" alt="Street Stance" />
-                                </div>
-                                <span class="mood-label">Street</span>
-                            </div>
-                            <div class="mood-card" onclick="setTryOnMood('Detail Zoom', this)">
-                                <div class="mood-thumb">
-                                    <img src="karan-front.jpg" alt="Detail Zoom" style="object-position: center 30%; transform: scale(1.3);" />
-                                </div>
-                                <span class="mood-label">Detail</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- YOUR LOOK SUMMARY PILL (WATTASHIRT STYLE) -->
-                    <div class="your-look-card">
-                        <div class="look-header">YOUR LOOK</div>
-                        <div class="look-config-summary" id="lookSummaryText">
-                            Vintage Black · Oversized · Front · Deadpan
-                        </div>
-                        <div class="look-action-row">
-                            <div class="look-price" id="lookPrice">₹999</div>
-                            <button class="btn-get-it" onclick="addCurrentLookToCart()">Get It →</button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- ==========================================
-         THE COLLECTION (DROPS 001, 002, 003)
+         SECTION 2: CATEGORY FILTER BAR & PRODUCT GRID (REFERENCE 2)
          ========================================== -->
     <section class="catalog-section" id="products">
         <div class="container">
-            <div class="section-head">
-                <div class="section-tag">— THE COMPLETE COLLECTION —</div>
-                <h2 class="section-title">Engineered Drops</h2>
-                <p class="section-desc">Limited edition heavyweight garments. Designed in Chennai, built for unrestricted motion.</p>
+            <!-- Filter Pills -->
+            <div class="category-pills-bar">
+                <button class="cat-pill-btn active" onclick="filterCategory('all', this)">All Drops</button>
+                <button class="cat-pill-btn" onclick="filterCategory('tees', this)">Oversized Tees</button>
+                <button class="cat-pill-btn" onclick="filterCategory('joggers', this)">Joggers</button>
+                <button class="cat-pill-btn" onclick="filterCategory('crop', this)">Baby Crops</button>
+                <button class="cat-pill-btn" onclick="filterCategory('popular', this)">Popular</button>
             </div>
 
+            <!-- Products Grid with ↗ Try-On Triggers -->
             <div class="product-grid">
-                <!-- Product 1: Karan Aujla Tee -->
-                <div class="product-card">
+                <!-- 1. Karan Aujla Signature Tee -->
+                <div class="product-card" data-cat="tees" onclick="openProductTryOn('karan-001')">
                     <div class="product-thumb-wrap">
-                        <span class="product-pill-badge">DROP 001 · SIGNATURE</span>
+                        <span class="product-price-badge">₹999</span>
+                        <div class="product-arrow-btn">↗</div>
                         <img src="karan-front.jpg" alt="Karan Aujla Signature Tee" />
                     </div>
                     <div class="product-card-body">
-                        <div>
-                            <h3 class="product-title">Karan Signature Tee</h3>
-                            <p class="product-meta">Oversized · 240 GSM Combed Cotton</p>
-                        </div>
-                        <div class="product-price-row">
-                            <div class="product-price">₹999</div>
-                            <button class="btn-card-buy" onclick="scrollToSection('tryon')">Try On & Buy</button>
-                        </div>
+                        <h3 class="product-title">Karan Signature Tee</h3>
+                        <p class="product-meta">240 GSM Combed Cotton · Drop 001</p>
+                        <button class="btn-tryon-card">⚡ Try It On</button>
                     </div>
                 </div>
 
-                <!-- Product 2: Drop 003 Jogger -->
-                <div class="product-card" id="catalog-joggers">
+                <!-- 2. Drop 003 Jogger -->
+                <div class="product-card" data-cat="joggers" onclick="openProductTryOn('jogger-003')">
                     <div class="product-thumb-wrap">
-                        <span class="product-pill-badge">DROP 003 · THE JOGGER</span>
-                        <img src="eclipse-jogger-1.jpg" alt="Eclipse Signature Jogger" />
+                        <span class="product-price-badge">₹1,199</span>
+                        <div class="product-arrow-btn">↗</div>
+                        <img src="eclipse-jogger-1.jpg" alt="Signature Jogger" />
                     </div>
                     <div class="product-card-body">
-                        <div>
-                            <h3 class="product-title">Signature Jogger</h3>
-                            <p class="product-meta">Relaxed Fit · 300+ GSM Heavy Fleece</p>
-                        </div>
-                        <div class="product-price-row">
-                            <div class="product-price">₹1,199</div>
-                            <button class="btn-card-buy" onclick="quickAddProduct('jogger-003', 'Signature Jogger 003', 1199, 'eclipse-jogger-1.jpg', 'Relaxed Fit · Black')">Add to Bag</button>
-                        </div>
+                        <h3 class="product-title">Signature Jogger 003</h3>
+                        <p class="product-meta">Relaxed Fit · 320 GSM Fleece</p>
+                        <button class="btn-tryon-card">⚡ Try It On</button>
                     </div>
                 </div>
 
-                <!-- Product 3: Hibiscus Baby Crop Tee -->
-                <div class="product-card" id="catalog-crop">
+                <!-- 3. Hibiscus Crop -->
+                <div class="product-card" data-cat="crop" onclick="openProductTryOn('crop-hibiscus')">
                     <div class="product-thumb-wrap">
-                        <span class="product-pill-badge">DROP 002 · BABY CROP</span>
+                        <span class="product-price-badge">₹800</span>
+                        <div class="product-arrow-btn">↗</div>
                         <img src="product-hibiscus.png" alt="Hibiscus Baby Crop Tee" />
                     </div>
                     <div class="product-card-body">
-                        <div>
-                            <h3 class="product-title">Hibiscus Baby Crop</h3>
-                            <p class="product-meta">Fitted Crop · 100% Combed Cotton</p>
-                        </div>
-                        <div class="product-price-row">
-                            <div class="product-price">₹800</div>
-                            <button class="btn-card-buy" onclick="quickAddProduct('crop-hibiscus', 'Hibiscus Crop Tee', 800, 'product-hibiscus.png', 'Fitted Crop · White')">Add to Bag</button>
-                        </div>
+                        <h3 class="product-title">Hibiscus Baby Crop</h3>
+                        <p class="product-meta">Floral Screenprint · Fitted Crop</p>
+                        <button class="btn-tryon-card">⚡ Try It On</button>
                     </div>
                 </div>
 
-                <!-- Product 4: Just A Girl -->
-                <div class="product-card">
+                <!-- 4. Just A Girl Crop -->
+                <div class="product-card" data-cat="crop" onclick="openProductTryOn('crop-just-a-girl')">
                     <div class="product-thumb-wrap">
-                        <span class="product-pill-badge">DROP 002 · BABY CROP</span>
-                        <img src="product-just-a-girl.png" alt="Just A Girl Baby Crop Tee" />
+                        <span class="product-price-badge">₹800</span>
+                        <div class="product-arrow-btn">↗</div>
+                        <img src="product-just-a-girl.png" alt="Just A Girl Baby Crop" />
                     </div>
                     <div class="product-card-body">
-                        <div>
-                            <h3 class="product-title">Just A Girl</h3>
-                            <p class="product-meta">Fitted Crop · Graphic Print</p>
-                        </div>
-                        <div class="product-price-row">
-                            <div class="product-price">₹800</div>
-                            <button class="btn-card-buy" onclick="quickAddProduct('crop-just-a-girl', 'Just A Girl Crop Tee', 800, 'product-just-a-girl.png', 'Fitted Crop · White')">Add to Bag</button>
-                        </div>
+                        <h3 class="product-title">Just A Girl Crop</h3>
+                        <p class="product-meta">Y2K Slogan Print · White</p>
+                        <button class="btn-tryon-card">⚡ Try It On</button>
                     </div>
                 </div>
 
-                <!-- Product 5: Cherry Bow -->
-                <div class="product-card">
+                <!-- 5. Cherry Bow Crop -->
+                <div class="product-card" data-cat="crop" onclick="openProductTryOn('crop-cherry-bow')">
                     <div class="product-thumb-wrap">
-                        <span class="product-pill-badge">DROP 002 · BABY CROP</span>
-                        <img src="product-cherry-bow.png" alt="Cherry Bow Baby Crop Tee" />
+                        <span class="product-price-badge">₹800</span>
+                        <div class="product-arrow-btn">↗</div>
+                        <img src="product-cherry-bow.png" alt="Cherry Bow Baby Crop" />
                     </div>
                     <div class="product-card-body">
-                        <div>
-                            <h3 class="product-title">Cherry Bow Crop</h3>
-                            <p class="product-meta">Fitted Crop · Y2K Aesthetic</p>
-                        </div>
-                        <div class="product-price-row">
-                            <div class="product-price">₹800</div>
-                            <button class="btn-card-buy" onclick="quickAddProduct('crop-cherry-bow', 'Cherry Bow Crop Tee', 800, 'product-cherry-bow.png', 'Fitted Crop · White')">Add to Bag</button>
-                        </div>
+                        <h3 class="product-title">Cherry Bow Crop</h3>
+                        <p class="product-meta">Coquette Aesthetic · White</p>
+                        <button class="btn-tryon-card">⚡ Try It On</button>
                     </div>
                 </div>
 
-                <!-- Product 6: Kiss Love -->
-                <div class="product-card">
+                <!-- 6. Kiss Love Crop -->
+                <div class="product-card" data-cat="crop" onclick="openProductTryOn('crop-kiss-love')">
                     <div class="product-thumb-wrap">
-                        <span class="product-pill-badge">DROP 002 · BABY CROP</span>
-                        <img src="product-kiss-love.png" alt="Kiss Love Baby Crop Tee" />
+                        <span class="product-price-badge">₹800</span>
+                        <div class="product-arrow-btn">↗</div>
+                        <img src="product-kiss-love.png" alt="Kiss Love Baby Crop" />
                     </div>
                     <div class="product-card-body">
-                        <div>
-                            <h3 class="product-title">Kiss Love Crop</h3>
-                            <p class="product-meta">Fitted Crop · Graphic Print</p>
-                        </div>
-                        <div class="product-price-row">
-                            <div class="product-price">₹800</div>
-                            <button class="btn-card-buy" onclick="quickAddProduct('crop-kiss-love', 'Kiss Love Crop Tee', 800, 'product-kiss-love.png', 'Fitted Crop · White')">Add to Bag</button>
-                        </div>
+                        <h3 class="product-title">Kiss Love Crop</h3>
+                        <p class="product-meta">Statement Print · Fitted</p>
+                        <button class="btn-tryon-card">⚡ Try It On</button>
                     </div>
                 </div>
             </div>
@@ -320,24 +203,240 @@
     </section>
 
     <!-- ==========================================
-         ORDER TRACKING & CUSTOM STUDIO
+         SECTION 3: "OUR COLLECTION" MARQUEE & EDITORIAL (REFERENCE 1)
          ========================================== -->
-    <section id="track" style="padding: 100px 0; background: #f8fafc; border-top: 1px solid rgba(13,15,18,0.06);">
-        <div class="container" style="max-width: 800px;">
-            <div class="section-head" style="margin-bottom: 40px;">
-                <div class="section-tag">— LIVE FULFILLMENT —</div>
-                <h2 class="section-title">Track Your Order</h2>
-                <p class="section-desc">Enter your order ID (e.g. ECL894321) for real-time dispatch updates.</p>
+    <section class="our-collection-section" id="collection">
+        <!-- Top Social Handles -->
+        <div class="social-top-bar">
+            <span>INSTAGRAM</span>
+            <span>TELEGRAM</span>
+            <span>FACEBOOK</span>
+            <span>TWITTER</span>
+        </div>
+
+        <!-- Continuous Running Marquee Strip -->
+        <div class="marquee-strip">
+            <div class="marquee-track">
+                ✦ THE BEST STREETWEAR DROPS 2026 ✦ ECLIPSE CLOTHING ✦ THE SIGNATURE OVERSIZED TEES ✦ PAN-INDIA EXPRESS DELIVERY ✦ DROP 001 · DROP 002 · DROP 003 ✦ LIMITED EDITIONS ✦
+                ✦ THE BEST STREETWEAR DROPS 2026 ✦ ECLIPSE CLOTHING ✦ THE SIGNATURE OVERSIZED TEES ✦ PAN-INDIA EXPRESS DELIVERY ✦ DROP 001 · DROP 002 · DROP 003 ✦ LIMITED EDITIONS ✦
             </div>
-            
-            <form onsubmit="trackOrderSubmit(event)" style="display: flex; gap: 12px; max-width: 560px; margin: 0 auto;">
-                <input type="text" id="trackOrderInput" placeholder="Enter Order ID (e.g. ECL123456)" required
-                       style="flex: 1; padding: 16px 20px; border-radius: var(--radius-full); border: 1px solid rgba(13,15,18,0.15); font-family: inherit; font-size: 14px; outline: none;" />
-                <button type="submit" class="btn-hero-primary" style="padding: 16px 32px;">Track</button>
-            </form>
-            <div id="trackResultBox"></div>
+        </div>
+
+        <div class="container">
+            <h2 style="font-family: var(--font-hero); font-size: clamp(48px, 6vw, 84px); font-weight: 800; text-transform: uppercase; letter-spacing: -0.02em;">
+                OUR COLLECTION
+            </h2>
+            <p style="font-size: 14px; color: var(--text-muted); max-width: 480px; margin-top: 8px; text-transform: uppercase; font-family: var(--font-tech); letter-spacing: 0.1em;">
+                ECLIPSE DROPS ARE TAILORED FOR INDEPENDENT INDIVIDUALS WHO BELIEVE FASHION SHOULD FEEL LIKE FREEDOM.
+            </p>
+
+            <div class="editorial-collection-grid">
+                <!-- Card 1: Karan Drop -->
+                <div class="editorial-card" onclick="openProductTryOn('karan-001')">
+                    <img src="karan-front.jpg" alt="Signature Tee Edition" />
+                    <div class="editorial-card-content">
+                        <div class="editorial-card-title">MEN'S BLACK SIGNATURE KARAN OVERSIZED TEE</div>
+                        <a href="javascript:void(0)" class="btn-editorial-explore">EXPLORE →</a>
+                    </div>
+                </div>
+
+                <!-- Card 2: Signature Joggers -->
+                <div class="editorial-card" onclick="openProductTryOn('jogger-003')">
+                    <img src="eclipse-jogger-2.jpg" alt="Signature Jogger Edition" />
+                    <div class="editorial-card-content">
+                        <div class="editorial-card-title">DROP 003 — THE HEAVYWEIGHT JOGGER</div>
+                        <a href="javascript:void(0)" class="btn-editorial-explore">EXPLORE →</a>
+                    </div>
+                </div>
+
+                <!-- Card 3: Y2K Baby Crops -->
+                <div class="editorial-card" onclick="openProductTryOn('crop-cherry-bow')">
+                    <img src="product-cherry-bow.png" alt="Y2K Baby Crop Top" />
+                    <div class="editorial-card-content">
+                        <div class="editorial-card-title">DROP 002 — BABY CROPS & TEES</div>
+                        <a href="javascript:void(0)" class="btn-editorial-explore">EXPLORE →</a>
+                    </div>
+                </div>
+            </div>
         </div>
     </section>
+
+    <!-- ==========================================
+         SECTION 4: "STREET ESSENTIALS / FULL WINTERS" (REFERENCE 3)
+         ========================================== -->
+    <section class="street-essentials-section" id="essentials">
+        <div class="container">
+            <div class="editorial-split-header">
+                <div class="essentials-col-info">
+                    <div class="essentials-num">01</div>
+                    <div>
+                        <div class="essentials-label">HEAVYWEIGHT TEES</div>
+                        <p class="essentials-subtext">240+ GSM french terry combed cotton with drop-shoulder silhouette.</p>
+                    </div>
+                </div>
+
+                <div class="essentials-col-info">
+                    <div class="essentials-num">02</div>
+                    <div>
+                        <div class="essentials-label">ATHLETIC JOGGERS</div>
+                        <p class="essentials-subtext">320+ GSM brushed fleece built for effortless motion on the street.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="essentials-huge-title">STREET ESSENTIALS</div>
+
+            <div class="essentials-duo-grid">
+                <!-- Duo Card 1: Jogger Look -->
+                <div class="duo-card" onclick="openProductTryOn('jogger-003')">
+                    <img src="eclipse-jogger-3.jpg" alt="Signature Joggers 003" />
+                    <div class="duo-card-badge">DROP 003 // RELAXED FIT JOGGERS</div>
+                </div>
+
+                <!-- Duo Card 2: Back Graphic Tee -->
+                <div class="duo-card" onclick="openProductTryOn('karan-001')">
+                    <img src="karan-back.png" alt="Karan Signature Back Graphic" />
+                    <div class="duo-card-badge">NEW DROP // IT WAS ALL A DREAM</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         SECTION 5: BRUTALIST NEWSLETTER & TYPO FOOTER (REFERENCE 4)
+         ========================================== -->
+    <section class="newsletter-strip-section" id="newsletter">
+        <div class="container">
+            <div class="newsletter-split-box">
+                <div>
+                    <h2 class="newsletter-big-heading">SUBSCRIBE TO OUR INNER CIRCLE</h2>
+                    <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;">
+                        Get 1-hour early VIP access to limited drops, exclusive invite codes, and private member pricing.
+                    </p>
+                    <form onsubmit="event.preventDefault(); showToast('✦ Welcome to the Inner Circle!');" class="newsletter-form-pill">
+                        <input type="email" placeholder="ENTER YOUR MAIL" required />
+                        <button type="submit">→</button>
+                    </form>
+                </div>
+                <div style="display: flex; justify-content: center;">
+                    <img src="campaign-teaser.jpg" alt="Campaign Visual" style="border-radius: 20px; max-height: 280px; box-shadow: var(--shadow-floating);" />
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <footer class="brutalist-typo-footer">
+        <div class="container">
+            <div class="giant-footer-word">
+                <span>ECLIPSE</span>
+            </div>
+
+            <div class="footer-pill-tags">
+                <span class="f-pill">DROP 001</span>
+                <span class="f-pill">DROP 002</span>
+                <span class="f-pill">DROP 003</span>
+                <span class="f-pill">POPULAR</span>
+                <span class="f-pill">LIMITED EDITION</span>
+            </div>
+
+            <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; display: flex; justify-content: space-between; font-size: 12px; color: #718096; font-family: var(--font-tech);">
+                <span>© 2026 ECLIPSE CLOTHING. ALL RIGHTS RESERVED.</span>
+                <span>CHENNAI · PAN-INDIA</span>
+            </div>
+        </div>
+    </footer>
+
+    <!-- ==========================================
+         DEDICATED PERSONALIZED TRY-ON STUDIO OVERLAY
+         (OPENS WHEN ANY PRODUCT IS CLICKED)
+         ========================================== -->
+    <div class="tryon-studio-overlay" id="tryonStudioOverlay">
+        <!-- Top Navigation -->
+        <div class="tryon-nav-header">
+            <button class="btn-back-store" onclick="closeProductTryOn()">
+                ← Back to Store
+            </button>
+            <div style="font-family: var(--font-hero); font-size: 20px; font-weight: 800; letter-spacing: 0.1em;">
+                ECLIPSE · VIRTUAL TRY-ON STUDIO
+            </div>
+            <button class="btn-back-store" onclick="closeProductTryOn()">
+                ✕ Close
+            </button>
+        </div>
+
+        <div class="studio-grid-layout">
+            <!-- Left Column: Product Info & Customizers -->
+            <div class="studio-col-left">
+                <div>
+                    <div class="studio-product-tag" id="studioProductTag">DROP 001 · SIGNATURE OVERSIZED</div>
+                    <h2 class="studio-main-title" id="studioMainTitle">Karan Signature Tee</h2>
+                    <p class="studio-desc" id="studioDesc">
+                        Heavyweight 240+ GSM combed cotton with handwritten script signature and vintage Lamborghini car back print.
+                    </p>
+                </div>
+
+                <!-- 01 COLOUR -->
+                <div class="studio-control-block">
+                    <div class="control-header-row">
+                        <span class="control-label">01 COLOUR</span>
+                        <span class="control-val" id="studioColorDisplay">Vintage Black</span>
+                    </div>
+                    <div class="studio-swatch-row" id="studioSwatchContainer"></div>
+                </div>
+
+                <!-- 02 FIT -->
+                <div class="studio-control-block">
+                    <div class="control-header-row">
+                        <span class="control-label">02 FIT</span>
+                        <span class="control-val" id="studioFitDisplay">Oversized</span>
+                    </div>
+                    <div class="studio-fit-toggle" id="studioFitContainer"></div>
+                </div>
+            </div>
+
+            <!-- Center Stage: Virtual Model Display -->
+            <div class="studio-center-stage">
+                <img id="studioModelImg" src="karan-front.jpg" alt="Model Try-On Preview" class="studio-model-img" />
+            </div>
+
+            <!-- Right Column: Angles, Moods & Purchase -->
+            <div class="studio-col-right">
+                <!-- 03 VIEW (Angles) -->
+                <div class="studio-control-block" style="border-top: none; padding-top: 0;">
+                    <div class="control-header-row">
+                        <span class="control-label">03 VIEW</span>
+                        <span class="control-val" id="studioViewDisplay">Front</span>
+                    </div>
+                    <div class="studio-view-toggle">
+                        <button class="view-btn-pill active" data-view="Front" onclick="setStudioView('Front', this)">Front</button>
+                        <button class="view-btn-pill" data-view="Side" onclick="setStudioView('Side', this)">Side</button>
+                        <button class="view-btn-pill" data-view="Back" onclick="setStudioView('Back', this)">Back</button>
+                    </div>
+                </div>
+
+                <!-- 04 MOOD / STANCE -->
+                <div class="studio-control-block">
+                    <div class="control-header-row">
+                        <span class="control-label">04 MOOD</span>
+                        <span class="control-val" id="studioMoodDisplay">Deadpan</span>
+                    </div>
+                    <div class="studio-mood-row" id="studioMoodContainer"></div>
+                </div>
+
+                <!-- YOUR LOOK SUMMARY CARD -->
+                <div class="studio-look-card">
+                    <div class="studio-look-header">YOUR LOOK</div>
+                    <div class="studio-look-desc" id="studioLookSummary">
+                        Vintage Black · Oversized · Front · Deadpan
+                    </div>
+                    <div class="studio-look-action-row">
+                        <div class="studio-price" id="studioPrice">₹999</div>
+                        <button class="btn-studio-get" onclick="addStudioLookToCart()">Get It →</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <!-- ==========================================
          SLIDE-OVER CART DRAWER
@@ -349,7 +448,6 @@
             <button class="cart-drawer-close" onclick="closeCartDrawer()">✕</button>
         </div>
 
-        <!-- Free Shipping Meter -->
         <div class="shipping-meter-wrap">
             <div class="shipping-meter-text" id="shippingMeterText">Add items to unlock Free Shipping</div>
             <div class="meter-track">
@@ -374,52 +472,7 @@
     <!-- Toast Notification -->
     <div class="toast-msg" id="toastMsg">✦ Notification</div>
 
-    <!-- ==========================================
-         FOOTER
-         ========================================== -->
-    <footer>
-        <div class="container">
-            <div class="footer-top">
-                <div>
-                    <div class="footer-brand-title">ECLIPSE<span>×</span></div>
-                    <p class="footer-desc">
-                        Engineering premium heavyweight streetwear drops in limited batches. Born in Chennai, shipping nationwide.
-                    </p>
-                </div>
-                <div class="footer-col">
-                    <h4>Collections</h4>
-                    <ul class="footer-links">
-                        <li><a href="#tryon">Drop 001 · Karan Signature</a></li>
-                        <li><a href="#catalog-joggers">Drop 003 · Signature Jogger</a></li>
-                        <li><a href="#catalog-crop">Drop 002 · Baby Crop Tees</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Studio</h4>
-                    <ul class="footer-links">
-                        <li><a href="#tryon">Virtual Try-On</a></li>
-                        <li><a href="#track">Track Order</a></li>
-                        <li><a href="https://wa.me/916369142027" target="_blank">Custom Prints WhatsApp</a></li>
-                    </ul>
-                </div>
-                <div class="footer-col">
-                    <h4>Contact</h4>
-                    <ul class="footer-links">
-                        <li><a href="tel:+916369142027">+91 63691 42027</a></li>
-                        <li><a href="https://instagram.com/eclipseclothingx" target="_blank">@eclipseclothingx</a></li>
-                        <li><a href="#">Chennai, Tamil Nadu</a></li>
-                    </ul>
-                </div>
-            </div>
-
-            <div class="footer-bottom">
-                <span>© 2026 ECLIPSE Official Store. All rights reserved.</span>
-                <span>eclipseclothingx.shop</span>
-            </div>
-        </div>
-    </footer>
-
-    <!-- JavaScript Controller -->
-    <script src="script.js?v=10"></script>
+    <!-- Script -->
+    <script src="script.js?v=25"></script>
 </body>
 </html>
