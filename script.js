@@ -24,29 +24,49 @@ function initTryOnStudio() {
   updateLookSummary();
 }
 
+
+// Real AI Studio Asset Map for Colors & Angles
+const ASSET_MAP = {
+  'Vintage Black': {
+    Front: 'karan-front.jpg',
+    Side: 'karan-side.jpg',
+    Back: 'karan-back.png'
+  },
+  'Bone White': {
+    Front: 'karan-white-front.jpg',
+    Side: 'karan-side.jpg',
+    Back: 'karan-white-back.jpg'
+  }
+};
+
+function getActiveModelSrc() {
+  const color = state.tryOn.color || 'Vintage Black';
+  const view = state.tryOn.view || 'Front';
+  return (ASSET_MAP[color] && ASSET_MAP[color][view]) || 'karan-front.jpg';
+}
+
+function updateModelDisplay() {
+  const modelImg = document.getElementById('stageModelImg');
+  if (!modelImg) return;
+
+  modelImg.classList.add('fade-out');
+  setTimeout(() => {
+    modelImg.src = getActiveModelSrc();
+    modelImg.alt = `Karan Aujla Tee ${state.tryOn.color} ${state.tryOn.view} View`;
+    modelImg.style.filter = 'drop-shadow(0 25px 35px rgba(0,0,0,0.18))';
+    modelImg.classList.remove('fade-out');
+  }, 180);
+}
+
 function setTryOnColor(colorName, el) {
   state.tryOn.color = colorName;
-  
-  // Update indicator text
   const valDisplay = document.getElementById('colorValDisplay');
   if (valDisplay) valDisplay.textContent = colorName;
-  
-  // Update button active states
   document.querySelectorAll('.color-swatch-btn').forEach(btn => btn.classList.remove('active'));
   if (el) el.classList.add('active');
-  
-  // Apply visual effect to model image
-  const modelImg = document.getElementById('stageModelImg');
-  if (modelImg) {
-    if (colorName === 'Bone White') {
-      modelImg.style.filter = 'contrast(1.1) brightness(1.2) drop-shadow(0 25px 35px rgba(0,0,0,0.18))';
-    } else {
-      modelImg.style.filter = 'drop-shadow(0 25px 35px rgba(0,0,0,0.18))';
-    }
-  }
-  
+  updateModelDisplay();
   updateLookSummary();
-  showToast(`Color updated: ${colorName}`);
+  showToast(`Color: ${colorName}`);
 }
 
 function setTryOnFit(fitType, el) {
@@ -76,37 +96,11 @@ function setTryOnFit(fitType, el) {
 
 function setTryOnView(viewName, el) {
   state.tryOn.view = viewName;
-  
-  // Update indicator text
   const valDisplay = document.getElementById('viewValDisplay');
   if (valDisplay) valDisplay.textContent = viewName;
-  
-  // Update button active states
   document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
   if (el) el.classList.add('active');
-  
-  // Swap model image smoothly
-  const modelImg = document.getElementById('stageModelImg');
-  if (!modelImg) return;
-  
-  modelImg.classList.add('fade-out');
-  
-  setTimeout(() => {
-    if (viewName === 'Back') {
-      modelImg.src = 'karan-back.png';
-      modelImg.alt = 'Karan Aujla Tee Back View';
-    } else if (viewName === 'Side') {
-      modelImg.src = 'karan-front.jpg';
-      modelImg.style.transform = 'scale(0.98) rotateY(15deg)';
-      modelImg.alt = 'Karan Aujla Tee Side View';
-    } else {
-      modelImg.src = 'karan-front.jpg';
-      modelImg.style.transform = 'scale(1) rotateY(0deg)';
-      modelImg.alt = 'Karan Aujla Tee Front View';
-    }
-    modelImg.classList.remove('fade-out');
-  }, 200);
-  
+  updateModelDisplay();
   updateLookSummary();
 }
 
