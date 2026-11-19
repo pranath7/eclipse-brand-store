@@ -1,8 +1,7 @@
 /* ==========================================================================
-   ECLIPSE STORE — SCRIPT.JS (CONTROLLER FOR HOME & PERSONALIZED TRY-ON)
+   ECLIPSE STORE — SCRIPT.JS (STREETWEAR ONLY + PERSONALIZED TRY-ON)
    ========================================================================== */
 
-// Global State
 const state = {
   cart: JSON.parse(localStorage.getItem('eclipse_cart_v2') || '[]'),
   currentCategory: 'all',
@@ -16,7 +15,7 @@ const state = {
 };
 
 // ==========================================================================
-// 1. PRODUCT DATABASE FOR PERSONALIZED TRY-ON
+// 1. STREETWEAR-ONLY PRODUCTS DATABASE
 // ==========================================================================
 
 const PRODUCTS_DATA = {
@@ -52,12 +51,44 @@ const PRODUCTS_DATA = {
       { id: 'Detail', label: 'Detail', img: 'karan-front.jpg' }
     ]
   },
+  'karan-white': {
+    id: 'karan-white',
+    name: 'Karan Signature Tee (Bone White)',
+    drop: 'DROP 001 · BONE WHITE EDITION',
+    category: 'tees',
+    desc: 'Off-white combed heavyweight cotton with contrasting black handwritten script signature and monochrome back artwork.',
+    price: 999,
+    colors: [
+      { name: 'Bone White', hex: '#f4f3ef' },
+      { name: 'Vintage Black', hex: '#111111' }
+    ],
+    fits: ['Regular', 'Oversized'],
+    defaultColor: 'Bone White',
+    defaultFit: 'Oversized',
+    views: {
+      'Bone White': {
+        Front: 'karan-white-front.jpg',
+        Side: 'karan-side.jpg',
+        Back: 'karan-white-back.jpg'
+      },
+      'Vintage Black': {
+        Front: 'karan-front.jpg',
+        Side: 'karan-side.jpg',
+        Back: 'karan-back.png'
+      }
+    },
+    moods: [
+      { id: 'Deadpan', label: 'Deadpan', img: 'karan-white-front.jpg' },
+      { id: 'Street', label: 'Street', img: 'karan-side.jpg' },
+      { id: 'Detail', label: 'Detail', img: 'karan-white-front.jpg' }
+    ]
+  },
   'jogger-003': {
     id: 'jogger-003',
     name: 'Signature Streetwear Jogger',
     drop: 'DROP 003 · THE JOGGER',
     category: 'joggers',
-    desc: 'Heavyweight 320+ GSM brushed cotton fleece. Deep pockets, engineered ribbed cuffs, and relaxed athletic streetwear drape.',
+    desc: 'Heavyweight 320+ GSM brushed cotton fleece. Deep functional streetwear pockets, ribbed cuffs, and relaxed athletic drape.',
     price: 1199,
     colors: [
       { name: 'Obsidian Black', hex: '#111111' },
@@ -84,144 +115,46 @@ const PRODUCTS_DATA = {
       { id: 'Detail', label: 'Detail', img: 'eclipse-jogger-3.jpg' }
     ]
   },
-  'crop-hibiscus': {
-    id: 'crop-hibiscus',
-    name: 'Hibiscus Baby Crop Tee',
-    drop: 'DROP 002 · BABY CROP',
-    category: 'crop',
-    desc: '100% fine combed breathable cotton. Vivid floral hibiscus screen-print with baby tee silhouette.',
-    price: 800,
+  'karan-dream': {
+    id: 'karan-dream',
+    name: '"It Was All A Dream" Back Edition',
+    drop: 'DROP 001 · GRAPHIC BACK PRINT',
+    category: 'tees',
+    desc: 'Feature back piece showcasing the iconic vintage Lamborghini luxury car illustration and bold street typography.',
+    price: 999,
     colors: [
-      { name: 'Classic White', hex: '#ffffff' },
-      { name: 'Washed Rose', hex: '#f43f5e' }
+      { name: 'Vintage Black', hex: '#111111' },
+      { name: 'Bone White', hex: '#f4f3ef' }
     ],
-    fits: ['Fitted Baby Crop', 'Boxy Crop'],
-    defaultColor: 'Classic White',
-    defaultFit: 'Fitted Baby Crop',
+    fits: ['Oversized', 'Regular'],
+    defaultColor: 'Vintage Black',
+    defaultFit: 'Oversized',
     views: {
-      'Classic White': {
-        Front: 'product-hibiscus.png',
-        Side: 'product-hibiscus.png',
-        Back: 'product-hibiscus.png'
+      'Vintage Black': {
+        Front: 'karan-back.png',
+        Side: 'karan-side.jpg',
+        Back: 'karan-front.jpg'
       },
-      'Washed Rose': {
-        Front: 'product-hibiscus.png',
-        Side: 'product-hibiscus.png',
-        Back: 'product-hibiscus.png'
+      'Bone White': {
+        Front: 'karan-white-back.jpg',
+        Side: 'karan-side.jpg',
+        Back: 'karan-white-front.jpg'
       }
     },
     moods: [
-      { id: 'Casual', label: 'Casual', img: 'product-hibiscus.png' },
-      { id: 'Street', label: 'Street', img: 'product-hibiscus.png' },
-      { id: 'Detail', label: 'Detail', img: 'product-hibiscus.png' }
-    ]
-  },
-  'crop-just-a-girl': {
-    id: 'crop-just-a-girl',
-    name: 'Just A Girl Baby Crop',
-    drop: 'DROP 002 · BABY CROP',
-    category: 'crop',
-    desc: 'Statement viral slogan baby tee with sparkle bow graphic on ultra-soft luxury combed cotton.',
-    price: 800,
-    colors: [
-      { name: 'Classic White', hex: '#ffffff' },
-      { name: 'Soft Cream', hex: '#fef08a' }
-    ],
-    fits: ['Fitted Baby Crop', 'Boxy Crop'],
-    defaultColor: 'Classic White',
-    defaultFit: 'Fitted Baby Crop',
-    views: {
-      'Classic White': {
-        Front: 'product-just-a-girl.png',
-        Side: 'product-just-a-girl.png',
-        Back: 'product-just-a-girl.png'
-      },
-      'Soft Cream': {
-        Front: 'product-just-a-girl.png',
-        Side: 'product-just-a-girl.png',
-        Back: 'product-just-a-girl.png'
-      }
-    },
-    moods: [
-      { id: 'Cute', label: 'Cute', img: 'product-just-a-girl.png' },
-      { id: 'Street', label: 'Street', img: 'product-just-a-girl.png' },
-      { id: 'Detail', label: 'Detail', img: 'product-just-a-girl.png' }
-    ]
-  },
-  'crop-cherry-bow': {
-    id: 'crop-cherry-bow',
-    name: 'Cherry Bow Baby Crop',
-    drop: 'DROP 002 · BABY CROP',
-    category: 'crop',
-    desc: 'Y2K coquette aesthetic cherry bow illustration on premium structured cotton baby top.',
-    price: 800,
-    colors: [
-      { name: 'Classic White', hex: '#ffffff' },
-      { name: 'Cherry Red', hex: '#dc2626' }
-    ],
-    fits: ['Fitted Baby Crop', 'Boxy Crop'],
-    defaultColor: 'Classic White',
-    defaultFit: 'Fitted Baby Crop',
-    views: {
-      'Classic White': {
-        Front: 'product-cherry-bow.png',
-        Side: 'product-cherry-bow.png',
-        Back: 'product-cherry-bow.png'
-      },
-      'Cherry Red': {
-        Front: 'product-cherry-bow.png',
-        Side: 'product-cherry-bow.png',
-        Back: 'product-cherry-bow.png'
-      }
-    },
-    moods: [
-      { id: 'Coquette', label: 'Coquette', img: 'product-cherry-bow.png' },
-      { id: 'Street', label: 'Street', img: 'product-cherry-bow.png' },
-      { id: 'Detail', label: 'Detail', img: 'product-cherry-bow.png' }
-    ]
-  },
-  'crop-kiss-love': {
-    id: 'crop-kiss-love',
-    name: 'Kiss Love Baby Crop',
-    drop: 'DROP 002 · BABY CROP',
-    category: 'crop',
-    desc: 'Bold graphic lips print on vintage softened white ribbed cotton baby tee.',
-    price: 800,
-    colors: [
-      { name: 'Classic White', hex: '#ffffff' },
-      { name: 'Dark Kiss', hex: '#111111' }
-    ],
-    fits: ['Fitted Baby Crop', 'Boxy Crop'],
-    defaultColor: 'Classic White',
-    defaultFit: 'Fitted Baby Crop',
-    views: {
-      'Classic White': {
-        Front: 'product-kiss-love.png',
-        Side: 'product-kiss-love.png',
-        Back: 'product-kiss-love.png'
-      },
-      'Dark Kiss': {
-        Front: 'product-kiss-love.png',
-        Side: 'product-kiss-love.png',
-        Back: 'product-kiss-love.png'
-      }
-    },
-    moods: [
-      { id: 'Bold', label: 'Bold', img: 'product-kiss-love.png' },
-      { id: 'Street', label: 'Street', img: 'product-kiss-love.png' },
-      { id: 'Detail', label: 'Detail', img: 'product-kiss-love.png' }
+      { id: 'Back Art', label: 'Back Art', img: 'karan-back.png' },
+      { id: 'Street', label: 'Street', img: 'karan-side.jpg' },
+      { id: 'Front View', label: 'Front', img: 'karan-front.jpg' }
     ]
   }
 };
 
 // ==========================================================================
-// 2. OPEN PERSONALIZED TRY-ON STUDIO FOR SPECIFIC PRODUCT
+// 2. OPEN PERSONALIZED TRY-ON STUDIO
 // ==========================================================================
 
 function openProductTryOn(productId) {
-  const prod = PRODUCTS_DATA[productId];
-  if (!prod) return;
-
+  const prod = PRODUCTS_DATA[productId] || PRODUCTS_DATA['karan-001'];
   state.activeProduct = prod;
   state.activeLook = {
     color: prod.defaultColor,
@@ -230,13 +163,12 @@ function openProductTryOn(productId) {
     mood: prod.moods[0].id
   };
 
-  // Populate Header & Info
   document.getElementById('studioProductTag').textContent = prod.drop;
   document.getElementById('studioMainTitle').textContent = prod.name;
   document.getElementById('studioDesc').textContent = prod.desc;
   document.getElementById('studioPrice').textContent = `₹${prod.price}`;
 
-  // Populate Color Swatches
+  // Swatches
   const swatchContainer = document.getElementById('studioSwatchContainer');
   document.getElementById('studioColorDisplay').textContent = prod.defaultColor;
   swatchContainer.innerHTML = prod.colors.map((c, i) => `
@@ -246,15 +178,15 @@ function openProductTryOn(productId) {
             aria-label="${c.name}"></button>
   `).join('');
 
-  // Populate Fit Selector
+  // Fits
   const fitContainer = document.getElementById('studioFitContainer');
   document.getElementById('studioFitDisplay').textContent = prod.defaultFit;
   fitContainer.innerHTML = prod.fits.map((f, i) => `
-    <button class="fit-btn-pill ${i === 1 ? 'active' : ''}"
+    <button class="fit-btn-pill ${i === 1 || prod.fits.length === 1 ? 'active' : ''}"
             onclick="setStudioFit('${f}', this)">${f}</button>
   `).join('');
 
-  // Populate Mood Cards
+  // Moods
   const moodContainer = document.getElementById('studioMoodContainer');
   document.getElementById('studioMoodDisplay').textContent = prod.moods[0].label;
   moodContainer.innerHTML = prod.moods.map((m, i) => `
@@ -266,16 +198,14 @@ function openProductTryOn(productId) {
     </div>
   `).join('');
 
-  // Reset View to Front
+  // View reset
   document.querySelectorAll('.view-btn-pill').forEach(b => b.classList.remove('active'));
   document.querySelector('.view-btn-pill[data-view="Front"]')?.classList.add('active');
   document.getElementById('studioViewDisplay').textContent = 'Front';
 
-  // Render Image
   renderStudioModel();
   updateStudioSummary();
 
-  // Show Overlay
   document.getElementById('tryonStudioOverlay')?.classList.add('active');
   document.body.style.overflow = 'hidden';
 }
@@ -334,7 +264,7 @@ function renderStudioModel() {
     modelImg.src = imgSrc;
     modelImg.alt = `${prod.name} ${state.activeLook.color} ${state.activeLook.view}`;
     modelImg.classList.remove('fade-out');
-  }, 180);
+  }, 160);
 }
 
 function updateStudioSummary() {
@@ -366,7 +296,7 @@ function addStudioLookToCart() {
 }
 
 // ==========================================================================
-// 3. CATEGORY FILTER (REFERENCE 2)
+// 3. CATEGORY FILTERS
 // ==========================================================================
 
 function filterCategory(cat, el) {
@@ -502,7 +432,6 @@ function closeCartDrawer() {
   document.getElementById('cartDrawer')?.classList.remove('active');
 }
 
-// Helpers
 function scrollToSection(id) {
   const el = document.getElementById(id);
   if (el) {
@@ -521,7 +450,7 @@ function showToast(msg) {
 }
 
 function openVideoModal() {
-  alert("✦ ECLIPSE DROP 001 FILM\n\nDirecting: Chennai Street Division\nModel: Karan Aujla Signature Edition\nFabric: 240+ GSM Combed French Terry\n\n(Full campaign teaser loaded!)");
+  alert("✦ ECLIPSE CAMPAIGN FILM\n\nModel: Karan Aujla Signature Edition\nDrop: 001 & 003\nFabric: 240+ GSM Combed French Terry\n\n(Full campaign teaser loaded!)");
 }
 
 function triggerCheckout() {
@@ -542,7 +471,6 @@ function triggerCheckout() {
   }
 }
 
-// Close Try-on on ESC key
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeProductTryOn();

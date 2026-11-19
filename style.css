@@ -38,6 +38,11 @@
   padding: 0;
 }
 
+html, body {
+  max-width: 100vw;
+  overflow-x: hidden;
+}
+
 html {
   scroll-behavior: smooth;
   font-size: 16px;
@@ -48,7 +53,6 @@ body {
   font-family: var(--font-body);
   color: var(--dark);
   background: var(--bg-ice);
-  overflow-x: hidden;
   -webkit-font-smoothing: antialiased;
 }
 
@@ -226,7 +230,7 @@ img {
 }
 
 /* ==========================================================================
-   VEXO HERO SECTION (IMAGE 1 EXACT REPLICA)
+   1. VEXO HERO SECTION (IMAGE 1 EXACT REPLICA)
    ========================================================================== */
 
 .hero-section {
@@ -456,12 +460,160 @@ img {
 }
 
 /* ==========================================================================
-   SECTION 2: CATEGORY FILTER PILLS & GRID (REFERENCE 2)
+   2. "OUR COLLECTION" MARQUEE & EDITORIAL (SECOND SECTION)
+   ========================================================================== */
+
+.our-collection-section {
+  padding: 80px 0 100px;
+  background: #ffffff;
+  border-top: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.social-top-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+  padding: 20px 0;
+  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+  font-family: var(--font-tech);
+  font-size: 13px;
+  font-weight: 800;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+
+.marquee-strip {
+  width: 100%;
+  overflow: hidden;
+  white-space: nowrap;
+  background: var(--dark);
+  color: #ffffff;
+  padding: 14px 0;
+  margin: 30px 0 60px;
+  font-family: var(--font-tech);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.2em;
+}
+
+.marquee-track {
+  display: inline-block;
+  animation: marqueeScroll 25s linear infinite;
+}
+
+@keyframes marqueeScroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.editorial-collection-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 28px;
+  margin-top: 40px;
+}
+
+.editorial-card {
+  position: relative;
+  height: 520px;
+  border-radius: var(--radius-md);
+  overflow: hidden;
+  background: #111;
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  padding: 32px;
+  color: #ffffff;
+  cursor: pointer;
+}
+
+.editorial-card img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center top;
+  opacity: 0.88;
+  transition: transform 0.6s ease;
+}
+
+.editorial-card:hover img {
+  transform: scale(1.06);
+}
+
+.editorial-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.88) 100%);
+  pointer-events: none;
+}
+
+.editorial-card-content {
+  position: relative;
+  z-index: 5;
+}
+
+.editorial-card-title {
+  font-family: var(--font-hero);
+  font-size: 20px;
+  font-weight: 800;
+  text-transform: uppercase;
+  line-height: 1.25;
+  margin-bottom: 16px;
+}
+
+.btn-editorial-explore {
+  border: 1px solid #ffffff;
+  color: #ffffff;
+  font-family: var(--font-tech);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.15em;
+  padding: 8px 24px;
+  border-radius: var(--radius-full);
+  display: inline-block;
+  transition: var(--transition);
+}
+
+.btn-editorial-explore:hover {
+  background: #ffffff;
+  color: #000000;
+}
+
+/* ==========================================================================
+   3. ALL PRODUCTS CATALOG (DIRECTLY BELOW OUR COLLECTION)
    ========================================================================== */
 
 .catalog-section {
   padding: 100px 0;
-  background: #ffffff;
+  background: #f8fafc;
+  border-top: 1px solid rgba(13, 15, 18, 0.06);
+}
+
+.section-head {
+  text-align: center;
+  max-width: 640px;
+  margin: 0 auto 40px;
+}
+
+.section-tag {
+  font-family: var(--font-tech);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.18em;
+  color: var(--accent-gold);
+  text-transform: uppercase;
+  margin-bottom: 10px;
+}
+
+.section-title {
+  font-family: var(--font-hero);
+  font-size: clamp(32px, 4vw, 52px);
+  font-weight: 800;
+  text-transform: uppercase;
+  color: var(--dark);
 }
 
 .category-pills-bar {
@@ -470,12 +622,12 @@ img {
   justify-content: center;
   gap: 12px;
   flex-wrap: wrap;
-  margin-bottom: 50px;
+  margin-bottom: 48px;
 }
 
 .cat-pill-btn {
   border: 1px solid rgba(11, 13, 16, 0.2);
-  padding: 10px 26px;
+  padding: 10px 28px;
   border-radius: var(--radius-full);
   font-family: var(--font-tech);
   font-size: 12px;
@@ -496,12 +648,12 @@ img {
 
 .product-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(290px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
   gap: 32px;
 }
 
 .product-card {
-  background: #f8fafc;
+  background: #ffffff;
   border: 1px solid rgba(13, 15, 18, 0.08);
   border-radius: var(--radius-md);
   overflow: hidden;
@@ -521,7 +673,7 @@ img {
 .product-thumb-wrap {
   position: relative;
   width: 100%;
-  height: 380px;
+  height: 400px;
   background: #eaeff2;
   overflow: hidden;
 }
@@ -530,6 +682,7 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   transition: transform 0.5s ease;
 }
 
@@ -544,7 +697,7 @@ img {
   background: rgba(255, 255, 255, 0.95);
   backdrop-filter: blur(8px);
   font-family: var(--font-tech);
-  font-size: 12px;
+  font-size: 13px;
   font-weight: 800;
   padding: 6px 14px;
   border-radius: var(--radius-full);
@@ -616,133 +769,12 @@ img {
 }
 
 /* ==========================================================================
-   SECTION 3: "OUR COLLECTION" MARQUEE & EDITORIAL (REFERENCE 1)
-   ========================================================================== */
-
-.our-collection-section {
-  padding: 100px 0;
-  background: #ffffff;
-  border-top: 1px solid rgba(0, 0, 0, 0.06);
-}
-
-.social-top-bar {
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  padding: 20px 0;
-  border-bottom: 1px solid rgba(0, 0, 0, 0.08);
-  font-family: var(--font-tech);
-  font-size: 13px;
-  font-weight: 800;
-  letter-spacing: 0.15em;
-  text-transform: uppercase;
-}
-
-.marquee-strip {
-  width: 100%;
-  overflow: hidden;
-  white-space: nowrap;
-  background: var(--dark);
-  color: #ffffff;
-  padding: 14px 0;
-  margin: 30px 0 60px;
-  font-family: var(--font-tech);
-  font-size: 12px;
-  font-weight: 700;
-  letter-spacing: 0.2em;
-}
-
-.marquee-track {
-  display: inline-block;
-  animation: marqueeScroll 25s linear infinite;
-}
-
-@keyframes marqueeScroll {
-  0% { transform: translateX(0); }
-  100% { transform: translateX(-50%); }
-}
-
-.editorial-collection-grid {
-  display: grid;
-  grid-template-columns: 2fr 1.5fr 1.5fr;
-  gap: 28px;
-  margin-top: 40px;
-}
-
-.editorial-card {
-  position: relative;
-  height: 480px;
-  border-radius: var(--radius-md);
-  overflow: hidden;
-  background: #111;
-  display: flex;
-  flex-direction: column;
-  justify-content: flex-end;
-  padding: 32px;
-  color: #ffffff;
-}
-
-.editorial-card img {
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  opacity: 0.85;
-  transition: transform 0.6s ease;
-}
-
-.editorial-card:hover img {
-  transform: scale(1.06);
-}
-
-.editorial-card::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(180deg, transparent 40%, rgba(0, 0, 0, 0.85) 100%);
-  pointer-events: none;
-}
-
-.editorial-card-content {
-  position: relative;
-  z-index: 5;
-}
-
-.editorial-card-title {
-  font-family: var(--font-hero);
-  font-size: 22px;
-  font-weight: 800;
-  text-transform: uppercase;
-  line-height: 1.2;
-  margin-bottom: 16px;
-}
-
-.btn-editorial-explore {
-  border: 1px solid #ffffff;
-  color: #ffffff;
-  font-family: var(--font-tech);
-  font-size: 11px;
-  font-weight: 700;
-  letter-spacing: 0.15em;
-  padding: 8px 24px;
-  border-radius: var(--radius-full);
-  display: inline-block;
-  transition: var(--transition);
-}
-
-.btn-editorial-explore:hover {
-  background: #ffffff;
-  color: #000000;
-}
-
-/* ==========================================================================
-   SECTION 4: "STREET ESSENTIALS / FULL WINTERS" (REFERENCE 3)
+   4. STREET ESSENTIALS (PHOTO RATIO FIXED)
    ========================================================================== */
 
 .street-essentials-section {
   padding: 100px 0;
-  background: #f8fafc;
+  background: #ffffff;
   border-top: 1px solid rgba(0, 0, 0, 0.06);
 }
 
@@ -752,17 +784,17 @@ img {
   justify-content: space-between;
   border-bottom: 2px solid var(--dark);
   padding-bottom: 20px;
-  margin-bottom: 50px;
+  margin-bottom: 40px;
 }
 
 .essentials-col-info {
   display: flex;
-  gap: 40px;
+  gap: 30px;
 }
 
 .essentials-num {
   font-family: var(--font-hero);
-  font-size: 56px;
+  font-size: 52px;
   font-weight: 800;
   line-height: 1;
 }
@@ -779,31 +811,33 @@ img {
 .essentials-subtext {
   font-size: 12px;
   color: var(--text-muted);
-  max-width: 220px;
+  max-width: 240px;
   line-height: 1.5;
 }
 
 .essentials-huge-title {
   font-family: var(--font-hero);
-  font-size: clamp(48px, 6vw, 84px);
+  font-size: clamp(40px, 5.5vw, 76px);
   font-weight: 800;
   text-transform: uppercase;
   letter-spacing: -0.02em;
-  margin-bottom: 40px;
+  margin-bottom: 36px;
 }
 
 .essentials-duo-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 36px;
+  gap: 32px;
 }
 
+/* FIXED PHOTO RATIO (Natural 4:5 Portrait Ratio without weird crops) */
 .duo-card {
   background: #eaeff2;
   border-radius: var(--radius-lg);
   overflow: hidden;
-  height: 520px;
   position: relative;
+  aspect-ratio: 4 / 5;
+  width: 100%;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -814,11 +848,12 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
   transition: transform 0.5s ease;
 }
 
 .duo-card:hover img {
-  transform: scale(1.04);
+  transform: scale(1.03);
 }
 
 .duo-card-badge {
@@ -838,12 +873,12 @@ img {
 }
 
 /* ==========================================================================
-   SECTION 5: BRUTALIST NEWSLETTER & TYPOGRAPHIC FOOTER (REFERENCE 4)
+   5. BRUTALIST NEWSLETTER & OVERFLOW-FIXED FOOTER
    ========================================================================== */
 
 .newsletter-strip-section {
   padding: 80px 0;
-  background: #ffffff;
+  background: #f8fafc;
   border-top: 1px solid rgba(0, 0, 0, 0.08);
 }
 
@@ -856,19 +891,21 @@ img {
 
 .newsletter-big-heading {
   font-family: var(--font-hero);
-  font-size: clamp(36px, 4.5vw, 64px);
+  font-size: clamp(32px, 4vw, 56px);
   font-weight: 800;
   line-height: 1.05;
   text-transform: uppercase;
-  margin-bottom: 24px;
+  margin-bottom: 20px;
 }
 
 .newsletter-form-pill {
   display: flex;
-  background: #f1f3f5;
+  background: #ffffff;
+  border: 1px solid rgba(0, 0, 0, 0.12);
   border-radius: var(--radius-full);
   padding: 6px 8px;
   max-width: 440px;
+  box-shadow: var(--shadow-subtle);
 }
 
 .newsletter-form-pill input {
@@ -898,46 +935,53 @@ img {
   transform: translateX(2px);
 }
 
+/* FIXED FOOTER (Zero Overflow / Perfect Screen Bounds) */
 .brutalist-typo-footer {
   background: var(--dark);
   color: #ffffff;
   padding: 80px 0 40px;
+  overflow: hidden;
+  position: relative;
+  width: 100%;
 }
 
 .giant-footer-word {
   font-family: var(--font-hero);
-  font-size: clamp(70px, 16vw, 240px);
+  font-size: clamp(48px, 12vw, 160px);
   font-weight: 800;
   letter-spacing: 0.04em;
   text-transform: uppercase;
-  line-height: 0.85;
+  line-height: 0.9;
   color: #ffffff;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  position: relative;
+  display: block;
+  text-align: center;
+  width: 100%;
+  max-width: 100%;
+  overflow: hidden;
+  margin: 0 auto;
 }
 
 .footer-pill-tags {
   display: flex;
+  justify-content: center;
   gap: 12px;
-  margin: 40px 0;
+  margin: 36px 0;
   flex-wrap: wrap;
 }
 
 .f-pill {
   border: 1px solid rgba(255, 255, 255, 0.3);
-  padding: 8px 24px;
+  padding: 8px 22px;
   border-radius: var(--radius-full);
   font-family: var(--font-tech);
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.15em;
   text-transform: uppercase;
 }
 
 /* ==========================================================================
-   DEDICATED FULL-SCREEN PERSONALIZED TRY-ON STUDIO MODAL
+   PERSONALIZED TRY-ON STUDIO MODAL (ON CLICK)
    ========================================================================== */
 
 .tryon-studio-overlay {
@@ -959,11 +1003,11 @@ img {
 }
 
 .tryon-nav-header {
-  padding: 20px 40px;
+  padding: 18px 40px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.9);
   backdrop-filter: blur(16px);
   border-bottom: 1px solid rgba(0, 0, 0, 0.08);
   position: sticky;
@@ -994,7 +1038,7 @@ img {
 
 .studio-grid-layout {
   max-width: 1360px;
-  margin: 40px auto;
+  margin: 30px auto;
   padding: 0 32px;
   display: grid;
   grid-template-columns: 340px 1fr 340px;
@@ -1003,11 +1047,10 @@ img {
   width: 100%;
 }
 
-/* Left Column */
 .studio-col-left {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
 .studio-product-tag {
@@ -1022,10 +1065,10 @@ img {
 
 .studio-main-title {
   font-family: var(--font-hero);
-  font-size: 48px;
+  font-size: 42px;
   font-weight: 800;
-  line-height: 1;
-  margin-bottom: 14px;
+  line-height: 1.05;
+  margin-bottom: 12px;
 }
 
 .studio-desc {
@@ -1036,14 +1079,14 @@ img {
 
 .studio-control-block {
   border-top: 1px solid rgba(13, 15, 18, 0.08);
-  padding-top: 20px;
+  padding-top: 18px;
 }
 
 .control-header-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 12px;
+  margin-bottom: 10px;
 }
 
 .control-label {
@@ -1084,7 +1127,7 @@ img {
 }
 
 .fit-btn-pill {
-  padding: 8px 20px;
+  padding: 8px 18px;
   border-radius: var(--radius-full);
   font-size: 13px;
   font-weight: 700;
@@ -1102,7 +1145,7 @@ img {
   display: flex;
   justify-content: center;
   align-items: center;
-  min-height: 600px;
+  min-height: 580px;
   background: radial-gradient(circle at 50% 60%, rgba(255, 255, 255, 0.95) 0%, rgba(235, 240, 244, 0.4) 70%);
   border-radius: var(--radius-lg);
   padding: 24px;
@@ -1125,7 +1168,7 @@ img {
 .studio-col-right {
   display: flex;
   flex-direction: column;
-  gap: 28px;
+  gap: 24px;
 }
 
 .studio-view-toggle {
@@ -1188,6 +1231,7 @@ img {
   width: 100%;
   height: 100%;
   object-fit: cover;
+  object-position: center top;
 }
 
 .studio-mood-label {
@@ -1215,7 +1259,7 @@ img {
 }
 
 .studio-look-desc {
-  font-size: 15px;
+  font-size: 14px;
   font-weight: 800;
   color: var(--dark);
 }
@@ -1253,7 +1297,7 @@ img {
 }
 
 /* ==========================================================================
-   SLIDE-OVER CART DRAWER & TOAST
+   CART DRAWER & TOAST
    ========================================================================== */
 
 .cart-drawer-overlay {
