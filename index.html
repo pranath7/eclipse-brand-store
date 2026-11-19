@@ -505,9 +505,39 @@
                 </div>
             </div>
 
-            <!-- Center Stage: Virtual Model Display -->
-            <div class="studio-center-stage">
-                <img id="studioModelImg" src="karan-szn1-back.png" alt="Model Try-On Preview" class="studio-model-img" />
+            <!-- Center Stage: 3D Floating Model Display (Zero Flat Box, Perspective Floating Cutout) -->
+            <div class="studio-center-stage" id="studioCenterStage">
+                <!-- Symmetrical Perspective Ray Wireframe (Matches Landing Page Hero Runway) -->
+                <svg class="studio-stage-rays-svg" viewBox="0 0 600 600" fill="none" preserveAspectRatio="none">
+                    <line x1="300" y1="410" x2="30" y2="40" stroke="rgba(13, 15, 18, 0.08)" stroke-width="1.2" />
+                    <line x1="300" y1="410" x2="0" y2="200" stroke="rgba(13, 15, 18, 0.08)" stroke-width="1.2" />
+                    <line x1="300" y1="410" x2="0" y2="380" stroke="rgba(13, 15, 18, 0.08)" stroke-width="1.2" />
+                    <line x1="300" y1="410" x2="570" y2="40" stroke="rgba(13, 15, 18, 0.08)" stroke-width="1.2" />
+                    <line x1="300" y1="410" x2="600" y2="200" stroke="rgba(13, 15, 18, 0.08)" stroke-width="1.2" />
+                    <line x1="300" y1="410" x2="600" y2="380" stroke="rgba(13, 15, 18, 0.08)" stroke-width="1.2" />
+                    <!-- Runway Stage Perspective Rings -->
+                    <ellipse cx="300" cy="450" rx="210" ry="42" stroke="rgba(13, 15, 18, 0.06)" stroke-width="1.2" stroke-dasharray="4 4" />
+                    <ellipse cx="300" cy="450" rx="130" ry="26" stroke="rgba(13, 15, 18, 0.09)" stroke-width="1.2" />
+                </svg>
+
+                <!-- Floating 3D Badge -->
+                <div class="studio-3d-badge">
+                    <span class="badge-dot-live"></span>
+                    <span id="studio3dBadgeText">3D FLOAT · BACK ARTWORK (MOCHA TAN)</span>
+                </div>
+
+                <!-- 3D Model Floating Wrapper (Perspective Depth & Floor Shadow) -->
+                <div class="studio-float-wrap" id="studioFloatWrap">
+                    <img id="studioModelImg" src="hero-szn1-back-cutout.png" alt="Model 3D Try-On Preview" class="studio-model-img" />
+                    <!-- Ambient 3D Floor Shadow -->
+                    <div class="studio-floor-shadow"></div>
+                </div>
+
+                <!-- 3D Floating Showcase Hint -->
+                <div class="studio-stage-rotate-hint">
+                    <span class="rotate-icon">✦</span>
+                    <span>3D FLOATING SHOWCASE · MOVE CURSOR TO TILT</span>
+                </div>
             </div>
 
             <!-- Right Column: View & Size -->
@@ -515,10 +545,10 @@
                 <!-- 03 VIEW (Angles) -->
                 <div class="studio-control-block" style="border-top: none; padding-top: 0;">
                     <div class="control-header-row">
-                        <span class="control-label">03 VIEW</span>
+                        <span class="control-label">03 VIEW (360° ANGLES)</span>
                         <span class="control-val" id="studioViewDisplay">Back</span>
                     </div>
-                    <div class="studio-view-toggle">
+                    <div class="studio-view-toggle" id="studioViewToggle">
                         <button class="view-btn-pill active" data-view="Back" onclick="setStudioView('Back', this)">Back (Art)</button>
                         <button class="view-btn-pill" data-view="Front" onclick="setStudioView('Front', this)">Front (KA)</button>
                         <button class="view-btn-pill" data-view="Side" onclick="setStudioView('Side', this)">Side</button>

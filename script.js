@@ -35,20 +35,20 @@ const PRODUCTS_DATA = {
     defaultFit: 'Oversized',
     views: {
       'Mocha Tan': {
-        Front: 'karan-szn1-front.jpg',
-        Side: 'karan-side.jpg',
-        Back: 'karan-szn1-back.png'
+        Front: 'hero-szn1-cutout.png',
+        Side: 'karan-side-mocha-cutout.png',
+        Back: 'hero-szn1-back-cutout.png'
       },
       'Vintage Black': {
-        Front: 'karan-front.jpg',
-        Side: 'karan-side.jpg',
-        Back: 'karan-back.png'
+        Front: 'karan-black-front-cutout.png',
+        Side: 'karan-side-cutout.png',
+        Back: 'karan-black-back-cutout.png'
       }
     },
     moods: [
-      { id: 'Front Stance', label: 'Front KA', img: 'karan-szn1-front.jpg' },
-      { id: 'Back Artwork', label: 'Back Art', img: 'karan-szn1-back.png' },
-      { id: 'Side Profile', label: 'Side Profile', img: 'karan-side.jpg' }
+      { id: 'Back Artwork', label: 'Back (Art)', img: 'hero-szn1-back-cutout.png' },
+      { id: 'Front Stance', label: 'Front (KA)', img: 'hero-szn1-cutout.png' },
+      { id: 'Side Profile', label: 'Side Profile', img: 'karan-side-mocha-cutout.png' }
     ]
   },
   'jogger-003': {
@@ -67,20 +67,20 @@ const PRODUCTS_DATA = {
     defaultFit: 'Relaxed Fit',
     views: {
       'Obsidian Black': {
-        Front: 'eclipse-jogger-1.jpg',
-        Side: 'eclipse-jogger-2.jpg',
-        Back: 'eclipse-jogger-3.jpg'
+        Front: 'eclipse-jogger-1-cutout.png',
+        Side: 'eclipse-jogger-2-cutout.png',
+        Back: 'eclipse-jogger-3-cutout.png'
       },
       'Street Slate': {
-        Front: 'eclipse-jogger-2.jpg',
-        Side: 'eclipse-jogger-1.jpg',
-        Back: 'eclipse-jogger-3.jpg'
+        Front: 'eclipse-jogger-2-cutout.png',
+        Side: 'eclipse-jogger-1-cutout.png',
+        Back: 'eclipse-jogger-3-cutout.png'
       }
     },
     moods: [
-      { id: 'Motion', label: 'Motion', img: 'eclipse-jogger-1.jpg' },
-      { id: 'Stance', label: 'Stance', img: 'eclipse-jogger-2.jpg' },
-      { id: 'Detail', label: 'Detail', img: 'eclipse-jogger-3.jpg' }
+      { id: 'Front Stance', label: 'Front', img: 'eclipse-jogger-1-cutout.png' },
+      { id: 'Side Stance', label: 'Side', img: 'eclipse-jogger-2-cutout.png' },
+      { id: 'Back View', label: 'Back', img: 'eclipse-jogger-3-cutout.png' }
     ]
   }
 };
@@ -130,16 +130,57 @@ function openProductTryOn(productId, initialView) {
   const sizeDisp = document.getElementById('studioSizeDisplay');
   if (sizeDisp) sizeDisp.textContent = 'L';
 
+  // Dynamic View Buttons for Tee vs Jogger
+  const viewToggle = document.getElementById('studioViewToggle');
+  if (viewToggle) {
+    if (prod.id === 'karan-001') {
+      viewToggle.innerHTML = `
+        <button class="view-btn-pill ${viewToUse === 'Back' ? 'active' : ''}" data-view="Back" onclick="setStudioView('Back', this)">Back (Art)</button>
+        <button class="view-btn-pill ${viewToUse === 'Front' ? 'active' : ''}" data-view="Front" onclick="setStudioView('Front', this)">Front (KA)</button>
+        <button class="view-btn-pill ${viewToUse === 'Side' ? 'active' : ''}" data-view="Side" onclick="setStudioView('Side', this)">Side</button>
+      `;
+    } else {
+      viewToggle.innerHTML = `
+        <button class="view-btn-pill ${viewToUse === 'Front' ? 'active' : ''}" data-view="Front" onclick="setStudioView('Front', this)">Front</button>
+        <button class="view-btn-pill ${viewToUse === 'Side' ? 'active' : ''}" data-view="Side" onclick="setStudioView('Side', this)">Side</button>
+        <button class="view-btn-pill ${viewToUse === 'Back' ? 'active' : ''}" data-view="Back" onclick="setStudioView('Back', this)">Back</button>
+      `;
+    }
+  }
+
   // View reset
   document.querySelectorAll('.view-btn-pill').forEach(b => b.classList.remove('active'));
   document.querySelector(`.view-btn-pill[data-view="${viewToUse}"]`)?.classList.add('active');
   document.getElementById('studioViewDisplay').textContent = viewToUse;
+
+  // Initialize 3D Parallax Tilt Handler on the Studio Stage
+  initStudio3DTilt();
 
   renderStudioModel();
   updateStudioSummary();
 
   document.getElementById('tryonStudioOverlay')?.classList.add('active');
   document.body.style.overflow = 'hidden';
+}
+
+// 3D Parallax Hover for Floating Model
+function initStudio3DTilt() {
+  const stage = document.getElementById('studioCenterStage');
+  const floatWrap = document.getElementById('studioFloatWrap');
+  if (!stage || !floatWrap || stage.dataset.tiltInitialized) return;
+
+  stage.dataset.tiltInitialized = 'true';
+
+  stage.addEventListener('mousemove', (e) => {
+    const rect = stage.getBoundingClientRect();
+    const x = (e.clientX - rect.left) / rect.width - 0.5;
+    const y = (e.clientY - rect.top) / rect.height - 0.5;
+    floatWrap.style.transform = `perspective(1000px) rotateY(${x * 18}deg) rotateX(${-y * 14}deg) translateY(-8px)`;
+  });
+
+  stage.addEventListener('mouseleave', () => {
+    floatWrap.style.transform = '';
+  });
 }
 
 function closeProductTryOn() {
@@ -191,7 +232,7 @@ function renderStudioModel() {
   if (!prod || !modelImg) return;
 
   const colorViews = prod.views[state.activeLook.color] || prod.views[prod.defaultColor];
-  const imgSrc = colorViews[state.activeLook.view] || colorViews['Front'];
+  const imgSrc = colorViews[state.activeLook.view] || colorViews['Front'] || colorViews['Back'];
 
   modelImg.classList.add('fade-out');
   setTimeout(() => {
@@ -199,6 +240,19 @@ function renderStudioModel() {
     modelImg.alt = `${prod.name} ${state.activeLook.color} ${state.activeLook.view}`;
     modelImg.classList.remove('fade-out');
   }, 160);
+
+  // Update 3D Floating Badge
+  const badgeText = document.getElementById('studio3dBadgeText');
+  if (badgeText) {
+    const v = state.activeLook.view;
+    let label = v;
+    if (prod.id === 'karan-001') {
+      label = v === 'Back' ? 'BACK ARTWORK' : (v === 'Front' ? 'FRONT KA' : 'SIDE PROFILE');
+    } else {
+      label = v === 'Front' ? 'FRONT STANCE' : (v === 'Side' ? 'SIDE STANCE' : 'BACK VIEW');
+    }
+    badgeText.textContent = `3D FLOAT · ${label} (${state.activeLook.color.toUpperCase()})`;
+  }
 }
 
 function updateStudioSummary() {
@@ -496,4 +550,14 @@ window.addEventListener('keydown', (e) => {
 document.addEventListener('DOMContentLoaded', () => {
   updateCartBadge();
   renderCart();
+
+  // Support direct URL deeplinking to 3D Try-On Studio (e.g. ?tryon=karan-001&view=Back)
+  const urlParams = new URLSearchParams(window.location.search);
+  const tryonTarget = urlParams.get('tryon');
+  const viewTarget = urlParams.get('view');
+  if (tryonTarget && PRODUCTS_DATA[tryonTarget]) {
+    setTimeout(() => {
+      openProductTryOn(tryonTarget, viewTarget || (tryonTarget === 'karan-001' ? 'Back' : 'Front'));
+    }, 120);
+  }
 });
