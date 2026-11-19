@@ -1518,3 +1518,51 @@ img {
     display: flex;
   }
 }
+
+
+/* 2 Products Grid Layout */
+.product-grid-two {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 460px));
+  justify-content: center;
+  gap: 36px;
+  max-width: 1000px;
+  margin: 0 auto;
+}
+
+@media (max-width: 768px) {
+  .product-grid-two {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* Lower Frame Size for Street Essentials */
+.essentials-duo-grid {
+  display: grid !important;
+  grid-template-columns: 1fr 1fr !important;
+  gap: 28px !important;
+  max-width: 1040px !important;
+  margin: 0 auto !important;
+}
+
+.duo-card {
+  background: #eaeff2 !important;
+  border-radius: var(--radius-lg) !important;
+  overflow: hidden !important;
+  position: relative !important;
+  height: 350px !important; /* Compact lowered frame size */
+  aspect-ratio: auto !important;
+  width: 100% !important;
+  display: flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  cursor: pointer !important;
+}
+
+.duo-card img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  object-position: center 20% !important;
+  transition: transform 0.5s ease !important;
+}
