@@ -463,14 +463,14 @@
     <div class="tryon-studio-overlay" id="tryonStudioOverlay">
         <!-- Top Navigation -->
         <div class="tryon-nav-header">
-            <button class="btn-back-store" onclick="closeProductTryOn()">
-                ← Back to Store
+            <button class="btn-back-store" onclick="closeProductTryOn()" aria-label="Back to Store">
+                <span>←</span> <span>Back</span>
             </button>
-            <div style="font-family: var(--font-hero); font-size: 20px; font-weight: 800; letter-spacing: 0.1em;">
-                ECLIPSE · VIRTUAL TRY-ON STUDIO
+            <div class="tryon-header-title">
+                TRY-ON STUDIO
             </div>
-            <button class="btn-back-store" onclick="closeProductTryOn()">
-                ✕ Close
+            <button class="btn-close-studio" onclick="closeProductTryOn()" aria-label="Close Studio">
+                <span>✕</span> <span>Close</span>
             </button>
         </div>
 

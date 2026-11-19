@@ -201,8 +201,27 @@
         }
 
         @media (max-width: 600px) {
+            .header-container {
+                padding: 12px 14px;
+            }
+            .btn-back-link {
+                font-size: 11px;
+                gap: 4px;
+            }
+            .checkout-brand {
+                font-size: 15px !important;
+                letter-spacing: 0.08em !important;
+            }
+            .security-badge {
+                font-size: 10px !important;
+                padding: 4px 8px !important;
+            }
             .form-grid-2 {
                 grid-template-columns: 1fr;
+            }
+            .btn-checkout-wa {
+                padding: 16px 18px;
+                font-size: 13px;
             }
         }
 
@@ -827,69 +846,9 @@
                             <input type="text" id="custPin" inputmode="numeric" class="form-input" placeholder="6-digit PIN code" pattern="[0-9]{6}" maxlength="6" required />
                         </div>
                     </div>
-                </div>
-
-                <!-- STEP 3: Payment & Dispatch Preference -->
-                <div class="checkout-card">
-                    <div class="card-heading-row">
-                        <h2 class="card-title">
-                            <span class="step-num">3</span>
-                            Payment & Dispatch Preference
-                        </h2>
-                    </div>
-
-                    <div class="payment-options-grid">
-                        <!-- Option 1: WhatsApp Direct Order -->
-                        <label class="payment-tile selected" onclick="selectPaymentTile(this)">
-                            <input type="radio" name="paymentMethod" value="WhatsApp Direct Order" checked />
-                            <div class="payment-tile-body">
-                                <div class="payment-tile-header">
-                                    <div class="payment-title">
-                                        💬 WhatsApp Instant Order
-                                    </div>
-                                    <span class="badge-recommended">FASTEST DISPATCH</span>
-                                </div>
-                                <div class="payment-desc">
-                                    Your order details will be sent directly to our store WhatsApp. We will verify your size, share payment details (UPI/COD), and dispatch within 24 hours.
-                                </div>
-                            </div>
-                        </label>
-
-                        <!-- Option 2: Cash on Delivery -->
-                        <label class="payment-tile" onclick="selectPaymentTile(this)">
-                            <input type="radio" name="paymentMethod" value="Cash on Delivery (COD)" />
-                            <div class="payment-tile-body">
-                                <div class="payment-tile-header">
-                                    <div class="payment-title">
-                                        💵 Cash on Delivery (COD)
-                                    </div>
-                                    <span style="font-size: 11px; font-family: var(--font-tech); color: var(--text-muted);">DOORSTEP SCAN/CASH</span>
-                                </div>
-                                <div class="payment-desc">
-                                    Pay cash or scan QR when the courier brings the package to your doorstep.
-                                </div>
-                            </div>
-                        </label>
-
-                        <!-- Option 3: Direct UPI -->
-                        <label class="payment-tile" onclick="selectPaymentTile(this)">
-                            <input type="radio" name="paymentMethod" value="Direct UPI / Instant Pay" />
-                            <div class="payment-tile-body">
-                                <div class="payment-tile-header">
-                                    <div class="payment-title">
-                                        ⚡ Direct UPI Transfer
-                                    </div>
-                                    <span style="font-size: 11px; font-family: var(--font-tech); color: #16a34a; font-weight: 700;">GPay / PhonePe / Paytm</span>
-                                </div>
-                                <div class="payment-desc">
-                                    Instant UPI verification on WhatsApp. Zero gateway transaction fees.
-                                </div>
-                            </div>
-                        </label>
-                    </div>
 
                     <!-- Custom Order Note -->
-                    <div class="form-group" style="margin-top: 20px;">
+                    <div class="form-group" style="margin-top: 14px;">
                         <label class="form-label" for="custNotes">Special Delivery / Sizing Note (Optional)</label>
                         <textarea id="custNotes" class="form-textarea" rows="2" placeholder="e.g. Prefer extra loose drop-shoulder fit, or please deliver between 2 PM - 6 PM"></textarea>
                     </div>
@@ -1190,11 +1149,6 @@
             renderSummary();
         }
 
-        function selectPaymentTile(labelEl) {
-            document.querySelectorAll('.payment-tile').forEach(t => t.classList.remove('selected'));
-            labelEl.classList.add('selected');
-        }
-
         // WhatsApp Order Dispatch
         function handleWhatsAppOrder(e) {
             e.preventDefault();
@@ -1214,7 +1168,6 @@
             const state = document.getElementById('custState').value;
             const pin = document.getElementById('custPin').value.trim();
             const notes = document.getElementById('custNotes').value.trim();
-            const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked')?.value || 'WhatsApp Direct Order';
 
             const subtotal = cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
             
@@ -1267,7 +1220,6 @@ ${itemsText}
 • *Items Subtotal:* ₹${subtotal}
 ${autoBundleDiscount > 0 ? `• *Set Savings:* -₹${autoBundleDiscount} (Coordinated Uniform Deal)\n` : ''}• *Express Shipping:* ${shipping === 0 ? 'FREE Express Delivery' : `₹${shipping}`}
 ${discount > 0 ? `• *VIP Discount:* -₹${discount}\n` : ''}• *TOTAL TO PAY:* ₹${finalTotal}
-• *Payment Preference:* ${paymentMethod}
 ${notes ? `\n📝 *Customer Note:* ${notes}\n` : ''}
 ══════════════════════
 🚀 *Please confirm my order and share dispatch tracking details!*`;
