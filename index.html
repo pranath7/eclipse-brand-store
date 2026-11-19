@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ECLIPSE | Signature Streetwear & Studio</title>
-    <meta name="description" content="Official ECLIPSE Store — Signature Streetwear Drops, Karan Aujla Editions, and Heavyweight Joggers.">
+    <title>ECLIPSE | AUJLA SZN 1 Official Drop</title>
+    <meta name="description" content="Official ECLIPSE Store — Karan Aujla AUJLA SZN 1 Signature Drop & Heavyweight Streetwear.">
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -12,9 +12,206 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@500;600;700;800&family=Syne:wght@700;800&display=swap" rel="stylesheet">
 
     <!-- Stylesheet -->
-    <link rel="stylesheet" href="style.css?v=35">
+    <link rel="stylesheet" href="style.css?v=40">
 </head>
 <body>
+
+    <!-- ==========================================
+         GLASSMORPHISM NAVBAR (HOME PAGE)
+         ========================================== -->
+    <header class="header-wrapper">
+        <nav class="navbar">
+            <div class="nav-group-left">
+                <a href="#collection" class="nav-link">Collection</a>
+                <a href="#products" class="nav-link">Shop</a>
+                <a href="#essentials" class="nav-link">Essentials</a>
+                <a href="#newsletter" class="nav-link">Inner Circle</a>
+            </div>
+
+            <div class="brand-center">
+                <a href="#" class="brand-logo">
+                    ECLIPSE<span class="dot"></span>
+                </a>
+            </div>
+
+            <div class="nav-group-right">
+                <button class="nav-link" onclick="openProductTryOn('karan-001', 'Back')" style="background:none;border:none;cursor:pointer;font-weight:700;">Studio Try-On ✦</button>
+                <button class="btn-sign" onclick="scrollToSection('newsletter')">AUJLA SZN 1</button>
+                <button class="cart-icon-btn" onclick="openCartDrawer()" aria-label="Open Shopping Bag">
+                    🛍️
+                    <span class="cart-badge" id="cartBadgeCount" style="display: none;">0</span>
+                </button>
+            </div>
+        </nav>
+    </header>
+
+    <!-- ==========================================
+         1. HERO SECTION (VEXO REFERENCE WITH BACK PRINT CUTOUT)
+         ========================================== -->
+    <section class="hero-section" id="hero">
+        <!-- Symmetrical Perspective Guide Rays -->
+        <svg class="hero-perspective-svg" viewBox="0 0 1440 850" fill="none" preserveAspectRatio="none">
+            <line x1="720" y1="460" x2="60" y2="40" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
+            <line x1="720" y1="460" x2="0" y2="220" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
+            <line x1="720" y1="460" x2="0" y2="440" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
+            <line x1="720" y1="460" x2="1380" y2="40" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
+            <line x1="720" y1="460" x2="1440" y2="220" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
+            <line x1="720" y1="460" x2="1440" y2="440" stroke="rgba(13, 15, 18, 0.12)" stroke-width="1.2" />
+        </svg>
+
+        <div class="hero-header-content">
+            <h1 class="hero-title">
+                AUJLA SZN 1<br>
+                THE SIGNATURE DROP!
+            </h1>
+            <div class="hero-cta-pills">
+                <button class="btn-hero-primary" onclick="scrollToSection('collection')">Our Collection</button>
+                <button class="btn-hero-secondary" onclick="openProductTryOn('karan-001', 'Back')">Personalized Try-On ✦</button>
+            </div>
+        </div>
+
+        <!-- Center Cutout Model: BACK PRINT AS MAIN DESIGN -->
+        <div class="hero-center-stage">
+            <div class="hero-model-wrap" onclick="openProductTryOn('karan-001', 'Back')" title="Click to open Try-On Studio">
+                <img src="hero-szn1-back-cutout.png" alt="AUJLA SZN 1 Signature Tee Back Artwork" class="hero-model-img" />
+            </div>
+        </div>
+
+        <!-- Bottom Bar (Social Proof & Video Preview) -->
+        <div class="hero-bottom-bar">
+            <div class="hero-social-proof">
+                <div class="avatar-cluster">
+                    <div class="avatar-circle" style="background-image: url('karan-szn1-front.jpg');" title="Front Monogram"></div>
+                    <div class="avatar-circle" style="background-image: url('karan-szn1-back.png');" title="Back Art"></div>
+                    <div class="avatar-circle" style="background-image: url('eclipse-jogger-1.jpg');" title="Signature Jogger"></div>
+                </div>
+                <p class="hero-proof-text">
+                    Official Karan Aujla Signature Drop. Engineered with 240+ GSM combed cotton, embroidered KA monogram, and iconic estate artwork.
+                </p>
+            </div>
+
+            <div class="hero-video-card" onclick="openVideoModal()">
+                <img src="campaign-teaser.jpg" alt="Campaign Teaser Film" />
+                <div class="video-play-overlay">
+                    <div class="play-circle">▶</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         2. OUR COLLECTION (PLACED RIGHT AFTER HERO)
+         ========================================== -->
+    <section class="our-collection-section" id="collection">
+        <!-- Top Social Channels -->
+        <div class="social-top-bar">
+            <span>INSTAGRAM</span>
+            <span>SPOTIFY</span>
+            <span>YOUTUBE</span>
+            <span>TWITTER</span>
+        </div>
+
+        <!-- Continuous Running Marquee Strip -->
+        <div class="marquee-strip">
+            <div class="marquee-track">
+                ✦ AUJLA SZN 1 OFFICIAL DROP ✦ ECLIPSE STREETWEAR ✦ HEAVYWEIGHT 240 GSM ✦ EMBROIDERED KA MONOGRAM ✦ LAMBORGHINI ESTATE ART ✦ PAN-INDIA EXPRESS DELIVERY ✦ DROP 001 · DROP 003 ✦
+                ✦ AUJLA SZN 1 OFFICIAL DROP ✦ ECLIPSE STREETWEAR ✦ HEAVYWEIGHT 240 GSM ✦ EMBROIDERED KA MONOGRAM ✦ LAMBORGHINI ESTATE ART ✦ PAN-INDIA EXPRESS DELIVERY ✦ DROP 001 · DROP 003 ✦
+            </div>
+        </div>
+
+        <div class="container">
+            <div class="editorial-collection-grid">
+                <!-- Card 1: AUJLA SZN 1 Back Artwork (Main Design) -->
+                <div class="editorial-card" onclick="openProductTryOn('karan-001', 'Back')">
+                    <img src="karan-szn1-back.png" alt="AUJLA SZN 1 Back Graphic" />
+                    <div class="card-glass-badge">
+                        <span class="badge-title">AUJLA SZN 1</span>
+                        <span class="badge-sub">LAMBORGHINI ESTATE ART</span>
+                    </div>
+                </div>
+
+                <!-- Card 2: AUJLA SZN 1 Front Monogram -->
+                <div class="editorial-card" onclick="openProductTryOn('karan-001', 'Front')">
+                    <img src="karan-szn1-front.jpg" alt="AUJLA SZN 1 KA Monogram Front" />
+                    <div class="card-glass-badge">
+                        <span class="badge-title">AUJLA SZN 1</span>
+                        <span class="badge-sub">EMBROIDERED KA MONOGRAM</span>
+                    </div>
+                </div>
+
+                <!-- Card 3: Signature Joggers Drop 003 -->
+                <div class="editorial-card" onclick="openProductTryOn('jogger-003', 'Front')">
+                    <img src="eclipse-jogger-1.jpg" alt="Signature Jogger 003" />
+                    <div class="card-glass-badge">
+                        <span class="badge-title">DROP 003</span>
+                        <span class="badge-sub">SIGNATURE JOGGERS</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==========================================
+         3. CATALOG (SHOWING EXACTLY 2 PRODUCTS)
+         ========================================== -->
+    <section class="catalog-section" id="products">
+        <div class="container">
+            <div class="section-head">
+                <div class="section-eyebrow">AUJLA SZN 1 // THE OFFICIAL DROP</div>
+                <h2 class="section-title">THE ECLIPSE CATALOG</h2>
+                <p class="section-sub">
+                    Two iconic pieces crafted without compromise. Click any piece for full virtual studio try-on.
+                </p>
+            </div>
+
+            <!-- Two-Product Grid (Strict 2-Product Constraint) -->
+            <div class="product-grid-two">
+                <!-- Product 1: AUJLA SZN 1 Signature Oversized Tee (Back Art Main) -->
+                <div class="product-card" onclick="openProductTryOn('karan-001', 'Back')">
+                    <div class="product-thumb-wrap">
+                        <span class="product-price-badge">₹999</span>
+                        <div class="product-arrow-btn">↗</div>
+                        <img src="karan-szn1-back.png" alt="AUJLA SZN 1 Signature Tee" />
+                    </div>
+                    <div class="product-card-body">
+                        <div style="font-family: var(--font-tech); font-size: 11px; font-weight: 800; color: #a17846; letter-spacing: 0.1em;">OFFICIAL DROP // AUJLA SZN 1</div>
+                        <div class="product-title">AUJLA SZN 1 Signature Tee</div>
+                        <div class="product-meta">Mocha Tan · 240+ GSM Combed Cotton · Embroidered KA Monogram & Lamborghini Estate Art</div>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button class="btn-tryon-card" style="flex: 1;" onclick="event.stopPropagation(); openProductTryOn('karan-001', 'Back')">
+                                ✦ Virtual Try-On ↗
+                            </button>
+                            <button class="btn-tryon-card" style="flex: 1; background: #222;" onclick="event.stopPropagation(); quickAddToCart('karan-001')">
+                                Quick Add +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Product 2: Signature Streetwear Jogger 003 -->
+                <div class="product-card" onclick="openProductTryOn('jogger-003', 'Front')">
+                    <div class="product-thumb-wrap">
+                        <span class="product-price-badge">₹1,199</span>
+                        <div class="product-arrow-btn">↗</div>
+                        <img src="eclipse-jogger-1.jpg" alt="Signature Streetwear Jogger" />
+                    </div>
+                    <div class="product-card-body">
+                        <div style="font-family: var(--font-tech); font-size: 11px; font-weight: 800; color: #64748b; letter-spacing: 0.1em;">DROP 003 // RELAXED FIT</div>
+                        <div class="product-title">Signature Streetwear Jogger</div>
+                        <div class="product-meta">Obsidian Black · 320+ GSM Heavyweight Fleece · Deep Pockets & Street Silhouette</div>
+                        <div style="display: flex; gap: 8px; margin-top: 8px;">
+                            <button class="btn-tryon-card" style="flex: 1;" onclick="event.stopPropagation(); openProductTryOn('jogger-003', 'Front')">
+                                ✦ Virtual Try-On ↗
+                            </button>
+                            <button class="btn-tryon-card" style="flex: 1; background: #222;" onclick="event.stopPropagation(); quickAddToCart('jogger-003')">
+                                Quick Add +
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
 
     <!-- ==========================================
          4. STREET ESSENTIALS (COMPACT FRAME & CORRECT TEE ANGLE)
@@ -43,15 +240,15 @@
 
             <div class="essentials-duo-grid">
                 <!-- Duo Card 1: Jogger Look -->
-                <div class="duo-card" onclick="openProductTryOn('jogger-003')">
+                <div class="duo-card" onclick="openProductTryOn('jogger-003', 'Front')">
                     <img src="eclipse-jogger-1.jpg" alt="Signature Joggers 003" />
                     <div class="duo-card-badge">DROP 003 // RELAXED FIT JOGGERS</div>
                 </div>
 
                 <!-- Duo Card 2: Correct Front Angle of Karan Signature Tee -->
-                <div class="duo-card" onclick="openProductTryOn('karan-001')">
-                    <img src="karan-front.jpg" alt="Karan Aujla Signature Oversized Tee" />
-                    <div class="duo-card-badge">DROP 001 // SIGNATURE TEE</div>
+                <div class="duo-card" onclick="openProductTryOn('karan-001', 'Front')">
+                    <img src="karan-szn1-front.jpg" alt="AUJLA SZN 1 KA Monogram Front View" />
+                    <div class="duo-card-badge">AUJLA SZN 1 // FRONT MONOGRAM TEE</div>
                 </div>
             </div>
         </div>
@@ -64,11 +261,11 @@
         <div class="container">
             <div class="newsletter-split-box">
                 <div>
-                    <h2 class="newsletter-big-heading">SUBSCRIBE TO OUR INNER CIRCLE</h2>
+                    <h2 class="newsletter-big-heading">SUBSCRIBE FOR AUJLA SZN 1 VIP ACCESS</h2>
                     <p style="font-size: 14px; color: var(--text-muted); margin-bottom: 24px;">
-                        Get 1-hour early VIP access to limited drops, exclusive invite codes, and private member pricing.
+                        Get 1-hour early VIP drop access, exclusive private member invite codes, and limited reissue alerts.
                     </p>
-                    <form onsubmit="event.preventDefault(); showToast('✦ Welcome to the Inner Circle!');" class="newsletter-form-pill">
+                    <form onsubmit="event.preventDefault(); showToast('✦ Welcome to the AUJLA SZN 1 Inner Circle!');" class="newsletter-form-pill">
                         <input type="email" placeholder="ENTER YOUR MAIL" required />
                         <button type="submit">→</button>
                     </form>
@@ -87,10 +284,10 @@
             </div>
 
             <div class="footer-pill-tags">
-                <span class="f-pill">DROP 001</span>
+                <span class="f-pill">AUJLA SZN 1</span>
                 <span class="f-pill">DROP 003</span>
-                <span class="f-pill">POPULAR</span>
                 <span class="f-pill">LIMITED EDITION</span>
+                <span class="f-pill">AUTHENTIC STREETWEAR</span>
             </div>
 
             <div style="border-top: 1px solid rgba(255,255,255,0.1); padding-top: 30px; display: flex; justify-content: space-between; font-size: 12px; color: #718096; font-family: var(--font-tech);">
@@ -122,10 +319,10 @@
             <!-- Left Column: Product Info & Customizers -->
             <div class="studio-col-left">
                 <div>
-                    <div class="studio-product-tag" id="studioProductTag">DROP 001 · SIGNATURE OVERSIZED</div>
-                    <h2 class="studio-main-title" id="studioMainTitle">Karan Signature Tee</h2>
+                    <div class="studio-product-tag" id="studioProductTag">OFFICIAL DROP · AUJLA SZN 1</div>
+                    <h2 class="studio-main-title" id="studioMainTitle">AUJLA SZN 1 Signature Tee</h2>
                     <p class="studio-desc" id="studioDesc">
-                        Heavyweight 240+ GSM combed cotton with handwritten script signature and vintage Lamborghini car back print.
+                        Heavyweight 240+ GSM combed cotton in Mocha Tan. Features luxury embroidered KA chest monogram and high-density "AUJLA SZN 1" Lamborghini Estate back graphic.
                     </p>
                 </div>
 
@@ -133,7 +330,7 @@
                 <div class="studio-control-block">
                     <div class="control-header-row">
                         <span class="control-label">01 COLOUR</span>
-                        <span class="control-val" id="studioColorDisplay">Vintage Black</span>
+                        <span class="control-val" id="studioColorDisplay">Mocha Tan</span>
                     </div>
                     <div class="studio-swatch-row" id="studioSwatchContainer"></div>
                 </div>
@@ -150,7 +347,7 @@
 
             <!-- Center Stage: Virtual Model Display -->
             <div class="studio-center-stage">
-                <img id="studioModelImg" src="karan-front.jpg" alt="Model Try-On Preview" class="studio-model-img" />
+                <img id="studioModelImg" src="karan-szn1-back.png" alt="Model Try-On Preview" class="studio-model-img" />
             </div>
 
             <!-- Right Column: Angles, Moods & Purchase -->
@@ -159,12 +356,12 @@
                 <div class="studio-control-block" style="border-top: none; padding-top: 0;">
                     <div class="control-header-row">
                         <span class="control-label">03 VIEW</span>
-                        <span class="control-val" id="studioViewDisplay">Front</span>
+                        <span class="control-val" id="studioViewDisplay">Back</span>
                     </div>
                     <div class="studio-view-toggle">
-                        <button class="view-btn-pill active" data-view="Front" onclick="setStudioView('Front', this)">Front</button>
+                        <button class="view-btn-pill active" data-view="Back" onclick="setStudioView('Back', this)">Back (Art)</button>
+                        <button class="view-btn-pill" data-view="Front" onclick="setStudioView('Front', this)">Front (KA)</button>
                         <button class="view-btn-pill" data-view="Side" onclick="setStudioView('Side', this)">Side</button>
-                        <button class="view-btn-pill" data-view="Back" onclick="setStudioView('Back', this)">Back</button>
                     </div>
                 </div>
 
@@ -172,7 +369,7 @@
                 <div class="studio-control-block">
                     <div class="control-header-row">
                         <span class="control-label">04 MOOD</span>
-                        <span class="control-val" id="studioMoodDisplay">Deadpan</span>
+                        <span class="control-val" id="studioMoodDisplay">Back Art</span>
                     </div>
                     <div class="studio-mood-row" id="studioMoodContainer"></div>
                 </div>
@@ -181,7 +378,7 @@
                 <div class="studio-look-card">
                     <div class="studio-look-header">YOUR LOOK</div>
                     <div class="studio-look-desc" id="studioLookSummary">
-                        Vintage Black · Oversized · Front · Deadpan
+                        Mocha Tan · Oversized · Back · Back Art
                     </div>
                     <div class="studio-look-action-row">
                         <div class="studio-price" id="studioPrice">₹999</div>
@@ -227,6 +424,6 @@
     <div class="toast-msg" id="toastMsg">✦ Notification</div>
 
     <!-- Script -->
-    <script src="script.js?v=35"></script>
+    <script src="script.js?v=40"></script>
 </body>
 </html>

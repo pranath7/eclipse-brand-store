@@ -1,5 +1,5 @@
 /* ==========================================================================
-   ECLIPSE STORE — SCRIPT.JS (STREETWEAR ONLY + PERSONALIZED TRY-ON)
+   ECLIPSE STORE — SCRIPT.JS (AUJLA SZN 1 OFFICIAL DROP CONTROLLER)
    ========================================================================== */
 
 const state = {
@@ -15,61 +15,29 @@ const state = {
 };
 
 // ==========================================================================
-// 1. STREETWEAR-ONLY PRODUCTS DATABASE
+// 1. PRODUCTS DATABASE (OFFICIAL AUJLA SZN 1 + JOGGER 003)
 // ==========================================================================
 
 const PRODUCTS_DATA = {
   'karan-001': {
     id: 'karan-001',
-    name: 'Karan Aujla Signature Tee',
-    drop: 'DROP 001 · SIGNATURE OVERSIZED',
+    name: 'AUJLA SZN 1 Signature Tee',
+    drop: 'OFFICIAL DROP · AUJLA SZN 1',
     category: 'tees',
-    desc: 'Heavyweight 240+ GSM combed french terry cotton. Handwritten script chest signature with vintage luxury car back print graphic.',
+    desc: 'Heavyweight 240+ GSM combed cotton in Mocha Tan. Features luxury embroidered KA chest monogram and high-density "AUJLA SZN 1" Lamborghini Estate back graphic.',
     price: 999,
     colors: [
-      { name: 'Vintage Black', hex: '#111111' },
-      { name: 'Bone White', hex: '#f4f3ef' }
-    ],
-    fits: ['Regular', 'Oversized'],
-    defaultColor: 'Vintage Black',
-    defaultFit: 'Oversized',
-    views: {
-      'Vintage Black': {
-        Front: 'karan-front.jpg',
-        Side: 'karan-side.jpg',
-        Back: 'karan-back.png'
-      },
-      'Bone White': {
-        Front: 'karan-white-front.jpg',
-        Side: 'karan-side.jpg',
-        Back: 'karan-white-back.jpg'
-      }
-    },
-    moods: [
-      { id: 'Deadpan', label: 'Deadpan', img: 'karan-front.jpg' },
-      { id: 'Street', label: 'Street', img: 'karan-side.jpg' },
-      { id: 'Detail', label: 'Detail', img: 'karan-front.jpg' }
-    ]
-  },
-  'karan-white': {
-    id: 'karan-white',
-    name: 'Karan Signature Tee (Bone White)',
-    drop: 'DROP 001 · BONE WHITE EDITION',
-    category: 'tees',
-    desc: 'Off-white combed heavyweight cotton with contrasting black handwritten script signature and monochrome back artwork.',
-    price: 999,
-    colors: [
-      { name: 'Bone White', hex: '#f4f3ef' },
+      { name: 'Mocha Tan', hex: '#b3946b' },
       { name: 'Vintage Black', hex: '#111111' }
     ],
     fits: ['Regular', 'Oversized'],
-    defaultColor: 'Bone White',
+    defaultColor: 'Mocha Tan',
     defaultFit: 'Oversized',
     views: {
-      'Bone White': {
-        Front: 'karan-white-front.jpg',
+      'Mocha Tan': {
+        Front: 'karan-szn1-front.jpg',
         Side: 'karan-side.jpg',
-        Back: 'karan-white-back.jpg'
+        Back: 'karan-szn1-back.png'
       },
       'Vintage Black': {
         Front: 'karan-front.jpg',
@@ -78,9 +46,9 @@ const PRODUCTS_DATA = {
       }
     },
     moods: [
-      { id: 'Deadpan', label: 'Deadpan', img: 'karan-white-front.jpg' },
-      { id: 'Street', label: 'Street', img: 'karan-side.jpg' },
-      { id: 'Detail', label: 'Detail', img: 'karan-white-front.jpg' }
+      { id: 'Front Stance', label: 'Front KA', img: 'karan-szn1-front.jpg' },
+      { id: 'Back Artwork', label: 'Back Art', img: 'karan-szn1-back.png' },
+      { id: 'Side Profile', label: 'Side Profile', img: 'karan-side.jpg' }
     ]
   },
   'jogger-003': {
@@ -114,38 +82,6 @@ const PRODUCTS_DATA = {
       { id: 'Stance', label: 'Stance', img: 'eclipse-jogger-2.jpg' },
       { id: 'Detail', label: 'Detail', img: 'eclipse-jogger-3.jpg' }
     ]
-  },
-  'karan-dream': {
-    id: 'karan-dream',
-    name: '"It Was All A Dream" Back Edition',
-    drop: 'DROP 001 · GRAPHIC BACK PRINT',
-    category: 'tees',
-    desc: 'Feature back piece showcasing the iconic vintage Lamborghini luxury car illustration and bold street typography.',
-    price: 999,
-    colors: [
-      { name: 'Vintage Black', hex: '#111111' },
-      { name: 'Bone White', hex: '#f4f3ef' }
-    ],
-    fits: ['Oversized', 'Regular'],
-    defaultColor: 'Vintage Black',
-    defaultFit: 'Oversized',
-    views: {
-      'Vintage Black': {
-        Front: 'karan-back.png',
-        Side: 'karan-side.jpg',
-        Back: 'karan-front.jpg'
-      },
-      'Bone White': {
-        Front: 'karan-white-back.jpg',
-        Side: 'karan-side.jpg',
-        Back: 'karan-white-front.jpg'
-      }
-    },
-    moods: [
-      { id: 'Back Art', label: 'Back Art', img: 'karan-back.png' },
-      { id: 'Street', label: 'Street', img: 'karan-side.jpg' },
-      { id: 'Front View', label: 'Front', img: 'karan-front.jpg' }
-    ]
   }
 };
 
@@ -153,14 +89,15 @@ const PRODUCTS_DATA = {
 // 2. OPEN PERSONALIZED TRY-ON STUDIO
 // ==========================================================================
 
-function openProductTryOn(productId) {
+function openProductTryOn(productId, initialView) {
   const prod = PRODUCTS_DATA[productId] || PRODUCTS_DATA['karan-001'];
   state.activeProduct = prod;
+  const viewToUse = initialView || (productId === 'karan-001' ? 'Back' : 'Front');
   state.activeLook = {
     color: prod.defaultColor,
     fit: prod.defaultFit,
-    view: 'Front',
-    mood: prod.moods[0].id
+    view: viewToUse,
+    mood: (productId === 'karan-001' && viewToUse === 'Back') ? 'Back Artwork' : prod.moods[0].id
   };
 
   document.getElementById('studioProductTag').textContent = prod.drop;
@@ -188,9 +125,10 @@ function openProductTryOn(productId) {
 
   // Moods
   const moodContainer = document.getElementById('studioMoodContainer');
-  document.getElementById('studioMoodDisplay').textContent = prod.moods[0].label;
-  moodContainer.innerHTML = prod.moods.map((m, i) => `
-    <div class="studio-mood-card ${i === 0 ? 'active' : ''}" onclick="setStudioMood('${m.id}', this)">
+  const activeMoodObj = prod.moods.find(m => m.id === state.activeLook.mood) || prod.moods[0];
+  document.getElementById('studioMoodDisplay').textContent = activeMoodObj.label;
+  moodContainer.innerHTML = prod.moods.map(m => `
+    <div class="studio-mood-card ${m.id === state.activeLook.mood ? 'active' : ''}" onclick="setStudioMood('${m.id}', this)">
       <div class="studio-mood-thumb">
         <img src="${m.img}" alt="${m.label}" />
       </div>
@@ -200,8 +138,8 @@ function openProductTryOn(productId) {
 
   // View reset
   document.querySelectorAll('.view-btn-pill').forEach(b => b.classList.remove('active'));
-  document.querySelector('.view-btn-pill[data-view="Front"]')?.classList.add('active');
-  document.getElementById('studioViewDisplay').textContent = 'Front';
+  document.querySelector(`.view-btn-pill[data-view="${viewToUse}"]`)?.classList.add('active');
+  document.getElementById('studioViewDisplay').textContent = viewToUse;
 
   renderStudioModel();
   updateStudioSummary();
@@ -319,6 +257,21 @@ function filterCategory(cat, el) {
 // 4. CART & DRAWER
 // ==========================================================================
 
+function quickAddToCart(productId) {
+  const prod = PRODUCTS_DATA[productId] || PRODUCTS_DATA['karan-001'];
+  const defaultImg = prod.views[prod.defaultColor]?.Back || prod.views[prod.defaultColor]?.Front || 'karan-szn1-back.png';
+  addToCart({
+    id: `${prod.id}-${prod.defaultColor}-${prod.defaultFit}`.toLowerCase().replace(/\s+/g, '-'),
+    name: prod.name,
+    meta: `${prod.defaultColor} · ${prod.defaultFit}`,
+    price: prod.price,
+    img: defaultImg,
+    qty: 1
+  });
+  openCartDrawer();
+  showToast(`✦ Added ${prod.name} to Bag!`);
+}
+
 function addToCart(product) {
   const existing = state.cart.find(item => item.id === product.id);
   if (existing) {
@@ -376,7 +329,7 @@ function renderCart() {
       <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
         <div style="font-size: 40px; margin-bottom: 12px;">🛍️</div>
         <p style="font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 6px;">Your Bag is Empty</p>
-        <p style="font-size: 13px;">Click on any product to try it on and configure your look.</p>
+        <p style="font-size: 13px;">Experience AUJLA SZN 1 in our Try-On studio.</p>
       </div>
     `;
     if (subtotalEl) subtotalEl.textContent = '₹0';
@@ -393,7 +346,7 @@ function renderCart() {
         <img src="${item.img}" alt="${item.name}" class="cart-item-img" />
         <div class="cart-item-info">
           <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-meta">${item.meta || 'Drop Collection'}</div>
+          <div class="cart-item-meta">${item.meta || 'AUJLA SZN 1'}</div>
           <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px;">
             <div style="display: flex; align-items: center; gap: 8px; background: #f1f3f5; border-radius: 20px; padding: 2px 10px;">
               <button onclick="updateQty('${item.id}', -1)" style="font-size: 14px; font-weight: 700;">-</button>
@@ -450,7 +403,7 @@ function showToast(msg) {
 }
 
 function openVideoModal() {
-  alert("✦ ECLIPSE CAMPAIGN FILM\n\nModel: Karan Aujla Signature Edition\nDrop: 001 & 003\nFabric: 240+ GSM Combed French Terry\n\n(Full campaign teaser loaded!)");
+  alert("✦ AUJLA SZN 1 CAMPAIGN FILM\n\nOfficial Karan Aujla Drop\nPiece: Luxury Embroidered KA Monogram Tee\nArt: Lamborghini Estate Edition\nFabric: 240+ GSM Heavyweight Combed Cotton\n\n(Full campaign teaser loaded!)");
 }
 
 function triggerCheckout() {
@@ -467,7 +420,7 @@ function triggerCheckout() {
     renderCart();
     updateCartBadge();
     closeCartDrawer();
-    alert(`🎉 Order Placed Successfully!\n\nOrder ID: ${orderId}\nWe have sent tracking details to your registered number.`);
+    alert(`🎉 Order Placed Successfully!\n\nOrder ID: ${orderId}\nAUJLA SZN 1 order confirmed.`);
   }
 }
 
