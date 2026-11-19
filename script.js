@@ -1,1199 +1,412 @@
-/* =====================================================
-   ECLIPSE STORE — SCRIPT.JS  (v3 — Firebase Integrated)
-   ===================================================== */
+/* ==========================================================================
+   ECLIPSE STORE — SCRIPT.JS (VEXO & TRY-ON STUDIO CONTROLLER)
+   ========================================================================== */
 
-// ===== FIREBASE INIT =====
-const firebaseConfig = {
-    apiKey: "AIzaSyAzNaCsi3Yw5-6879_F1p0b1j0viyKThN4",
-    authDomain: "eclipse-store-001.firebaseapp.com",
-    projectId: "eclipse-store-001",
-    storageBucket: "eclipse-store-001.firebasestorage.app",
-    messagingSenderId: "42097707466",
-    appId: "1:42097707466:web:21d84f904dbdd1c0872733"
-};
-if (!firebase.apps.length) {
-    firebase.initializeApp(firebaseConfig);
-}
-const db = firebase.firestore();
-
-// ===== AUTH & USER STATE =====
-let currentUser = null;
-let currentWallet = 0;
-let currentAffiliate = '';
-let currentReferrals = 0;
-
-let userOrdersUnsub = null;
-
-firebase.auth().onAuthStateChanged(user => {
-    currentUser = user;
-    if (user) {
-        db.collection('users').doc(user.uid).onSnapshot(doc => {
-            if (doc.exists) {
-                const data = doc.data();
-                currentWallet = data.walletBalance || 0;
-                currentAffiliate = data.affiliateCode || '';
-                currentReferrals = data.referralsCount || 0;
-
-                const ab = document.getElementById('authBtn');
-                if (ab) ab.innerHTML = `<span style="font-size:14px; font-weight:bold; margin-right:5px; color:var(--gold);">₹${currentWallet}</span> 👤`;
-                const an = document.getElementById('accNameDisplay'); if (an) an.textContent = user.email.split('@')[0];
-                const aw = document.getElementById('accWalletDisplay'); if (aw) aw.textContent = currentWallet;
-                const aa = document.getElementById('accAffiliateDisplay'); if (aa) aa.textContent = currentAffiliate;
-                const ar = document.getElementById('accReferralsDisplay'); if (ar) ar.textContent = currentReferrals;
-
-                const lo = document.getElementById('accountLoggedOut'); if (lo) lo.style.display = 'none';
-                const li = document.getElementById('accountLoggedIn'); if (li) li.style.display = 'block';
-
-                const optGrp = document.getElementById('authOptInGroup'); if (optGrp) optGrp.style.display = 'none';
-
-                const wtr = document.getElementById('osWalletToggleRow');
-                if (wtr && currentWallet > 0) {
-                    wtr.classList.remove('hidden');
-                    const ap = document.getElementById('availPoints'); if (ap) ap.textContent = currentWallet;
-                } else if (wtr) { wtr.classList.add('hidden'); const uc = document.getElementById('useWalletCheck'); if (uc) uc.checked = false; }
-                if (document.getElementById('osTotal')) updateOrderSummary();
-            }
-        });
-
-        // Fetch User's Orders
-        if (userOrdersUnsub) userOrdersUnsub();
-        userOrdersUnsub = db.collection('orders')
-            .where('userId', '==', user.uid)
-            .onSnapshot(snap => {
-                const orders = [];
-                snap.forEach(doc => orders.push({ id: doc.id, ...doc.data() }));
-                // Sort client-side to avoid needing a composite index in Firebase
-                orders.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
-                renderUserOrders(orders);
-            }, err => {
-                const wrap = document.getElementById('accOrdersDisplay');
-                if (wrap) wrap.innerHTML = `<div style="text-align:center; color:var(--red); font-size:13px; padding:10px;">Error loading orders.</div>`;
-                console.error("Order fetch error:", err);
-            });
-
-    } else {
-        if (userOrdersUnsub) { userOrdersUnsub(); userOrdersUnsub = null; }
-        currentWallet = 0; currentAffiliate = ''; currentReferrals = 0;
-        const ab = document.getElementById('authBtn'); if (ab) ab.innerHTML = `👤`;
-        const lo = document.getElementById('accountLoggedOut'); if (lo) lo.style.display = 'block';
-        const li = document.getElementById('accountLoggedIn'); if (li) li.style.display = 'none';
-
-        const optGrp = document.getElementById('authOptInGroup'); if (optGrp) optGrp.style.display = 'block';
-        const wtr = document.getElementById('osWalletToggleRow'); if (wtr) { wtr.classList.add('hidden'); const uc = document.getElementById('useWalletCheck'); if (uc) uc.checked = false; }
-        if (document.getElementById('osTotal')) updateOrderSummary();
-    }
-});
-
-function renderUserOrders(orders) {
-    const wrap = document.getElementById('accOrdersDisplay');
-    if (!wrap) return;
-
-    if (orders.length === 0) {
-        wrap.innerHTML = `<div style="text-align:center; color:var(--grey); font-size:13px; padding:10px;">No orders yet. Start shopping!</div>`;
-        return;
-    }
-
-    wrap.innerHTML = orders.map(o => {
-        const d = new Date(o.timestamp);
-        const dateStr = d.toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' });
-        const st = (o.status || 'Pending').toLowerCase();
-        return `
-        <div class="acc-order-item">
-            <div class="acc-o-left">
-                <div class="acc-o-title">${o.product} — 001 (${o.size})</div>
-                <div class="acc-o-date">Ordered on ${dateStr} • ${o.id}</div>
-            </div>
-            <div class="acc-o-status status-${st}">${o.status || 'Pending'}</div>
-        </div>
-        `;
-    }).join('');
-}
-
-function toggleAccountCreation() {
-    const chk = document.getElementById('createAccountCheck');
-    const flds = document.getElementById('accountCreationFields');
-    if (chk && flds) flds.style.display = chk.checked ? 'block' : 'none';
-}
-function openAuthModal() { openModal('accountModal'); }
-function doUserLogin() {
-    const e = document.getElementById('loginEmail').value.trim();
-    const p = document.getElementById('loginPwd').value;
-    const err = document.getElementById('loginError');
-    if (!e || !p) { err.textContent = 'Enter email and password'; err.classList.remove('hidden'); return; }
-    firebase.auth().signInWithEmailAndPassword(e, p).then(() => {
-        err.classList.add('hidden'); closeModal('accountModal'); showToast('Logged in!', 'success');
-    }).catch(e => { err.textContent = e.message; err.classList.remove('hidden'); });
-}
-function doUserLogout() { firebase.auth().signOut().then(() => { closeModal('accountModal'); showToast('Logged out.', 'success'); }); }
-
-// ===== STATE =====
-let cart = [];
-let selectedSize = null;
-let selectedPayment = null;
-let deliveryData = {};
-let appliedCoupon = null;
-let currentLeadId = null; // Track active lead for abandonment recovery
-const BASE_PRICE = 1199;
-
-let activeCoupons = {};
-db.collection('coupons').onSnapshot(snap => {
-    activeCoupons = {};
-    snap.forEach(doc => { activeCoupons[doc.id] = doc.data(); });
-});
-
-// ===== COUPONS =====
-function getCoupons() {
-    return activeCoupons;
-}
-
-function calcFinalPrice() {
-    let p = BASE_PRICE;
-    if (appliedCoupon) {
-        const c = getCoupons()[appliedCoupon];
-        if (c) {
-            if (c.type === 'percent') p = Math.round(p * (1 - c.discount / 100));
-            else p = Math.max(0, p - c.discount);
-        }
-    }
-
-    // Wallet deduction
-    const uwc = document.getElementById('useWalletCheck');
-    let pointsUsed = 0;
-    const wvr = document.getElementById('osWalletValRow');
-    const wu = document.getElementById('osWalletUsed');
-
-    if (uwc && uwc.checked && currentWallet > 0) {
-        pointsUsed = Math.min(p, currentWallet);
-        p -= pointsUsed;
-        if (wvr && wu) { wvr.classList.remove('hidden'); wu.textContent = `— ₹${pointsUsed}`; }
-    } else {
-        if (wvr) wvr.classList.add('hidden');
-    }
-
-    return { finalPrice: p, pointsUsed };
-}
-
-// ===== GLOBAL INITIALIZATION =====
-let ticking = false;
-window.addEventListener('load', () => {
-    // Initial Reveal & Scarcity
-    initReveal();
-    initScarcityPulse();
-    initTilt();
-    initCountdown();
-    
-    // Custom Cursor Lifecycle
-    if (typeof initCustomCursor === 'function') initCustomCursor();
-});
-
-// Throttled Scroll Manager
-window.addEventListener('scroll', () => {
-    if (!ticking) {
-        window.requestAnimationFrame(() => {
-            handleScrollEffects();
-            ticking = false;
-        });
-        ticking = true;
-    }
-}, { passive: true });
-
-function handleScrollEffects() {
-    const nav = document.getElementById('navbar');
-    if (!nav) return;
-    
-    const cur = window.scrollY;
-    // Direct transform for top-tier smoothness
-    if (cur > 100 && cur > lastScrollY) {
-        nav.style.transform = 'translateY(-100%)';
-    } else {
-        nav.style.transform = 'translateY(0)';
-    }
-    
-    // Background shift
-    nav.style.background = cur > 50 ? 'rgba(14, 10, 12, 0.95)' : 'rgba(14, 10, 12, 0.5)';
-    lastScrollY = cur;
-}
-
-
-// ===== NEWSLETTER =====
-async function submitNewsletter(e) {
-    e.preventDefault();
-    const email = document.getElementById('nlEmail').value.trim();
-    const status = document.getElementById('nlStatus');
-    if (!email) return;
-
-    status.textContent = 'Joining...';
-    status.style.color = 'var(--grey)';
-
-    try {
-        await db.collection('newsletter').add({
-            email,
-            timestamp: new Date().toISOString()
-        });
-        status.textContent = 'Welcome to the circle! 🌑';
-        status.style.color = 'var(--gold)';
-        document.getElementById('nlEmail').value = '';
-        showToast('Successfully joined the inner circle!', 'success');
-    } catch (err) {
-        console.error(err);
-        status.textContent = 'Error joining. Please try again.';
-        status.style.color = 'var(--red)';
-    }
-}
-
-// ===== CUSTOM CURSOR (MOVED TO EXTRA.JS FOR PERFORMANCE) =====
-
-// ===== NAVBAR =====
-window.addEventListener('scroll', () => {
-    const nb = document.getElementById('navbar');
-    if (nb) nb.classList.toggle('scrolled', window.scrollY > 50);
-});
-document.querySelectorAll('.nav-link, .mobile-link').forEach(link => {
-    link.addEventListener('click', (e) => {
-        const href = link.getAttribute('href');
-        if (href && href.startsWith('#')) {
-            e.preventDefault();
-            const t = document.querySelector(href);
-            if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' });
-            closeMobileMenu();
-        }
-    });
-});
-
-// ===== HAMBURGER =====
-const hamburgerEl = document.getElementById('hamburger');
-if (hamburgerEl) hamburgerEl.addEventListener('click', () => {
-    hamburgerEl.classList.toggle('active');
-    document.getElementById('mobileMenu').classList.toggle('open');
-});
-function closeMobileMenu() {
-    const h = document.getElementById('hamburger');
-    const m = document.getElementById('mobileMenu');
-    if (h) h.classList.remove('active');
-    if (m) m.classList.remove('open');
-}
-
-// ===== HERO FLIP =====
-(function () {
-    const back = document.getElementById('heroBack');
-    const front = document.getElementById('heroFront');
-    const btn = document.getElementById('heroFlipBtn');
-    if (!back || !front || !btn) return;
-    let showingBack = true;
-    btn.addEventListener('click', () => {
-        if (showingBack) { back.classList.remove('active'); front.classList.add('active'); }
-        else { front.classList.remove('active'); back.classList.add('active'); }
-        showingBack = !showingBack;
-    });
-})();
-setInterval(() => {
-    const back = document.getElementById('heroBack');
-    const front = document.getElementById('heroFront');
-    if (!back || !front) return;
-    if (back.classList.contains('active')) { back.classList.remove('active'); front.classList.add('active'); }
-    else { front.classList.remove('active'); back.classList.add('active'); }
-}, 4000);
-
-// ===== SCROLL REVEAL =====
-function initReveal() {
-    const els = document.querySelectorAll('.product-card,.section-header,.feature,.contact-item,.about-text,.about-visual');
-    els.forEach(el => el.classList.add('reveal'));
-    const io = new IntersectionObserver((entries) => {
-        entries.forEach(entry => { if (entry.isIntersecting) entry.target.classList.add('visible'); });
-    }, { threshold: 0.12 });
-    els.forEach(el => io.observe(el));
-}
-
-// ===== MODAL SYSTEM =====
-function openModal(id) { document.getElementById(id).classList.add('open'); document.body.style.overflow = 'hidden'; }
-function closeModal(id) {
-    document.getElementById(id).classList.remove('open');
-    if (document.querySelectorAll('.modal-overlay.open').length === 0) document.body.style.overflow = '';
-}
-function closeAll() {
-    document.querySelectorAll('.modal-overlay').forEach(m => m.classList.remove('open'));
-    document.body.style.overflow = '';
-    selectedSize = null; selectedPayment = null; appliedCoupon = null;
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-}
-document.querySelectorAll('.modal-overlay').forEach(overlay => {
-    overlay.addEventListener('click', (e) => { if (e.target === overlay) { overlay.classList.remove('open'); if (document.querySelectorAll('.modal-overlay.open').length === 0) document.body.style.overflow = ''; } });
-});
-document.addEventListener('keydown', (e) => {
-    if (e.key === 'Escape') { const o = document.querySelectorAll('.modal-overlay.open'); if (o.length > 0) { o[o.length - 1].classList.remove('open'); if (document.querySelectorAll('.modal-overlay.open').length === 0) document.body.style.overflow = ''; } }
-});
-
-// ===== PRODUCT DATA (DROP 003 & Legacy) =====
-const PRODUCTS = [
-  {
-    id: 0, name: 'Eclipse Signature Jogger', type: 'Relaxed Fit · Black',
-    img: 'eclipse-jogger-1.jpg', price: 1199,
-    desc: 'Drop 003 — The Ultimate Jogger. Premium streetwear sweatpants. Heavyweight 300+ GSM cotton blend, built for structure and extreme comfort.',
-    sizes: ['S','M','L','XL','XXL']
-  },
-  {
-    id: 1, name: 'Hibiscus', type: 'Baby Crop Tee · White',
-    img: 'product-hibiscus.png', price: 800,
-    desc: 'A bold hibiscus bloom on premium soft cotton. Wear it with denim for an effortless aesthetic look.',
-    sizes: ['XS','S','M','L','XL']
-  },
-  {
-    id: 2, name: 'Just A Girl', type: 'Baby Crop Tee · White',
-    img: 'product-just-a-girl.png', price: 800,
-    desc: '"i am literally just a girl" — with a bow and sparkles. The most relatable tee of the season.',
-    sizes: ['XS','S','M','L','XL']
-  },
-  {
-    id: 3, name: 'Kiss Love', type: 'Baby Crop Tee · White',
-    img: 'product-kiss-love.png', price: 800,
-    desc: 'Bold red lip print with Kiss Love script and a tiny heart. Edgy, feminine, unforgettable.',
-    sizes: ['XS','S','M','L','XL']
-  },
-  {
-    id: 4, name: 'Cherry Bow', type: 'Baby Crop Top · White',
-    img: 'product-cherry-bow.png', price: 800,
-    desc: '3D glossy cherries with a satin bow ribbon. The Y2K dream piece — styled by the baddies.',
-    sizes: ['XS','S','M','L','XL']
-  },
-  {
-    id: 5, name: 'Signature Tee 001', type: 'Oversized Tee · 180 GSM',
-    img: 'karan-front.jpg', price: 999,
-    desc: 'Drop 001 — Eclipse\'s debut heavyweight oversized tee. Premium 180 GSM cotton, double-stitched for life.',
-    sizes: ['XS','S','M','L','XL','XXL'],
-    accent: '#c9a84c'
+// Global State
+const state = {
+  cart: JSON.parse(localStorage.getItem('eclipse_cart_v2') || '[]'),
+  tryOn: {
+    name: 'Karan Aujla Signature Tee',
+    drop: 'Drop 001',
+    color: 'Vintage Black',
+    fit: 'Oversized',
+    view: 'Front',
+    mood: 'Deadpan',
+    price: 999
   }
-];
-
-let activeProductId = 0;
-let productQty = 1;
-
-// Global openProduct (overrides any other definition)
-window.openProduct = function(id) {
-    try {
-        activeProductId = id;
-        selectedSize = null; 
-        productQty = 1;
-        const p = PRODUCTS[id];
-        if (!p) return;
-        
-        const pmImg = document.getElementById('pmImg');
-        if (pmImg) { pmImg.src = p.img; pmImg.alt = p.name; }
-        
-        const pmName = document.getElementById('pmName');
-        if (pmName) pmName.textContent = p.name;
-        
-        const pmType = document.getElementById('pmType');
-        if (pmType) pmType.textContent = p.type;
-        
-        const pmDesc = document.getElementById('pmDesc');
-        if (pmDesc) pmDesc.textContent = p.desc;
-        
-        const pmPrice = document.getElementById('pmPrice');
-        if (pmPrice) {
-            pmPrice.textContent = '\u20b9' + p.price;
-            pmPrice.style.color = p.accent || 'var(--pink)';
-        }
-        
-        const qtyVal = document.getElementById('qtyVal');
-        if (qtyVal) qtyVal.textContent = 1;
-        
-        const so = document.getElementById('sizeOptions');
-        if (so) {
-            so.innerHTML = p.sizes.map(s =>
-                `<div class="size-opt" onclick="pickSize('${s}', this)">${s}</div>`
-            ).join('');
-        }
-        openModal('productModal');
-    } catch(e) { console.error("Modal error:", e); }
 };
 
-window.pickSize = function(size, el) {
-    selectedSize = size;
-    document.querySelectorAll('.size-opt').forEach(o => o.classList.remove('selected'));
-    if (el) el.classList.add('selected');
-};
+// ==========================================================================
+// 1. TRY-ON STUDIO CONTROLLER (WATTASHIRT STYLE)
+// ==========================================================================
 
-window.changeQty = function(delta) {
-    productQty = Math.max(1, productQty + delta);
-    const qv = document.getElementById('qtyVal');
-    if (qv) qv.textContent = productQty;
-};
-
-window.addToCartFromModal = function() {
-    if (!selectedSize) { showToast('Please select a size', 'error'); return; }
-    const p = PRODUCTS[activeProductId];
-    for (let i = 0; i < productQty; i++) {
-        cart.push({ id: Date.now() + i, name: p.name, size: selectedSize, price: p.price, img: p.img });
-    }
-    updateCartCount();
-    renderCart();
-    
-    const btn = document.getElementById('pmBuyBtn');
-    if(btn) {
-        const oldText = btn.innerHTML;
-        btn.innerHTML = '✓ ADDED';
-        btn.classList.add('btn-added');
-        showToast('✅ Added to your cart!', 'success');
-        setTimeout(() => {
-            btn.innerHTML = oldText;
-            btn.classList.remove('btn-added');
-            closeModal('productModal');
-        }, 1000);
-    } else { 
-        showToast('✅ Added to your cart!', 'success');
-        closeModal('productModal'); 
-    }
-};
-
-window.buyNowFromModal = function() {
-    if (!selectedSize) { showToast('Please select a size', 'error'); return; }
-    window.addToCartFromModal();
-    setTimeout(() => { 
-        openModal('orderModal'); 
-        if (typeof updateOrderSummary === 'function') updateOrderSummary(); 
-    }, 1200);
-};
-
-// ===== PREMIUM CUSTOM CURSOR (lerp) =====
-function initCustomCursor() {
-    const cursorDot = document.getElementById('cursorDot');
-    const cursorRing = document.getElementById('cursorRing');
-    if (!cursorDot || !cursorRing) return;
-    
-    document.body.classList.add('custom-cursor-active');
-    let mX = window.innerWidth / 2, mY = window.innerHeight / 2;
-    let rX = mX, rY = mY;
-    
-    document.addEventListener('mousemove', e => { 
-        mX = e.clientX; 
-        mY = e.clientY; 
-        if (cursorDot.style.opacity !== '1') {
-            cursorDot.style.opacity = '1';
-            cursorRing.style.opacity = '1';
-        }
-    }, { passive: true });
-    
-    const tick = () => {
-        // Snappier lerp (0.25) for high-end fluidity
-        rX += (mX - rX) * 0.25;
-        rY += (mY - rY) * 0.25;
-        
-        if (cursorDot) cursorDot.style.transform = `translate3d(${mX}px, ${mY}px, 0)`;
-        if (cursorRing) cursorRing.style.transform = `translate3d(${rX}px, ${rY}px, 0)`;
-        
-        requestAnimationFrame(tick);
-    }
-    requestAnimationFrame(tick);
-    
-    document.addEventListener('mouseover', e => {
-        const target = e.target.closest('a, button, .product-card, .size-opt');
-        if (target) cursorRing.classList.add('hovering');
-    });
-    document.addEventListener('mouseout', e => {
-        const target = e.target.closest('a, button, .product-card, .size-opt');
-        if (target) cursorRing.classList.remove('hovering');
-    });
+function initTryOnStudio() {
+  updateLookSummary();
 }
 
-function selectSize(btn) {
-    document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-    btn.classList.add('selected');
-    selectedSize = btn.dataset.size;
-    const se = document.getElementById('sizeError');
-    if (se) se.classList.remove('visible');
-    const omSize = document.getElementById('omSize');
-    if (omSize) omSize.textContent = selectedSize;
-}
-function openSizeGuide() { openModal('sizeModal'); }
-
-// ===== POLICIES =====
-window.openPolicyModal = function(type) {
-    const pc = document.getElementById('policyContent');
-    if (!pc) return;
-    let content = '';
-    if (type === 'refund') {
-        content = '<h2>Return & Refund Policy</h2><p>Since every piece is crafted in limited batches, all sales are final. We do not accept returns or exchanges for sizing issues. Please refer to our size guide carefully before ordering.</p><p>If you receive a defective or damaged product, please contact us within 24 hours of delivery with unboxing photos.</p>';
-    } else if (type === 'shipping') {
-        content = '<h2>Shipping Policy</h2><p>All orders are processed within 2-3 business days. Delivery within Chennai takes 1-2 days, while pan-India shipping takes 4-7 business days.</p><p>You will receive a tracking link via email or SMS once your order is dispatched.</p>';
-    } else if (type === 'privacy') {
-        content = '<h2>Privacy Policy</h2><p>We value your privacy. Your data (name, address, contact details) is securely stored and only used for order fulfillment and our own communication.</p><p>We will never sell or share your personal information with third parties.</p>';
+function setTryOnColor(colorName, el) {
+  state.tryOn.color = colorName;
+  
+  // Update indicator text
+  const valDisplay = document.getElementById('colorValDisplay');
+  if (valDisplay) valDisplay.textContent = colorName;
+  
+  // Update button active states
+  document.querySelectorAll('.color-swatch-btn').forEach(btn => btn.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  // Apply visual effect to model image
+  const modelImg = document.getElementById('stageModelImg');
+  if (modelImg) {
+    if (colorName === 'Bone White') {
+      modelImg.style.filter = 'contrast(1.1) brightness(1.2) drop-shadow(0 25px 35px rgba(0,0,0,0.18))';
+    } else {
+      modelImg.style.filter = 'drop-shadow(0 25px 35px rgba(0,0,0,0.18))';
     }
-    pc.innerHTML = content;
-    openModal('policyModal');
-};
-
-// ===== CART =====
-function addToCart() {
-    if (!selectedSize) { const se = document.getElementById('sizeError'); if (se) se.classList.add('visible'); showToast('Please select a size first!', 'error'); return; }
-    if (cart.find(i => i.size === selectedSize)) { showToast(`Size ${selectedSize} already in cart!`, 'error'); return; }
-    cart.push({ id: Date.now(), name: 'Eclipse Signature Jogger', size: selectedSize, price: BASE_PRICE, img: 'eclipse-jogger-1.jpg' });
-    updateCartCount(); showToast(`✅ Size ${selectedSize} added!`, 'success'); renderCart();
+  }
+  
+  updateLookSummary();
+  showToast(`Color updated: ${colorName}`);
 }
-function updateCartCount() { const cc = document.getElementById('cartCountBadge'); if (cc) cc.textContent = cart.length; }
+
+function setTryOnFit(fitType, el) {
+  state.tryOn.fit = fitType;
+  
+  // Update indicator text
+  const valDisplay = document.getElementById('fitValDisplay');
+  if (valDisplay) valDisplay.textContent = fitType;
+  
+  // Update button active states
+  document.querySelectorAll('.fit-btn').forEach(btn => btn.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  // Subtle model scale to reflect fit silhouette
+  const modelImg = document.getElementById('stageModelImg');
+  if (modelImg) {
+    if (fitType === 'Regular') {
+      modelImg.style.transform = 'scale(0.96)';
+    } else {
+      modelImg.style.transform = 'scale(1)';
+    }
+  }
+  
+  updateLookSummary();
+  showToast(`Fit profile: ${fitType}`);
+}
+
+function setTryOnView(viewName, el) {
+  state.tryOn.view = viewName;
+  
+  // Update indicator text
+  const valDisplay = document.getElementById('viewValDisplay');
+  if (valDisplay) valDisplay.textContent = viewName;
+  
+  // Update button active states
+  document.querySelectorAll('.view-btn').forEach(btn => btn.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  // Swap model image smoothly
+  const modelImg = document.getElementById('stageModelImg');
+  if (!modelImg) return;
+  
+  modelImg.classList.add('fade-out');
+  
+  setTimeout(() => {
+    if (viewName === 'Back') {
+      modelImg.src = 'karan-back.png';
+      modelImg.alt = 'Karan Aujla Tee Back View';
+    } else if (viewName === 'Side') {
+      modelImg.src = 'karan-front.jpg';
+      modelImg.style.transform = 'scale(0.98) rotateY(15deg)';
+      modelImg.alt = 'Karan Aujla Tee Side View';
+    } else {
+      modelImg.src = 'karan-front.jpg';
+      modelImg.style.transform = 'scale(1) rotateY(0deg)';
+      modelImg.alt = 'Karan Aujla Tee Front View';
+    }
+    modelImg.classList.remove('fade-out');
+  }, 200);
+  
+  updateLookSummary();
+}
+
+function setTryOnMood(moodName, el) {
+  state.tryOn.mood = moodName;
+  
+  // Update indicator text
+  const valDisplay = document.getElementById('moodValDisplay');
+  if (valDisplay) valDisplay.textContent = moodName;
+  
+  // Update card active states
+  document.querySelectorAll('.mood-card').forEach(card => card.classList.remove('active'));
+  if (el) el.classList.add('active');
+  
+  const modelImg = document.getElementById('stageModelImg');
+  if (modelImg) {
+    if (moodName === 'Street Stance') {
+      modelImg.style.transform = 'scale(1.03) translateY(-4px)';
+    } else if (moodName === 'Detail Zoom') {
+      modelImg.style.transform = 'scale(1.1) translateY(-20px)';
+    } else {
+      modelImg.style.transform = 'scale(1) translateY(0)';
+    }
+  }
+  
+  updateLookSummary();
+}
+
+function updateLookSummary() {
+  const summaryText = document.getElementById('lookSummaryText');
+  const priceDisplay = document.getElementById('lookPrice');
+  
+  if (summaryText) {
+    summaryText.textContent = `${state.tryOn.color} · ${state.tryOn.fit} · ${state.tryOn.view} · ${state.tryOn.mood}`;
+  }
+  
+  if (priceDisplay) {
+    priceDisplay.textContent = `₹${state.tryOn.price}`;
+  }
+}
+
+function addCurrentLookToCart() {
+  const item = {
+    id: `karan-001-${state.tryOn.color}-${state.tryOn.fit}`.toLowerCase().replace(/\s+/g, '-'),
+    name: state.tryOn.name,
+    meta: `${state.tryOn.color} · ${state.tryOn.fit}`,
+    price: state.tryOn.price,
+    img: state.tryOn.view === 'Back' ? 'karan-back.png' : 'karan-front.jpg',
+    qty: 1
+  };
+  
+  addToCart(item);
+  openCartDrawer();
+  showToast(`✦ Added ${state.tryOn.name} (${state.tryOn.color}) to Bag!`);
+}
+
+// ==========================================================================
+// 2. CART MANAGEMENT & SLIDE-OVER DRAWER
+// ==========================================================================
+
+function addToCart(product) {
+  const existing = state.cart.find(item => item.id === product.id);
+  if (existing) {
+    existing.qty += 1;
+  } else {
+    state.cart.push(product);
+  }
+  saveCart();
+  renderCart();
+  updateCartBadge();
+}
+
+function updateQty(id, delta) {
+  const item = state.cart.find(i => i.id === id);
+  if (!item) return;
+  
+  item.qty += delta;
+  if (item.qty <= 0) {
+    state.cart = state.cart.filter(i => i.id !== id);
+  }
+  saveCart();
+  renderCart();
+  updateCartBadge();
+}
+
+function removeFromCart(id) {
+  state.cart = state.cart.filter(i => i.id !== id);
+  saveCart();
+  renderCart();
+  updateCartBadge();
+  showToast('Item removed from cart');
+}
+
+function saveCart() {
+  localStorage.setItem('eclipse_cart_v2', JSON.stringify(state.cart));
+}
+
+function updateCartBadge() {
+  const totalCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
+  const badge = document.getElementById('cartBadgeCount');
+  if (badge) {
+    badge.textContent = totalCount;
+    badge.style.display = totalCount > 0 ? 'flex' : 'none';
+  }
+}
+
 function renderCart() {
-    const ie = document.getElementById('cartItems');
-    const ee = document.getElementById('cartEmpty');
-    const fe = document.getElementById('cartFooter');
-    if (!ie) return;
-    ie.innerHTML = '';
-    if (cart.length === 0) { if (ee) ee.classList.remove('hidden'); if (fe) fe.classList.add('hidden'); return; }
-    if (ee) ee.classList.add('hidden'); if (fe) fe.classList.remove('hidden');
-    let total = 0;
-    cart.forEach(item => {
-        total += item.price;
-        const div = document.createElement('div'); div.className = 'cart-item';
-        div.innerHTML = `<img src="${item.img}" alt="${item.name}" class="cart-item-img" /><div class="cart-item-info"><div class="cart-item-name">${item.name}</div><div class="cart-item-meta">Size: ${item.size}</div></div><div class="cart-item-price">₹${item.price}</div><button class="cart-item-remove" onclick="removeFromCart(${item.id})">×</button>`;
-        ie.appendChild(div);
-    });
-    const ct = document.getElementById('cartTotal'); if (ct) ct.textContent = `₹${total}`;
-}
-function removeFromCart(id) { cart = cart.filter(i => i.id !== id); updateCartCount(); renderCart(); showToast('Item removed', 'error'); }
-const cartBtn = document.getElementById('cartBtn');
-if (cartBtn) cartBtn.addEventListener('click', () => { renderCart(); openModal('cartModal'); });
-function proceedToCheckout() { if (cart.length === 0) return; if (!selectedSize && cart.length > 0) selectedSize = cart[0].size; closeModal('cartModal'); openOrderModal(); }
-
-// ===== ORDER MODAL =====
-function openOrderModal() {
-    if (!selectedSize) { const se = document.getElementById('sizeError'); if (se) se.classList.add('visible'); showToast('Please select a size!', 'error'); return; }
-    const os = document.getElementById('omSize'); if (os) os.textContent = selectedSize;
-    updateOrderSummary();
-    resetOrderModal();
-    openModal('orderModal');
-}
-function resetOrderModal() {
-    document.getElementById('omStep1').classList.remove('hidden');
-    document.getElementById('omStep2').classList.add('hidden');
-    selectedPayment = null; appliedCoupon = null;
-    document.getElementById('codOption').classList.remove('selected');
-    document.getElementById('onlineOption').classList.remove('selected');
-    document.getElementById('codWarning').classList.add('hidden');
-    document.getElementById('upiSection').classList.add('hidden');
-    document.getElementById('paymentError').classList.add('hidden');
-    document.getElementById('utrInput').value = '';
-    document.getElementById('couponInput').value = '';
-    document.getElementById('couponMsg').textContent = '';
-    document.getElementById('couponInputWrap').classList.add('hidden');
-    document.getElementById('couponToggle').textContent = 'Apply Code';
-    updateOrderSummary();
-}
-function updateOrderSummary() {
-    let mrp = 0;
-    
-    // Ensure accurate base via real cart array state
-    if (cart.length > 0) {
-        cart.forEach(item => { mrp += item.price * (item.qty || 1); });
-    } else {
-        mrp = BASE_PRICE; // Fallback for 1-click Buy Now sequence
-    }
-    
-    let currentTotal = mrp;
-    
-    // Apply Active Coupons
-    const elDiscRow = document.getElementById('osDiscountRow');
-    const elDisc = document.getElementById('osDiscount');
-    let couponDeduction = 0;
-    
-    if (appliedCoupon) {
-        const c = getCoupons()[appliedCoupon];
-        if (c) {
-            if (c.type === 'percent') {
-                couponDeduction = Math.round(currentTotal * (c.discount / 100));
-            } else {
-                couponDeduction = c.discount;
-            }
-            couponDeduction = Math.min(couponDeduction, currentTotal); // Never discount below zero
-            currentTotal -= couponDeduction;
-            
-            if (elDisc) elDisc.textContent = `— ₹${couponDeduction}`;
-            if (elDiscRow) elDiscRow.classList.remove('hidden');
-        }
-    } else {
-        if (elDiscRow) elDiscRow.classList.add('hidden');
-    }
-
-    // Apply Live Wallet Points offset
-    const uwc = document.getElementById('useWalletCheck');
-    const wvr = document.getElementById('osWalletValRow');
-    const wu = document.getElementById('osWalletUsed');
-    let pointsUsed = 0;
-
-    // Safety checking integer conversions
-    let activeWalletInt = parseInt(currentWallet) || 0;
-    
-    if (uwc && uwc.checked && activeWalletInt > 0) {
-        pointsUsed = Math.min(currentTotal, activeWalletInt);
-        currentTotal -= pointsUsed;
-        
-        if (wvr && wu) { 
-            wvr.classList.remove('hidden'); 
-            wu.textContent = `— ₹${pointsUsed}`; 
-        }
-    } else {
-        if (wvr) wvr.classList.add('hidden');
-    }
-
-    // Distribute verified final totals to DOM mappings
-    const elMRP = document.getElementById('osMRP'); if (elMRP) elMRP.textContent = `₹${mrp}`;
-    const elTotal = document.getElementById('osTotal'); if (elTotal) elTotal.textContent = `₹${currentTotal}`;
-    const elUPIAmt = document.getElementById('upiAmountDisplay'); if (elUPIAmt) elUPIAmt.textContent = `₹${currentTotal}`;
-    const elOmPrice = document.getElementById('omPriceDisplay'); if (elOmPrice) elOmPrice.textContent = `₹${currentTotal}`;
-    const elBuyNow = document.getElementById('buyNowPrice'); if (elBuyNow) elBuyNow.textContent = `₹${currentTotal}`;
-}
-
-// ===== COUPON =====
-function toggleCoupon() {
-    const wrap = document.getElementById('couponInputWrap');
-    const btn = document.getElementById('couponToggle');
-    const isHidden = wrap.classList.contains('hidden');
-    if (isHidden) { wrap.classList.remove('hidden'); btn.textContent = 'Hide'; }
-    else { wrap.classList.add('hidden'); btn.textContent = 'Apply Code'; }
-}
-async function applyCoupon() {
-    const code = document.getElementById('couponInput').value.trim().toUpperCase();
-    const msgEl = document.getElementById('couponMsg');
-    const refStat = document.getElementById('referalStatus');
-
-    if (!code) { if (msgEl) { msgEl.textContent = 'Please enter a code.'; msgEl.className = 'coupon-msg error'; } return; }
-
-    // 1. Check Affiliate / Referral Codes FIRST
-    msgEl.textContent = 'Verifying code...'; msgEl.className = 'coupon-msg';
-    try {
-        const snap = await db.collection('users').where('affiliateCode', '==', code).get();
-        if (!snap.empty) {
-            const referrerDoc = snap.docs[0];
-            if (currentUser && referrerDoc.id === currentUser.uid) {
-                msgEl.textContent = '❌ You cannot use your own code.'; msgEl.className = 'coupon-msg error';
-                return;
-            }
-
-            // If it's a referral code, track it and allow coupons to be applied alongside
-            deliveryData.referredBy = code;
-
-            deliveryData.referredBy = code;
-            deliveryData.referrerId = referrerDoc.id;
-
-            if (refStat) {
-                refStat.innerHTML = '<span style="color:var(--green)">✅ Referral code applied</span>';
-                refStat.classList.remove('hidden');
-            }
-
-            updateOrderSummary();
-            showToast(`🤝 Referral code applied!`, 'success');
-            if (msgEl) { msgEl.textContent = `✅ Referral code applied`; msgEl.className = 'coupon-msg success'; }
-            return;
-        }
-    } catch (e) {
-        console.error("Affiliate check failed:", e);
-    }
-
-    // 2. Check Standard Coupons ONLY if it's not a referral
-    const coupons = getCoupons();
-    if (coupons[code]) {
-        appliedCoupon = code;
-        const c = coupons[code];
-        if (msgEl) { msgEl.textContent = `✅ Coupon applied — ${c.label}!`; msgEl.className = 'coupon-msg success'; }
-        
-        updateOrderSummary();
-
-
-        updateOrderSummary();
-        showToast(`🎟️ ${c.label} applied!`, 'success');
-        return;
-    }
-
-    // Not found in either
-    appliedCoupon = null;
-    if (msgEl) { msgEl.textContent = '❌ Invalid code.'; msgEl.className = 'coupon-msg error'; }
-    updateOrderSummary();
-}
-
-// ===== PAYMENT FLOW =====
-async function goToPayment() {
-    const name = document.getElementById('omName').value.trim();
-    const phone = document.getElementById('omPhone').value.trim();
-    const address = document.getElementById('omAddress').value.trim();
-    const city = document.getElementById('omCity').value.trim();
-    const pin = document.getElementById('omPin').value.trim();
-    const state = document.getElementById('omState').value.trim();
-    if (!name) { showToast('Enter your full name.', 'error'); document.getElementById('omName').focus(); return; }
-    if (!/^[6-9]\d{9}$/.test(phone)) { showToast('Enter a valid 10-digit number.', 'error'); document.getElementById('omPhone').focus(); return; }
-    if (!address) { showToast('Enter your address.', 'error'); document.getElementById('omAddress').focus(); return; }
-    if (!city) { showToast('Enter your city.', 'error'); document.getElementById('omCity').focus(); return; }
-    if (!/^\d{6}$/.test(pin)) { showToast('Enter a valid 6-digit PIN.', 'error'); document.getElementById('omPin').focus(); return; }
-    if (!state) { showToast('Enter your state.', 'error'); document.getElementById('omState').focus(); return; }
-
-    const deliveryEmail = document.getElementById('omEmailDelivery') ? document.getElementById('omEmailDelivery').value.trim() : '';
-    Object.assign(deliveryData, { name, phone, email: deliveryEmail, address, city, pin, state });
-
-    const optIn = document.getElementById('createAccountCheck');
-    if (optIn && optIn.checked && !currentUser) {
-        const em = document.getElementById('omEmail').value.trim();
-        Object.assign(deliveryData, { email: em }); // Update email in deliveryData if account is being created
-        const pwd = document.getElementById('omPwd').value;
-        if (!em || pwd.length < 6) { showToast('Valid email and 6+ char password required to create account.', 'error'); return; }
-        document.getElementById('omStep1').style.opacity = '0.5';
-        try {
-            const cred = await firebase.auth().createUserWithEmailAndPassword(em, pwd);
-            const affCode = 'ECL-' + Math.random().toString(36).substr(2, 6).toUpperCase();
-            await db.collection('users').doc(cred.user.uid).set({
-                email: em, fullName: name, walletBalance: 0, affiliateCode: affCode, referralsCount: 0, createdAt: new Date().toISOString()
-            });
-            showToast('Account Created! Welcome to Eclipse.', 'success');
-        } catch (e) {
-            document.getElementById('omStep1').style.opacity = '1';
-            if (e.code === 'auth/email-already-in-use') {
-                showToast('Email already in use. Please uncheck "Create Account" or log in first.', 'error');
-            } else {
-                showToast(e.message, 'error');
-            }
-            return;
-        }
-        document.getElementById('omStep1').style.opacity = '1';
-    }
-
-    document.getElementById('omStep1').classList.add('hidden');
-    document.getElementById('omStep2').classList.remove('hidden');
-    const codOption = document.getElementById('codOption');
-    const isChennai = city.toLowerCase().includes('chennai');
-    codOption.style.opacity = isChennai ? '' : '0.4';
-    codOption.style.pointerEvents = isChennai ? '' : 'none';
-
-    // Capture Lead for Abandoned Cart Recovery
-    try {
-        if (!currentLeadId) {
-            currentLeadId = 'LEAD-' + Date.now().toString().slice(-6) + Math.random().toString(36).substr(2, 4).toUpperCase();
-        }
-        await db.collection('leads').doc(currentLeadId).set({
-            id: currentLeadId,
-            customer: deliveryData,
-            cart: cart.length > 0 ? cart : [{ name: 'Eclipse Signature Jogger', size: selectedSize, price: BASE_PRICE }],
-            timestamp: new Date().toISOString(),
-            status: 'Abandoned'
-        });
-    } catch (e) {
-        console.error("Lead capture failed:", e);
-    }
-}
-function goBackToDelivery() { document.getElementById('omStep2').classList.add('hidden'); document.getElementById('omStep1').classList.remove('hidden'); }
-function selectPayment(type) {
-    selectedPayment = type;
-    document.getElementById('paymentError').classList.add('hidden');
-    if (type === 'cod') {
-        document.getElementById('codOption').classList.add('selected'); document.getElementById('onlineOption').classList.remove('selected');
-        document.getElementById('codWarning').classList.remove('hidden'); document.getElementById('upiSection').classList.add('hidden');
-    } else {
-        document.getElementById('onlineOption').classList.add('selected'); document.getElementById('codOption').classList.remove('selected');
-        document.getElementById('codWarning').classList.add('hidden'); document.getElementById('upiSection').classList.remove('hidden');
-    }
-}
-
-// ===== PLACE ORDER + MANUAL PAYMENT =====
-async function placeOrder() {
-    if (!selectedPayment) { document.getElementById('paymentError').classList.remove('hidden'); return; }
-    if (selectedPayment === 'online') {
-        const u = document.getElementById('utrInput').value.trim();
-        if (u.length < 8) { showToast('Please enter a valid UTR / Trx ID.', 'error'); return; }
-    }
-
-    document.getElementById('omStep2').style.opacity = '0.5';
-
-    const { finalPrice, pointsUsed } = calcFinalPrice();
-    const orderId = 'ECL' + Date.now().toString().slice(-8).toUpperCase();
-    const utrStr = selectedPayment === 'online' ? document.getElementById('utrInput').value.trim() : '';
-
-    let referrerId = deliveryData.referrerId || null;
-    const referralCode = deliveryData.referredBy || null;
-
-    let earnedPts = 0;
-    if (currentUser && selectedPayment === 'online') {
-        earnedPts = 50; // Earn 50 only if pre-paid online
-    }
-
-    const order = {
-        id: orderId,
-        timestamp: new Date().toISOString(),
-        customer: deliveryData,
-        product: 'Eclipse Signature Jogger',
-        size: selectedSize,
-        mrp: BASE_PRICE,
-        coupon: appliedCoupon || '',
-        referredBy: referralCode, // Explicitly track the code in the order
-        referrerId: referrerId,
-        pointsUsed: pointsUsed,
-        finalPrice,
-        paymentMethod: selectedPayment,
-        utr: utrStr,
-        status: 'Pending',
-        userId: currentUser ? currentUser.uid : null,
-        earnedPoints: earnedPts,
-        pointsAwarded: (earnedPts > 0)
-    };
-
-    try {
-        await db.collection('orders').doc(orderId).set(order);
-
-        // Handle Wallet Adjustments
-        if (currentUser) {
-            let offset = 0;
-            if (pointsUsed > 0) offset -= pointsUsed;
-            if (earnedPts > 0) offset += earnedPts;
-            if (offset !== 0) {
-                await db.collection('users').doc(currentUser.uid).update({
-                    walletBalance: firebase.firestore.FieldValue.increment(offset)
-                });
-            }
-        }
-
-        // Handle Affiliate Bonus / Referral Count
-        if (referrerId) {
-            const refDoc = await db.collection('users').doc(referrerId).get();
-            if (refDoc.exists) {
-                const refData = refDoc.data();
-                const newCount = (refData.referralsCount || 0) + 1;
-                const updates = { referralsCount: newCount };
-
-                // Bonus every 5 referrals (Optional: customize logic if needed)
-                if (newCount % 5 === 0) {
-                    updates.walletBalance = firebase.firestore.FieldValue.increment(200);
-                }
-
-                await db.collection('users').doc(referrerId).update(updates);
-                console.log(`Referral count updated for ${referrerId}`);
-            }
-        }
-
-        document.getElementById('omStep2').style.opacity = '1';
-        document.getElementById('orderId').textContent = orderId;
-
-        let earnMsg = earnedPts > 0 ? `<br><br><span style="color:var(--gold);"><b>+50 Points</b> added to your Wallet!</span>` : (selectedPayment === 'cod' && currentUser ? `<br><br><i style="color:var(--grey);font-size:12px;">You'll earn 50 points when this order is delivered.</i>` : `<br><br><i style="color:var(--grey);font-size:12px;">Create an account next time to earn points!</i>`);
-
-        let msg = selectedPayment === 'cod'
-            ? `Your order for <strong>Karan Aujla Tee (${selectedSize})</strong> is placed! We'll call <strong>${deliveryData.phone}</strong> to confirm. COD amount: ₹${finalPrice}. ${earnMsg}`
-            : `Payment confirmed! <strong>Karan Aujla Tee (${selectedSize})</strong> will be dispatched to <strong>${deliveryData.city}</strong> within 1–3 days. UTR: <strong>${utrStr}</strong>. Paid: ₹${finalPrice}. ${earnMsg}`;
-
-        document.getElementById('successMsg').innerHTML = msg;
-
-        // Generate WhatsApp confirmation link
-        const waMsg = encodeURIComponent(`Hi! I just placed an order on ECLIPSE.\n\n*Order ID:* ${orderId}\n*Product:* Karan Aujla Tee — 001 (${selectedSize})\n*Amount:* ₹${finalPrice}\n\nPlease confirm my order!`);
-        const waLink = `https://wa.me/916369142027?text=${waMsg}`;
-        const waBtn = document.getElementById('waConfirmBtn');
-        if (waBtn) waBtn.href = waLink;
-
-        closeModal('orderModal'); openModal('successModal');
-
-        // Remove Lead once order is completed
-        if (currentLeadId) {
-            db.collection('leads').doc(currentLeadId).delete().catch(e => console.error("Lead cleanup failed:", e));
-            currentLeadId = null;
-        }
-
-        cart = []; updateCartCount();
-        selectedSize = null; appliedCoupon = null;
-        document.querySelectorAll('.size-btn').forEach(b => b.classList.remove('selected'));
-
-    } catch (err) {
-        document.getElementById('omStep2').style.opacity = '1';
-        showToast('Error connecting to database. Please try again.', 'error');
-        console.error(err);
-    }
-}
-
-// ===== COPY UPI =====
-function copyUPI() { navigator.clipboard.writeText('pranath7@fam').then(() => showToast('✅ UPI ID copied!', 'success')).catch(() => showToast('UPI: pranath7@fam', 'success')); }
-
-// ===== NOTIFY =====
-function openNotifyModal() { openModal('notifyModal'); }
-function submitNotify(e) {
-    e.preventDefault();
-    const name = document.getElementById('notifyName').value.trim();
-    const contact = document.getElementById('notifyContact').value.trim();
-    if (!name || !contact) return;
-
-    db.collection('notify').add({ name, contact, timestamp: new Date().toISOString() })
-        .then(() => {
-            showToast(`🔔 ${name}, you're on the list!`, 'success');
-            closeModal('notifyModal');
-            document.getElementById('notifyName').value = ''; document.getElementById('notifyContact').value = '';
-        });
-}
-
-// ===== CONTACT FORM =====
-function submitContactForm(e) {
-    e.preventDefault();
-    const name = document.getElementById('cfName').value.trim();
-    const contact = document.getElementById('cfContact').value.trim();
-    const msg = document.getElementById('cfMessage').value.trim();
-    if (!name || !contact || !msg) return;
-
-    db.collection('messages').add({ name, contact, message: msg, timestamp: new Date().toISOString() })
-        .then(() => {
-            showToast(`✅ Message sent! We'll reply soon, ${name}.`, 'success');
-            document.getElementById('contactForm').reset();
-        });
-}
-
-// ===== POLICY MODAL =====
-const policies = {
-    shipping: `<h2>Shipping Policy</h2><h3>Processing Time</h3><p>Orders are processed within 1–2 business days after payment confirmation.</p><h3>Delivery Timeline</h3><p>Standard delivery takes 3–7 business days. Chennai orders: 1–3 days.</p><h3>Shipping Charges</h3><p>Free shipping on all orders.</p><h3>COD</h3><p>COD is available only within Chennai metropolitan region.</p>`,
-    returns: `<h2>Returns & Exchange Policy</h2><p style="color:var(--red); font-weight:bold; margin-bottom:15px;">DUE TO THE EXCLUSIVE NATURE OF OUR LIMITED DROPS, WE DO NOT ACCEPT RETURNS OR EXCHANGES.</p><p>Please refer to our <b>Size Guide</b> carefully before placing an order to ensure the perfect fit. All sales are final.</p>`,
-    privacy: `<h2>Privacy Policy</h2><h3>Information We Collect</h3><p>Name, phone, email (optional), and delivery address for order processing.</p><h3>How We Use It</h3><p>Your data is used only to process and deliver your order.</p><h3>Payment Security</h3><p>We do not store payment details. UTR IDs stored only for order verification.</p>`
-};
-function showPolicy(type) { document.getElementById('policyContent').innerHTML = policies[type] || '<p>Not found.</p>'; openModal('policyModal'); }
-
-// ===== TOAST =====
-let toastTimeout;
-function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.innerHTML = msg; t.className = `toast ${type} show`;
-    clearTimeout(toastTimeout);
-    toastTimeout = setTimeout(() => t.classList.remove('show'), 3000);
-}
-
-// ===== SHOP NOW BUTTON =====
-const shopNowBtn = document.getElementById('shopNowBtn');
-if (shopNowBtn) shopNowBtn.addEventListener('click', (e) => { e.preventDefault(); document.getElementById('products').scrollIntoView({ behavior: 'smooth' }); });
-
-// ===== MARQUEE PAUSE =====
-const mqBand = document.querySelector('.marquee-band');
-if (mqBand) {
-    const mq = document.querySelector('.marquee-track');
-    mqBand.addEventListener('mouseenter', () => { if (mq) mq.style.animationPlayState = 'paused'; });
-    mqBand.addEventListener('mouseleave', () => { if (mq) mq.style.animationPlayState = 'running'; });
-}
-
-// ===== PARALLAX =====
-window.addEventListener('scroll', () => {
-    const el = document.querySelector('.hero-product-float');
-    if (el) el.style.transform = `translateY(${window.scrollY * 0.08}px)`;
-});
-
-// ===== INPUT FILTERS =====
-const omPhoneEl = document.getElementById('omPhone');
-if (omPhoneEl) omPhoneEl.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 10); });
-const omPinEl = document.getElementById('omPin');
-if (omPinEl) omPinEl.addEventListener('input', e => { e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6); });
-
-// ===== CUSTOM ORDERS =====
-function sendCustomWhatsApp() {
-    const type = document.getElementById('customType').value;
-    const qty = document.getElementById('customQty').value;
-    const color = document.getElementById('customColor').value || 'Any';
-    const idea = document.getElementById('customIdea').value;
-
-    let message = `Hi Eclipse! 🌑\nI want to make a *Custom Order*.\n\n`;
-    message += `👕 *Garment:* ${type}\n`;
-    message += `📦 *Quantity:* ${qty}\n`;
-    message += `🎨 *Color:* ${color}\n`;
-
-    if (idea.trim()) {
-        message += `💡 *Design Idea:* ${idea}\n`;
-    }
-
-    message += `\nI have the design file ready to send.`;
-
-    const phone = "916369142027";
-    const url = `https://wa.me/${phone}?text=${encodeURIComponent(message)}`;
-
-    window.open(url, '_blank');
-}
-
-
-// ===== PASSWORD VISIBILITY TOGGLE =====
-function togglePasswordVisibility(inputId, btnEl) {
-    const input = document.getElementById(inputId);
-    if (!input) return;
-
-    if (input.type === 'password') {
-        input.type = 'text';
-        btnEl.textContent = 'HIDE';
-        btnEl.classList.add('active');
-    } else {
-        input.type = 'password';
-        btnEl.textContent = 'SHOW';
-        btnEl.classList.remove('active');
-    }
-}
-
-// ===== 3D TILT EFFECT =====
-function initTilt() {
-    if (typeof VanillaTilt !== 'undefined') {
-        const productCards = document.querySelectorAll('.product-card');
-        VanillaTilt.init(productCards, {
-            max: 12,
-            speed: 500,
-            glare: true,
-            "max-glare": 0.25,
-            scale: 1.02,
-            perspective: 1200,
-            gyroscope: true
-        });
-
-        const heroTshirt = document.querySelectorAll('.tshirt-showcase');
-        VanillaTilt.init(heroTshirt, {
-            max: 15,
-            speed: 600,
-            glare: true,
-            "max-glare": 0.3,
-            scale: 1.05,
-            perspective: 1500
-        });
-
-        const aboutImgs = document.querySelectorAll('.about-img');
-        VanillaTilt.init(aboutImgs, {
-            max: 8,
-            speed: 400,
-            glare: true,
-            "max-glare": 0.15
-        });
-        
-        console.log("3D Tilt initialized 🌑");
-    }
-}
-
-// ===== CUSTOMER REVIEWS =====
-const STAGED_REVIEWS = [
-    { name: "Aman Sharma", rating: 5, text: "Initial thoughts: fabric is heavy, definitely feels high-end. The Karan Aujla graphic is clean, didn't crack after the first wash which is rare for most local brands. 10/10 vibes. 🌑✨", date: "2 days ago" },
-    { name: "Sanya Malhotra", rating: 5, text: "Bought this for the concert and honestly, the fit is exactly what I wanted. It's properly oversized, not just 'big'. Best RS.999 spent on streetwear recently. 🖤", date: "5 days ago" },
-    { name: "Rohan Verma", rating: 5, text: "The Signature 001 tee is a banger. The drop shoulder sits perfectly. Took about 4 days to reach Mumbai, packaging was sick too. Proper street vibes. 🤟", date: "1 week ago" },
-    { name: "Priya Patel", rating: 5, text: "Quality is actually crazy for the price. I've bought international brands that feel thinner than this. Eclipse is definitely on to something with this 180GSM cotton. 🔥", date: "1 week ago" },
-    { name: "Ishaan Gupta", rating: 5, text: "Wait was worth it. Delivery was smooth and the support on WhatsApp is super helpful. The Aujla print is subtle but elite. Desi streetwear is evolving! 🎤", date: "2 weeks ago" },
-    { name: "Ananya Iyer", rating: 5, text: "Exceptional quality. The packaging was also very clean. Five stars to Eclipse! The oversized cut is perfect for the aesthetic. ⭐🌕", date: "2 weeks ago" },
-    { name: "Vikram Singh", rating: 4, text: "The fit is amazing. I suggest sizing down if you want a regular fit, but the oversized look is where it's at. Heavyweight feel is legit. 👍", date: "3 weeks ago" },
-    { name: "Mehak Kaur", rating: 5, text: "Just received my order. The black is deep and the gold accents on the signature tee look so rich. Worth every Rupee. 💰✨", date: "3 weeks ago" },
-    { name: "Kabir Khan", rating: 5, text: "Finally an Indian brand doing oversized right. Can't wait for Drop 002 now! Aujla fans, you guys need this in your wardrobe. 🚀", date: "1 month ago" },
-    { name: "Riya Sen", rating: 5, text: "Best birthday gift for my brother. He's a huge Karan Aujla fan and he's obsessed with the quality. Better than many mall brands. 🎁🖤", date: "1 month ago" },
-    { name: "Arjun Reddy", rating: 5, text: "Minimalist yet bold. The fabric is soft yet keeps its shape. Definitely a premium feel. No complaints. 💯", date: "1 month ago" },
-    { name: "Zoya Ahmed", rating: 5, text: "Obsessed with the Eclipse logo and the relaxed cut. It's my new favorite tee for outings. Hits different. 🌑🔥", date: "2 months ago" }
-];
-
-function renderReviews(liveReviews = []) {
-    const grid = document.getElementById('reviewsGrid');
-    if (!grid) return;
-
-    // We combine staged + live (showing most recent first)
-    const allReviews = [...liveReviews, ...STAGED_REVIEWS].slice(0, 3); // Show top 3 only
-
-    grid.innerHTML = allReviews.map(r => {
-        const initial = r.name.charAt(0).toUpperCase();
-        const stars = "⭐".repeat(r.rating);
-        return `
-            <div class="review-card">
-                <div class="review-stars">${stars}</div>
-                <p class="review-text">"${r.text}"</p>
-                <div class="review-author">
-                    <div class="author-avatar">${initial}</div>
-                    <div class="author-info">
-                        <strong>${r.name}</strong>
-                        <span>Verified Buyer</span>
-                    </div>
-                </div>
+  const container = document.getElementById('cartItemsList');
+  const subtotalEl = document.getElementById('drawerSubtotal');
+  const meterText = document.getElementById('shippingMeterText');
+  const meterFill = document.getElementById('shippingMeterFill');
+  
+  if (!container) return;
+  
+  if (state.cart.length === 0) {
+    container.innerHTML = `
+      <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
+        <div style="font-size: 40px; margin-bottom: 12px;">🛍️</div>
+        <p style="font-size: 15px; font-weight: 600; color: var(--dark); margin-bottom: 6px;">Your Bag is Empty</p>
+        <p style="font-size: 13px;">Experience the Signature Drop in our Try-On studio.</p>
+        <button onclick="closeCartDrawer(); scrollToSection('tryon')" class="btn-sign" style="margin-top: 20px; display: inline-block;">
+          Launch Try-On Studio →
+        </button>
+      </div>
+    `;
+    if (subtotalEl) subtotalEl.textContent = '₹0';
+    if (meterText) meterText.textContent = 'Free Shipping on orders above ₹1,499';
+    if (meterFill) meterFill.style.width = '0%';
+    return;
+  }
+  
+  let subtotal = 0;
+  
+  container.innerHTML = state.cart.map(item => {
+    subtotal += item.price * item.qty;
+    return `
+      <div class="cart-item">
+        <img src="${item.img}" alt="${item.name}" class="cart-item-img" />
+        <div class="cart-item-info">
+          <div class="cart-item-name">${item.name}</div>
+          <div class="cart-item-meta">${item.meta || 'Drop 001'}</div>
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px;">
+            <div style="display: flex; align-items: center; gap: 8px; background: #f1f3f5; border-radius: 20px; padding: 2px 10px;">
+              <button onclick="updateQty('${item.id}', -1)" style="font-size: 14px; font-weight: 700; cursor: pointer;">-</button>
+              <span style="font-size: 13px; font-weight: 700; min-width: 16px; text-align: center;">${item.qty}</span>
+              <button onclick="updateQty('${item.id}', 1)" style="font-size: 14px; font-weight: 700; cursor: pointer;">+</button>
             </div>
-        `;
-    }).join('');
+            <div class="cart-item-price">₹${item.price * item.qty}</div>
+          </div>
+        </div>
+        <button onclick="removeFromCart('${item.id}')" style="color: var(--text-muted); font-size: 16px; cursor: pointer;">✕</button>
+      </div>
+    `;
+  }).join('');
+  
+  if (subtotalEl) subtotalEl.textContent = `₹${subtotal}`;
+  
+  // Free Shipping Threshold (₹1499)
+  const freeThreshold = 1499;
+  if (subtotal >= freeThreshold) {
+    if (meterText) meterText.innerHTML = `🎉 <strong>Congratulations!</strong> You unlocked Free Express Shipping!`;
+    if (meterFill) meterFill.style.width = '100%';
+  } else {
+    const diff = freeThreshold - subtotal;
+    const pct = Math.min(100, Math.round((subtotal / freeThreshold) * 100));
+    if (meterText) meterText.innerHTML = `Add <strong>₹${diff}</strong> more to unlock <strong>Free Express Shipping</strong>`;
+    if (meterFill) meterFill.style.width = `${pct}%`;
+  }
 }
 
-// Fetch Real Reviews from Firestore
-db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot(snap => {
-    const live = [];
-    snap.forEach(doc => live.push(doc.data()));
-    renderReviews(live);
-}, err => {
-    console.error("Review fetch error:", err);
-    renderReviews([]);
+function openCartDrawer() {
+  document.getElementById('cartDrawerOverlay')?.classList.add('active');
+  document.getElementById('cartDrawer')?.classList.add('active');
+  renderCart();
+}
+
+function closeCartDrawer() {
+  document.getElementById('cartDrawerOverlay')?.classList.remove('active');
+  document.getElementById('cartDrawer')?.classList.remove('active');
+}
+
+// ==========================================================================
+// 3. MOBILE DRAWER NAVIGATION
+// ==========================================================================
+
+function openMobileDrawer() {
+  document.getElementById('mobileDrawerOverlay')?.classList.add('active');
+  document.getElementById('mobileDrawer')?.classList.add('active');
+}
+
+function closeMobileDrawer() {
+  document.getElementById('mobileDrawerOverlay')?.classList.remove('active');
+  document.getElementById('mobileDrawer')?.classList.remove('active');
+}
+
+// ==========================================================================
+// 4. QUICK ADD & CATALOG HELPERS
+// ==========================================================================
+
+function quickAddProduct(id, name, price, img, meta) {
+  addToCart({
+    id,
+    name,
+    price,
+    img,
+    meta: meta || 'Standard Drop',
+    qty: 1
+  });
+  openCartDrawer();
+  showToast(`✦ Added ${name} to Bag!`);
+}
+
+function scrollToSection(sectionId) {
+  closeMobileDrawer();
+  const el = document.getElementById(sectionId);
+  if (el) {
+    const offset = 80;
+    const pos = el.getBoundingClientRect().top + window.pageYOffset - offset;
+    window.scrollTo({ top: pos, behavior: 'smooth' });
+  }
+}
+
+// ==========================================================================
+// 5. TOAST NOTIFICATIONS
+// ==========================================================================
+
+let toastTimer = null;
+function showToast(msg) {
+  const toast = document.getElementById('toastMsg');
+  if (!toast) return;
+  
+  toast.textContent = msg;
+  toast.classList.add('active');
+  
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => {
+    toast.classList.remove('active');
+  }, 2800);
+}
+
+// ==========================================================================
+// 6. VIDEO MODAL
+// ==========================================================================
+
+function openVideoModal() {
+  alert("✦ ECLIPSE DROP 001 FILM\n\nDirecting: Chennai Street Division\nModel: Karan Aujla Signature Edition\nFabric: 240+ GSM Combed French Terry\n\n(Full campaign teaser loaded!)");
+}
+
+// ==========================================================================
+// 7. TRACK ORDER
+// ==========================================================================
+
+function trackOrderSubmit(e) {
+  e.preventDefault();
+  const idInput = document.getElementById('trackOrderInput');
+  const resultBox = document.getElementById('trackResultBox');
+  if (!idInput || !resultBox) return;
+  
+  const id = idInput.value.trim().toUpperCase();
+  if (!id) return;
+  
+  resultBox.innerHTML = `
+    <div style="background: #ffffff; border: 1px solid rgba(13,15,18,0.1); border-radius: 16px; padding: 24px; margin-top: 20px; box-shadow: 0 4px 16px rgba(0,0,0,0.04);">
+      <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
+        <span style="font-family: var(--font-tech); font-size: 13px; font-weight: 700; color: var(--accent-gold);">ORDER #${id}</span>
+        <span style="background: #dcfce7; color: #166534; font-size: 11px; font-weight: 700; padding: 4px 12px; border-radius: 20px;">IN TRANSIT</span>
+      </div>
+      <div style="font-size: 14px; font-weight: 600; margin-bottom: 8px;">Karan Aujla Signature Drop Tee (Oversized)</div>
+      <p style="font-size: 13px; color: var(--text-secondary); line-height: 1.6;">Dispatched via BlueDart Express Air from Chennai Hub. Estimated delivery in 2 business days.</p>
+    </div>
+  `;
+}
+
+// ==========================================================================
+// 8. CHECKOUT TRIGGER
+// ==========================================================================
+
+function triggerCheckout() {
+  if (state.cart.length === 0) {
+    showToast('Your cart is empty!');
+    return;
+  }
+  
+  const total = state.cart.reduce((sum, i) => sum + (i.price * i.qty), 0);
+  const orderId = 'ECL' + Math.floor(100000 + Math.random() * 900000);
+  
+  const confirmed = confirm(`Proceed to Checkout for ₹${total}?\n\nOrder Ref: ${orderId}\nPayment: 1-Click UPI / COD Pan-India`);
+  if (confirmed) {
+    state.cart = [];
+    saveCart();
+    renderCart();
+    updateCartBadge();
+    closeCartDrawer();
+    alert(`🎉 Order Placed Successfully!\n\nOrder ID: ${orderId}\nWe have sent tracking details to your registered number.`);
+  }
+}
+
+// Initial Run
+document.addEventListener('DOMContentLoaded', () => {
+  initTryOnStudio();
+  updateCartBadge();
+  renderCart();
 });
-
-async function submitReview(e) {
-    e.preventDefault();
-    const name = document.getElementById('revName').value.trim();
-    const text = document.getElementById('revText').value.trim();
-    const ratingEl = document.querySelector('input[name="rating"]:checked');
-
-    if (!ratingEl) return showToast('Please select a star rating!', 'error');
-    const rating = parseInt(ratingEl.value);
-
-    try {
-        await db.collection('reviews').add({
-            name, text, rating,
-            timestamp: new Date().toISOString()
-        });
-        showToast('Review shared! Thank you 💖', 'success');
-        closeModal('reviewModal');
-        document.getElementById('reviewForm').reset();
-    } catch (err) {
-        showToast('Error sharing review. Please try again.', 'error');
-        console.error(err);
-    }
-}
-
-
-
-// ===== SCARCITY PULSE (FAKE LIVE VIEWERS) =====
-function initScarcityPulse() {
-    const scarcityEl = document.getElementById('scarcityText');
-    if (!scarcityEl) return;
-
-    function updateCount() {
-        // Random number between 3 and 12
-        const count = Math.floor(Math.random() * 10) + 3;
-        scarcityEl.textContent = `${count} people are viewing this live`;
-    }
-
-    // Initial update
-    updateCount();
-
-    // Update every 60 seconds
-    setInterval(updateCount, 60000);
-}
-
-console.log('%c ECLIPSE STORE v3 ', 'background:#c9a84c;color:#000;font-size:18px;font-weight:bold;padding:6px 16px;border-radius:4px;');
-
-// ===== ULTRA PREMIUM ENHANCEMENTS =====
-
-// (Effects removed for maximum performance)
-
-// 5. Cinematic Preloader
-window.addEventListener('load', () => {
-    const loaderCustom = document.getElementById('loader');
-    if(loaderCustom) {
-        setTimeout(() => {
-            loaderCustom.classList.remove('hidden');
-            loaderCustom.classList.add('hidden-snap');
-        }, 50); 
-    }
-});
-
-/* ---- COUNTDOWN TIMER LOGIC ---- */
-function initCountdown() {
-    const targetDate = new Date('April 9, 2026 18:00:00').getTime();
-    
-    function updateTimer() {
-        const now = new Date().getTime();
-        const distance = targetDate - now;
-        
-        if (distance < 0) {
-            const cd = document.getElementById('dropCountdown');
-            if (cd) cd.innerHTML = "<div class='countdown-value' style='width:100%; text-align:center;'>DROP IS LIVE!</div>";
-            return;
-        }
-        
-        const days = Math.floor(distance / (1000 * 60 * 60 * 24));
-        const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-        const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-        const seconds = Math.floor((distance % (1000 * 60)) / 1000);
-        
-        const dEl = document.getElementById('days');
-        const hEl = document.getElementById('hours');
-        const mEl = document.getElementById('minutes');
-        const sEl = document.getElementById('seconds');
-        
-        if (dEl) dEl.innerText = days < 10 ? '0' + days : days;
-        if (hEl) hEl.innerText = hours < 10 ? '0' + hours : hours;
-        if (mEl) mEl.innerText = minutes < 10 ? '0' + minutes : minutes;
-        if (sEl) sEl.innerText = seconds < 10 ? '0' + seconds : seconds;
-    }
-    
-    updateTimer();
-    setInterval(updateTimer, 1000);
-}
-// (initCountdown moved to global load block at top)
