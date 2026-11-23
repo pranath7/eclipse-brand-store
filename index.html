@@ -23,7 +23,10 @@
         <div class="drop-bar-inner">
             <div class="drop-bar-left">
                 <span class="live-dot-pulse"></span>
-                <span class="drop-bar-title">OFFICIAL DROP GOES LIVE 1ST DECEMBER 2026</span>
+                <span class="drop-bar-title">
+                    <span class="drop-text-desktop">OFFICIAL DROP GOES LIVE 1ST DECEMBER 2026</span>
+                    <span class="drop-text-mobile">DROP: 1ST DEC</span>
+                </span>
                 <span class="drop-bar-sub">· LIMITED TO 500 PIECES</span>
             </div>
             <div class="drop-bar-center">
@@ -39,8 +42,8 @@
             </div>
             <div class="drop-bar-right">
                 <button type="button" class="btn-vip-bar-cta" onclick="openVipModal('karan-001')">
-                    <span>CLAIM VIP PASS</span>
-                    <span>↗</span>
+                    <span class="vip-cta-desktop">CLAIM VIP PASS ↗</span>
+                    <span class="vip-cta-mobile">VIP PASS ↗</span>
                 </button>
             </div>
         </div>
@@ -651,6 +654,22 @@
                     </div>
                 </div>
             </div>
+        </div>
+
+        <!-- Dedicated Mobile Action Dock (Always visible, non-blocking on mobile) -->
+        <div class="studio-mobile-action-dock" id="studioMobileActionDock">
+            <div class="dock-meta-col">
+                <div class="dock-look-desc" id="studioMobileLookSummary">Mocha Tan · Size L · Back</div>
+                <div class="dock-price-row">
+                    <span class="dock-lock-icon">🔒</span>
+                    <span class="dock-price-title">PRICE CLASSIFIED</span>
+                    <span class="dock-price-badge">DEC 1</span>
+                </div>
+            </div>
+            <button type="button" class="btn-dock-vip" onclick="openVipFromStudio()">
+                <span>CLAIM VIP PASS 🔒</span>
+                <span>→</span>
+            </button>
         </div>
     </div>
 

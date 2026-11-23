@@ -120,6 +120,12 @@ img {
   white-space: nowrap;
 }
 
+.drop-text-desktop { display: inline; }
+.drop-text-mobile { display: none; }
+.vip-cta-desktop { display: inline; }
+.vip-cta-mobile { display: none; }
+.studio-mobile-action-dock { display: none; }
+
 .live-dot-pulse {
   width: 7px;
   height: 7px;
@@ -2487,38 +2493,65 @@ img {
 
   /* Header on Mobile */
   .drop-countdown-bar {
-    height: 34px !important;
+    height: 38px !important;
     padding: 0 10px !important;
   }
+  .drop-text-desktop { display: none !important; }
+  .drop-text-mobile { display: inline !important; font-size: 10px !important; font-weight: 800 !important; color: #f8fafc !important; }
+  .vip-cta-desktop { display: none !important; }
+  .vip-cta-mobile { display: inline !important; }
+  
   .drop-bar-left .drop-bar-sub {
     display: none !important;
   }
   .drop-bar-left {
-    font-size: 9.5px !important;
-    letter-spacing: 0.06em !important;
+    font-size: 10px !important;
+    letter-spacing: 0.05em !important;
+    gap: 5px !important;
   }
   .drop-nav-timer {
     font-size: 10px !important;
-    padding: 2px 6px !important;
-    gap: 3px !important;
+    padding: 2px 5px !important;
+    gap: 2px !important;
   }
   .drop-nav-timer strong {
     font-size: 10.5px !important;
   }
+  .drop-bar-right {
+    display: flex !important;
+  }
   .btn-vip-bar-cta {
-    display: none !important;
+    display: inline-flex !important;
+    padding: 4px 8px !important;
+    font-size: 9.5px !important;
+    letter-spacing: 0.04em !important;
+    border-radius: var(--radius-full) !important;
   }
   .header-wrapper {
-    top: 36px !important;
-    padding: 8px 14px !important;
+    top: 38px !important;
+    padding: 6px 12px !important;
   }
   .navbar {
-    padding: 6px 14px !important;
-    height: 56px !important;
+    padding: 6px 12px !important;
+    height: 52px !important;
   }
   .brand-logo {
-    font-size: 18px !important;
+    font-size: 17px !important;
     letter-spacing: 0.12em !important;
+  }
+  .nav-group-right .btn-sign {
+    padding: 5px 10px !important;
+    font-size: 10px !important;
+    letter-spacing: 0.04em !important;
+  }
+
+  /* Section Anchor Breathing Room on Mobile */
+  #hero,
+  #collection,
+  #products,
+  #essentials,
+  #newsletter {
+    scroll-margin-top: 96px !important;
   }
 
   /* Hero Section on Mobile */
@@ -2554,15 +2587,53 @@ img {
     margin-top: -4px !important;
   }
   .vip-modal-card {
-    padding: 24px 18px !important;
+    padding: 20px 16px !important;
     border-radius: 20px !important;
+    max-height: 94vh !important;
   }
   .vip-modal-title {
-    font-size: 22px !important;
+    font-size: 20px !important;
+    line-height: 1.15 !important;
+    margin-bottom: 6px !important;
+  }
+  .vip-modal-desc {
+    font-size: 11.5px !important;
+    line-height: 1.45 !important;
+    margin-bottom: 12px !important;
+  }
+  .vip-modal-timer-box {
+    padding: 8px 12px !important;
+    margin-bottom: 12px !important;
+  }
+  .vip-selected-preview {
+    padding: 8px 10px !important;
+    margin-bottom: 12px !important;
+  }
+  .vip-input-group {
+    margin-bottom: 10px !important;
+  }
+  .vip-input-group label {
+    font-size: 10px !important;
+    margin-bottom: 4px !important;
+  }
+  .vip-input-group input {
+    height: 42px !important;
+    padding: 8px 12px !important;
+    font-size: 13px !important;
+  }
+  .vip-size-pill {
+    padding: 8px 0 !important;
+    font-size: 12px !important;
   }
   .btn-vip-claim-cta {
     font-size: 12px !important;
-    padding: 14px 18px !important;
+    padding: 12px 16px !important;
+    margin-top: 6px !important;
+  }
+  .vip-guarantees-strip {
+    font-size: 9.5px !important;
+    margin-top: 8px !important;
+    gap: 4px !important;
   }
   .hero-header-content {
     margin-bottom: 8px !important;
@@ -2743,11 +2814,12 @@ img {
     background: rgba(255, 255, 255, 0.96) !important;
     backdrop-filter: blur(16px) !important;
     -webkit-backdrop-filter: blur(16px) !important;
-    z-index: 50 !important;
+    z-index: 100 !important;
     display: flex !important;
     align-items: center !important;
     justify-content: space-between !important;
     gap: 8px !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08) !important;
   }
   .tryon-header-title {
     font-size: 13px !important;
@@ -2767,51 +2839,54 @@ img {
   .studio-grid-layout {
     display: flex !important;
     flex-direction: column !important;
-    padding: 16px 16px 110px !important; /* clearance for bottom card */
-    gap: 20px !important;
+    padding: 14px 14px 130px !important; /* clearance for bottom dock */
+    gap: 16px !important;
   }
   /* Center Model at top on mobile - 3D Floating Runway */
   .studio-center-stage {
     order: 1 !important;
     width: 100% !important;
-    min-height: 360px !important;
-    height: 360px !important;
+    min-height: 320px !important;
+    height: 320px !important;
     background: transparent !important;
     border-radius: 0 !important;
     box-shadow: none !important;
-    padding: 10px 0 !important;
+    padding: 6px 0 !important;
   }
   .studio-float-wrap {
     animation: studioFloat3D 4s ease-in-out infinite !important;
-    padding-bottom: 14px !important;
+    padding-bottom: 12px !important;
   }
   .studio-model-img {
-    max-height: 310px !important;
+    max-height: 270px !important;
     object-fit: contain !important;
   }
   .studio-model-img.is-full-photo {
-    max-height: 320px !important;
+    max-height: 280px !important;
     border-radius: 14px !important;
   }
   .studio-floor-shadow {
-    width: 180px !important;
-    height: 24px !important;
+    width: 170px !important;
+    height: 22px !important;
     bottom: -2px !important;
   }
   .studio-3d-badge {
     top: 4px !important;
-    font-size: 10px !important;
-    padding: 5px 12px !important;
+    font-size: 9.5px !important;
+    padding: 4px 10px !important;
   }
   .studio-stage-rotate-hint {
     bottom: 2px !important;
-    font-size: 9px !important;
+    font-size: 8.5px !important;
   }
   .studio-col-left,
   .studio-col-right {
-    background: rgba(255, 255, 255, 0.88) !important;
+    background: rgba(255, 255, 255, 0.9) !important;
     border-radius: 18px !important;
-    padding: 18px !important;
+    padding: 16px !important;
+    backdrop-filter: none !important;
+    -webkit-backdrop-filter: none !important;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05) !important;
   }
   /* Views right under model */
   .studio-col-right {
@@ -2823,32 +2898,94 @@ img {
     order: 3 !important;
     width: 100% !important;
   }
-  /* Sticky Bottom Action Card for Studio */
+  .studio-main-title {
+    font-size: 26px !important;
+  }
+  .view-btn-pill {
+    padding: 9px 0 !important;
+    font-size: 12px !important;
+    min-height: 40px !important;
+  }
+  .size-btn-pill {
+    min-height: 40px !important;
+    font-size: 12.5px !important;
+  }
+  /* Hide the in-column look card on mobile */
   .studio-look-card {
+    display: none !important;
+  }
+  /* Dedicated Fixed Mobile Bottom Dock */
+  .studio-mobile-action-dock {
+    display: flex !important;
     position: fixed !important;
     bottom: 0 !important;
     left: 0 !important;
+    right: 0 !important;
     width: 100% !important;
-    margin: 0 !important;
-    border-radius: 0 !important;
-    background: #ffffff !important;
-    box-shadow: 0 -4px 20px rgba(0, 0, 0, 0.12) !important;
-    border-top: 1px solid rgba(0, 0, 0, 0.08) !important;
-    padding: 12px 16px !important;
-    z-index: 60 !important;
+    background: rgba(255, 255, 255, 0.96) !important;
+    backdrop-filter: blur(20px) !important;
+    -webkit-backdrop-filter: blur(20px) !important;
+    border-top: 1px solid rgba(13, 15, 18, 0.08) !important;
+    padding: 10px 14px max(10px, env(safe-area-inset-bottom, 10px)) !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    z-index: 1000 !important;
+    box-shadow: 0 -8px 24px rgba(0, 0, 0, 0.1) !important;
   }
-  .studio-look-header {
-    display: none !important;
+  .dock-meta-col {
+    display: flex !important;
+    flex-direction: column !important;
+    gap: 2px !important;
+    min-width: 0 !important;
   }
-  .studio-look-desc {
+  .dock-look-desc {
     font-size: 11px !important;
-    margin-bottom: 6px !important;
+    font-weight: 700 !important;
+    color: #64748b !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
   }
-
-  /* Cart Drawer Full-Width on Mobile */
-  .cart-drawer {
-    width: 100% !important;
-    max-width: 100% !important;
+  .dock-price-row {
+    display: flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+  }
+  .dock-lock-icon {
+    font-size: 11px !important;
+  }
+  .dock-price-title {
+    font-family: var(--font-tech) !important;
+    font-size: 12px !important;
+    font-weight: 800 !important;
+    color: var(--dark) !important;
+  }
+  .dock-price-badge {
+    font-family: var(--font-tech) !important;
+    font-size: 9px !important;
+    font-weight: 800 !important;
+    color: #b45309 !important;
+    background: rgba(245, 158, 11, 0.12) !important;
+    padding: 2px 6px !important;
+    border-radius: var(--radius-full) !important;
+  }
+  .btn-dock-vip {
+    display: inline-flex !important;
+    align-items: center !important;
+    gap: 6px !important;
+    background: var(--dark) !important;
+    color: #ffffff !important;
+    padding: 11px 18px !important;
+    font-size: 11px !important;
+    font-weight: 800 !important;
+    letter-spacing: 0.06em !important;
+    border-radius: var(--radius-full) !important;
+    border: none !important;
+    cursor: pointer !important;
+    white-space: nowrap !important;
+    flex-shrink: 0 !important;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.16) !important;
   }
 
   /* Floating WhatsApp Pill on Mobile */
@@ -3427,9 +3564,13 @@ img {
     min-width: 0 !important;
     padding: 0 !important;
   }
+  .bundle-suite-container {
+    scroll-margin-top: 96px !important;
+  }
   .btn-bundle-checkout {
-    padding: 13px 16px !important;
-    font-size: 12px !important;
+    padding: 12px 14px !important;
+    font-size: 11px !important;
+    letter-spacing: 0.04em !important;
   }
   .bundle-guarantees-row {
     font-size: 10px !important;

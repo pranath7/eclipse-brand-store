@@ -271,8 +271,11 @@ function renderStudioModel() {
 
 function updateStudioSummary() {
   const summary = document.getElementById('studioLookSummary');
-  if (summary && state.activeLook) {
-    summary.textContent = `${state.activeLook.color} · ${state.activeLook.fit} · Size ${state.activeLook.size || 'L'} · ${state.activeLook.view}`;
+  const mobileSummary = document.getElementById('studioMobileLookSummary');
+  if (state.activeLook) {
+    const text = `${state.activeLook.color} · ${state.activeLook.fit} · Size ${state.activeLook.size || 'L'} · ${state.activeLook.view}`;
+    if (summary) summary.textContent = text;
+    if (mobileSummary) mobileSummary.textContent = text;
   }
 }
 
