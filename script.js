@@ -67,20 +67,20 @@ const PRODUCTS_DATA = {
     defaultFit: 'Relaxed Fit',
     views: {
       'Obsidian Black': {
-        Front: 'eclipse-jogger-1-cutout.png',
-        Side: 'eclipse-jogger-2-cutout.png',
-        Back: 'eclipse-jogger-3-cutout.png'
+        Front: 'eclipse-jogger-1.jpg',
+        Side: 'eclipse-jogger-2.jpg',
+        Back: 'eclipse-jogger-3.jpg'
       },
       'Street Slate': {
-        Front: 'eclipse-jogger-2-cutout.png',
-        Side: 'eclipse-jogger-1-cutout.png',
-        Back: 'eclipse-jogger-3-cutout.png'
+        Front: 'eclipse-jogger-2.jpg',
+        Side: 'eclipse-jogger-1.jpg',
+        Back: 'eclipse-jogger-3.jpg'
       }
     },
     moods: [
-      { id: 'Front Stance', label: 'Front', img: 'eclipse-jogger-1-cutout.png' },
-      { id: 'Side Stance', label: 'Side', img: 'eclipse-jogger-2-cutout.png' },
-      { id: 'Back View', label: 'Back', img: 'eclipse-jogger-3-cutout.png' }
+      { id: 'Front Stance', label: 'Front', img: 'eclipse-jogger-1.jpg' },
+      { id: 'Side Stance', label: 'Side', img: 'eclipse-jogger-2.jpg' },
+      { id: 'Back View', label: 'Back', img: 'eclipse-jogger-3.jpg' }
     ]
   }
 };
@@ -234,6 +234,15 @@ function renderStudioModel() {
   const colorViews = prod.views[state.activeLook.color] || prod.views[prod.defaultColor];
   const imgSrc = colorViews[state.activeLook.view] || colorViews['Front'] || colorViews['Back'];
 
+  const floorShadow = document.querySelector('.studio-floor-shadow');
+  if (prod.id === 'jogger-003') {
+    modelImg.classList.add('is-full-photo');
+    if (floorShadow) floorShadow.style.opacity = '0';
+  } else {
+    modelImg.classList.remove('is-full-photo');
+    if (floorShadow) floorShadow.style.opacity = '';
+  }
+
   modelImg.classList.add('fade-out');
   setTimeout(() => {
     modelImg.src = imgSrc;
@@ -248,10 +257,11 @@ function renderStudioModel() {
     let label = v;
     if (prod.id === 'karan-001') {
       label = v === 'Back' ? 'BACK ARTWORK' : (v === 'Front' ? 'FRONT KA' : 'SIDE PROFILE');
+      badgeText.textContent = `3D FLOAT · ${label} (${state.activeLook.color.toUpperCase()})`;
     } else {
       label = v === 'Front' ? 'FRONT STANCE' : (v === 'Side' ? 'SIDE STANCE' : 'BACK VIEW');
+      badgeText.textContent = `HIGH-RES VIEW · ${label} (${state.activeLook.color.toUpperCase()})`;
     }
-    badgeText.textContent = `3D FLOAT · ${label} (${state.activeLook.color.toUpperCase()})`;
   }
 }
 
