@@ -79,34 +79,34 @@
                 <button type="button" class="btn-sign" onclick="openVipModal('karan-001')">VIP ACCESS 🔒</button>
             </div>
         </nav>
+    </header>
 
-        <!-- Slide-In Mobile Navigation Drawer -->
-        <div class="mobile-nav-drawer" id="mobileNavDrawer">
-            <div class="mobile-nav-inner">
-                <div class="mobile-nav-top">
-                    <span class="mobile-nav-brand">ECLIPSE</span>
-                    <button type="button" class="mobile-nav-close" onclick="toggleMobileNav()">✕</button>
+    <!-- Slide-In Mobile Navigation Drawer (Independent Root Overlay) -->
+    <div class="mobile-nav-drawer" id="mobileNavDrawer" aria-hidden="true">
+        <div class="mobile-nav-inner">
+            <div class="mobile-nav-top">
+                <span class="mobile-nav-brand">ECLIPSE</span>
+                <button type="button" class="mobile-nav-close" onclick="toggleMobileNav()" aria-label="Close Navigation">✕</button>
+            </div>
+            <div class="mobile-nav-links">
+                <a href="#hero" onclick="event.preventDefault(); navigateMobileNav('hero')">✦ HOME</a>
+                <a href="#collection" onclick="event.preventDefault(); navigateMobileNav('collection')">✦ OUR COLLECTION</a>
+                <a href="#products" onclick="event.preventDefault(); navigateMobileNav('products')">✦ THE CATALOG</a>
+                <a href="#essentials" onclick="event.preventDefault(); navigateMobileNav('essentials')">✦ STREET ESSENTIALS</a>
+                <a href="javascript:void(0)" onclick="toggleMobileNav(); setTimeout(() => openProductTryOn('karan-001', 'Back'), 120)">✦ VIRTUAL TRY-ON STUDIO</a>
+                <a href="javascript:void(0)" onclick="toggleMobileNav(); setTimeout(() => openVipModal('karan-001'), 120)">✦ VIP DROP PASS (DEC 1) 🔒</a>
+                <a href="#newsletter" onclick="event.preventDefault(); navigateMobileNav('newsletter')">✦ VIP INNER CIRCLE</a>
+            </div>
+            <div class="mobile-nav-footer">
+                <div style="font-size: 11px; font-family: var(--font-tech); color: #94a3b8; margin-bottom: 12px; letter-spacing: 0.1em;">
+                    AUJLA SZN 1 · DROP RELEASES DEC 1
                 </div>
-                <div class="mobile-nav-links">
-                    <a href="#hero" onclick="toggleMobileNav()">✦ HOME</a>
-                    <a href="#collection" onclick="toggleMobileNav()">✦ OUR COLLECTION</a>
-                    <a href="#products" onclick="toggleMobileNav()">✦ THE CATALOG</a>
-                    <a href="#essentials" onclick="toggleMobileNav()">✦ STREET ESSENTIALS</a>
-                    <a href="javascript:void(0)" onclick="toggleMobileNav(); openProductTryOn('karan-001', 'Back')">✦ VIRTUAL TRY-ON STUDIO</a>
-                    <a href="javascript:void(0)" onclick="toggleMobileNav(); openVipModal('karan-001')">✦ VIP DROP PASS (DEC 1) 🔒</a>
-                    <a href="#newsletter" onclick="toggleMobileNav()">✦ VIP INNER CIRCLE</a>
-                </div>
-                <div class="mobile-nav-footer">
-                    <div style="font-size: 11px; font-family: var(--font-tech); color: #94a3b8; margin-bottom: 12px; letter-spacing: 0.1em;">
-                        AUJLA SZN 1 · DROP RELEASES DEC 1
-                    </div>
-                    <button type="button" class="btn-mobile-checkout" onclick="toggleMobileNav(); openVipModal('karan-001')">
-                        Claim VIP Drop Pass 🔒
-                    </button>
-                </div>
+                <button type="button" class="btn-mobile-checkout" onclick="toggleMobileNav(); setTimeout(() => openVipModal('karan-001'), 120)">
+                    Claim VIP Drop Pass 🔒
+                </button>
             </div>
         </div>
-    </header>
+    </div>
 
     <!-- ==========================================
          1. HERO SECTION (VEXO REFERENCE WITH BACK PRINT CUTOUT)
@@ -184,11 +184,14 @@
                 </p>
             </div>
 
-            <div class="hero-video-card" onclick="openVideoModal()">
-                <img src="campaign-teaser.jpg" alt="Campaign Teaser Film" />
-                <div class="video-play-overlay">
-                    <div class="play-circle">▶</div>
+            <div class="hero-drop-card" onclick="openVipModal('karan-001')">
+                <div class="hero-drop-card-badge">
+                    <span class="live-dot-pulse"></span>
+                    <span>DROP 003 · DEC 1</span>
                 </div>
+                <div class="hero-drop-card-title">AUJLA SZN 1 COLLECTION</div>
+                <div class="hero-drop-card-sub">500 Pieces Worldwide · VIP Early Pass Open</div>
+                <span class="hero-drop-card-cta">Lock Pass 🔒 →</span>
             </div>
         </div>
     </section>
@@ -499,7 +502,7 @@
                     </form>
                 </div>
                 <div style="display: flex; justify-content: center;">
-                    <img src="campaign-teaser.jpg" alt="Campaign Visual" style="border-radius: 20px; max-height: 280px; box-shadow: var(--shadow-floating);" />
+                    <img src="karan-szn1-card.jpg" alt="AUJLA SZN 1 Signature Edition" style="border-radius: 20px; max-height: 280px; box-shadow: var(--shadow-floating); object-fit: cover;" />
                 </div>
             </div>
         </div>

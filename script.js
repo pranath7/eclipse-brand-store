@@ -405,10 +405,6 @@ function showToast(msg) {
   setTimeout(() => toast.classList.remove('active'), 2500);
 }
 
-function openVideoModal() {
-  alert("✦ AUJLA SZN 1 CAMPAIGN FILM\n\nOfficial Karan Aujla Drop\nPiece: Luxury Embroidered KA Monogram Tee\nArt: Lamborghini Estate Edition\nFabric: 240+ GSM Heavyweight Combed Cotton\n\n(Full campaign teaser loaded!)");
-}
-
 function triggerCheckout() {
   openVipModal('karan-001');
 }
@@ -419,7 +415,20 @@ function toggleMobileNav() {
   if (drawer) {
     const isActive = drawer.classList.toggle('active');
     if (toggleBtn) toggleBtn.classList.toggle('open', isActive);
+    drawer.setAttribute('aria-hidden', !isActive);
     document.body.style.overflow = isActive ? 'hidden' : 'auto';
+  }
+}
+
+function navigateMobileNav(targetId) {
+  toggleMobileNav();
+  if (targetId) {
+    setTimeout(() => {
+      const el = document.getElementById(targetId);
+      if (el) {
+        el.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 120);
   }
 }
 
