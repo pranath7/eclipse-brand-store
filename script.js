@@ -47,8 +47,7 @@ const PRODUCTS_DATA = {
     },
     moods: [
       { id: 'Back Artwork', label: 'Back (Art)', img: 'hero-szn1-back-cutout.png' },
-      { id: 'Front Stance', label: 'Front (KA)', img: 'hero-szn1-cutout.png' },
-      { id: 'Side Profile', label: 'Side Profile', img: 'karan-side-mocha-cutout.png' }
+      { id: 'Front Stance', label: 'Front (KA)', img: 'hero-szn1-cutout.png' }
     ]
   },
   'jogger-003': {
@@ -68,18 +67,15 @@ const PRODUCTS_DATA = {
     views: {
       'Obsidian Black': {
         Front: 'eclipse-jogger-1.jpg',
-        Side: 'eclipse-jogger-2.jpg',
         Back: 'eclipse-jogger-3.jpg'
       },
       'Street Slate': {
         Front: 'eclipse-jogger-2.jpg',
-        Side: 'eclipse-jogger-1.jpg',
         Back: 'eclipse-jogger-3.jpg'
       }
     },
     moods: [
       { id: 'Front Stance', label: 'Front', img: 'eclipse-jogger-1.jpg' },
-      { id: 'Side Stance', label: 'Side', img: 'eclipse-jogger-2.jpg' },
       { id: 'Back View', label: 'Back', img: 'eclipse-jogger-3.jpg' }
     ]
   }
@@ -92,7 +88,10 @@ const PRODUCTS_DATA = {
 function openProductTryOn(productId, initialView) {
   const prod = PRODUCTS_DATA[productId] || PRODUCTS_DATA['karan-001'];
   state.activeProduct = prod;
-  const viewToUse = initialView || (productId === 'karan-001' ? 'Back' : 'Front');
+  let viewToUse = initialView || (productId === 'karan-001' ? 'Back' : 'Front');
+  if (viewToUse === 'Side') {
+    viewToUse = (productId === 'karan-001' ? 'Back' : 'Front');
+  }
   state.activeLook = {
     color: prod.defaultColor,
     fit: prod.defaultFit,
@@ -137,19 +136,17 @@ function openProductTryOn(productId, initialView) {
   const sizeDisp = document.getElementById('studioSizeDisplay');
   if (sizeDisp) sizeDisp.textContent = 'L';
 
-  // Dynamic View Buttons for Tee vs Jogger
+  // Dynamic View Buttons for Tee vs Jogger (Side view removed per brand specification)
   const viewToggle = document.getElementById('studioViewToggle');
   if (viewToggle) {
     if (prod.id === 'karan-001') {
       viewToggle.innerHTML = `
         <button class="view-btn-pill ${viewToUse === 'Back' ? 'active' : ''}" data-view="Back" onclick="setStudioView('Back', this)">Back (Art)</button>
         <button class="view-btn-pill ${viewToUse === 'Front' ? 'active' : ''}" data-view="Front" onclick="setStudioView('Front', this)">Front (KA)</button>
-        <button class="view-btn-pill ${viewToUse === 'Side' ? 'active' : ''}" data-view="Side" onclick="setStudioView('Side', this)">Side</button>
       `;
     } else {
       viewToggle.innerHTML = `
         <button class="view-btn-pill ${viewToUse === 'Front' ? 'active' : ''}" data-view="Front" onclick="setStudioView('Front', this)">Front</button>
-        <button class="view-btn-pill ${viewToUse === 'Side' ? 'active' : ''}" data-view="Side" onclick="setStudioView('Side', this)">Side</button>
         <button class="view-btn-pill ${viewToUse === 'Back' ? 'active' : ''}" data-view="Back" onclick="setStudioView('Back', this)">Back</button>
       `;
     }
@@ -263,10 +260,10 @@ function renderStudioModel() {
     const v = state.activeLook.view;
     let label = v;
     if (prod.id === 'karan-001') {
-      label = v === 'Back' ? 'BACK ARTWORK' : (v === 'Front' ? 'FRONT KA' : 'SIDE PROFILE');
+      label = v === 'Back' ? 'BACK ARTWORK' : 'FRONT KA';
       badgeText.textContent = `3D FLOAT · ${label} (${state.activeLook.color.toUpperCase()})`;
     } else {
-      label = v === 'Front' ? 'FRONT STANCE' : (v === 'Side' ? 'SIDE STANCE' : 'BACK VIEW');
+      label = v === 'Front' ? 'FRONT STANCE' : 'BACK VIEW';
       badgeText.textContent = `HIGH-RES VIEW · ${label} (${state.activeLook.color.toUpperCase()})`;
     }
   }
