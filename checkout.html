@@ -961,7 +961,7 @@
 
                 <!-- Store WhatsApp Number Notice & Configurator -->
                 <div class="store-phone-pill">
-                    <span>📱 Dispatch WhatsApp: <strong id="storePhoneDisplay">+91 98765 43210</strong></span>
+                    <span>📱 Dispatch WhatsApp: <strong id="storePhoneDisplay">+91 63691 42027</strong></span>
                     <button type="button" class="btn-change-phone" onclick="changeStorePhone()">Change</button>
                 </div>
 
@@ -999,7 +999,7 @@
     <!-- Script -->
     <script>
         // Store Configuration
-        let STORE_PHONE = localStorage.getItem('eclipse_store_phone') || '919876543210';
+        let STORE_PHONE = localStorage.getItem('eclipse_store_phone') || '916369142027';
         let cart = JSON.parse(localStorage.getItem('eclipse_cart_v2') || '[]');
         let discount = 0;
         let lastGeneratedWaUrl = '';
@@ -1007,8 +1007,8 @@
         document.getElementById('storePhoneDisplay').textContent = '+' + STORE_PHONE;
 
         function changeStorePhone() {
-            const current = localStorage.getItem('eclipse_store_phone') || '919876543210';
-            const num = prompt("Enter your 10-digit WhatsApp number (with country code, e.g. 919876543210) to receive customer orders:", current);
+            const current = localStorage.getItem('eclipse_store_phone') || '916369142027';
+            const num = prompt("Enter your 10-digit WhatsApp number (with country code, e.g. 916369142027) to receive customer orders:", current);
             if (num && num.trim()) {
                 const cleaned = num.replace(/\D/g, '');
                 localStorage.setItem('eclipse_store_phone', cleaned);

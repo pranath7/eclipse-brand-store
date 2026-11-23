@@ -608,7 +608,8 @@ function submitVipPass(e) {
 
   const msg = `⚡ *AUJLA SZN 1 — VIP EARLY ACCESS PASS* ⚡\n\nHey ECLIPSE, lock my VIP Drop Pass for 1st December!\n\n• *Pass ID:* ${reservationCode}\n• *Name:* ${name}\n• *WhatsApp:* ${phone}\n• *Preferred Piece:* ${currentVipItem.name}\n• *Selected Size:* ${size}\n\nSend me the 1-hour early drop link before public sellout!`;
 
-  const waUrl = `https://wa.me/919342738374?text=${encodeURIComponent(msg)}`;
+  const ECLIPSE_WHATSAPP_NUMBER = '916369142027';
+  const waUrl = `https://wa.me/${ECLIPSE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
   window.open(waUrl, '_blank');
 
   closeVipModal();
