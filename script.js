@@ -2,6 +2,16 @@
    ECLIPSE STORE — SCRIPT.JS (AUJLA SZN 1 OFFICIAL DROP CONTROLLER)
    ========================================================================== */
 
+const ECLIPSE_WHATSAPP_NUMBER = '916369142027';
+window.ECLIPSE_WHATSAPP_NUMBER = ECLIPSE_WHATSAPP_NUMBER;
+
+// Reset any stale cached phone numbers in localStorage
+try {
+  if (localStorage.getItem('eclipse_store_phone') && localStorage.getItem('eclipse_store_phone') !== ECLIPSE_WHATSAPP_NUMBER) {
+    localStorage.setItem('eclipse_store_phone', ECLIPSE_WHATSAPP_NUMBER);
+  }
+} catch (e) {}
+
 const state = {
   cart: JSON.parse(localStorage.getItem('eclipse_cart_v2') || '[]'),
   currentCategory: 'all',
@@ -608,9 +618,13 @@ function submitVipPass(e) {
 
   const msg = `⚡ *AUJLA SZN 1 — VIP EARLY ACCESS PASS* ⚡\n\nHey ECLIPSE, lock my VIP Drop Pass for 1st December!\n\n• *Pass ID:* ${reservationCode}\n• *Name:* ${name}\n• *WhatsApp:* ${phone}\n• *Preferred Piece:* ${currentVipItem.name}\n• *Selected Size:* ${size}\n\nSend me the 1-hour early drop link before public sellout!`;
 
-  const ECLIPSE_WHATSAPP_NUMBER = '916369142027';
-  const waUrl = `https://wa.me/${ECLIPSE_WHATSAPP_NUMBER}?text=${encodeURIComponent(msg)}`;
-  window.open(waUrl, '_blank');
+  const targetNumber = (window.ECLIPSE_WHATSAPP_NUMBER || '916369142027').replace(/\D/g, '');
+  const waUrl = `https://wa.me/${targetNumber}?text=${encodeURIComponent(msg)}`;
+  
+  const waWin = window.open(waUrl, '_blank');
+  if (!waWin || waWin.closed || typeof waWin.closed === 'undefined') {
+    window.location.href = waUrl;
+  }
 
   closeVipModal();
   showToast(`✦ VIP Pass ${reservationCode} Reserved! Opening WhatsApp...`);
