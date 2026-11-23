@@ -5,6 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Checkout | ECLIPSE Official Store</title>
     <meta name="description" content="Secure Streetwear Checkout — AUJLA SZN 1 Signature Drops. Direct WhatsApp Order & Pan-India Express Delivery.">
+    <script>
+        // Pre-launch mode: redirect directly to main page with VIP pass trigger
+        window.location.replace('index.html?vip=1');
+    </script>
     
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -724,6 +728,33 @@
         .empty-cart-icon {
             font-size: 48px;
             margin-bottom: 16px;
+        }
+
+        /* Pre-Launch Drop Reservation Banner */
+        .checkout-drop-banner {
+            grid-column: 1 / -1;
+            background: #0b0d10;
+            color: #ffffff;
+            border-radius: var(--radius-md);
+            padding: 14px 20px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-family: var(--font-tech);
+            font-size: 11px;
+            font-weight: 800;
+            letter-spacing: 0.08em;
+            border: 1px solid rgba(255, 255, 255, 0.12);
+            margin-bottom: 24px;
+        }
+        .live-pulse-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 50%;
+            background: #f59e0b;
+            display: inline-block;
+            margin-right: 8px;
+            box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.25);
         }
     </style>
 </head>

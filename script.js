@@ -104,7 +104,14 @@ function openProductTryOn(productId, initialView) {
   document.getElementById('studioProductTag').textContent = prod.drop;
   document.getElementById('studioMainTitle').textContent = prod.name;
   document.getElementById('studioDesc').textContent = prod.desc;
-  document.getElementById('studioPrice').textContent = `₹${prod.price}`;
+  const studioPriceEl = document.getElementById('studioPrice');
+  if (studioPriceEl) {
+    studioPriceEl.innerHTML = `
+      <span class="lock-glyph">🔒</span>
+      <span class="classified-txt">PRICE CLASSIFIED</span>
+      <span class="classified-sub">REVEALS DEC 1</span>
+    `;
+  }
 
   // Swatches
   const swatchContainer = document.getElementById('studioSwatchContainer');
@@ -273,25 +280,7 @@ function updateStudioSummary() {
 }
 
 function addStudioLookToCart() {
-  const prod = state.activeProduct;
-  if (!prod) return;
-
-  const colorViews = prod.views[state.activeLook.color] || prod.views[prod.defaultColor];
-  const imgSrc = colorViews[state.activeLook.view] || colorViews['Front'];
-  const size = state.activeLook.size || 'L';
-
-  addToCart({
-    id: `${prod.id}-${state.activeLook.color}-${state.activeLook.fit}-${size}`.toLowerCase().replace(/\s+/g, '-'),
-    name: prod.name,
-    meta: `${state.activeLook.color} · ${state.activeLook.fit} · Size ${size}`,
-    price: prod.price,
-    img: imgSrc,
-    qty: 1
-  });
-
-  closeProductTryOn();
-  openCartDrawer();
-  showToast(`✦ Added ${prod.name} (Size ${size}) to Bag!`);
+  openVipFromStudio();
 }
 
 // ==========================================================================
@@ -319,18 +308,7 @@ function filterCategory(cat, el) {
 // ==========================================================================
 
 function quickAddToCart(productId) {
-  const prod = PRODUCTS_DATA[productId] || PRODUCTS_DATA['karan-001'];
-  const defaultImg = prod.views[prod.defaultColor]?.Back || prod.views[prod.defaultColor]?.Front || 'karan-szn1-back.png';
-  addToCart({
-    id: `${prod.id}-${prod.defaultColor}-${prod.defaultFit}`.toLowerCase().replace(/\s+/g, '-'),
-    name: prod.name,
-    meta: `${prod.defaultColor} · ${prod.defaultFit}`,
-    price: prod.price,
-    img: defaultImg,
-    qty: 1
-  });
-  openCartDrawer();
-  showToast(`✦ Added ${prod.name} to Bag!`);
+  openVipModal(productId);
 }
 
 const bundleSelectionState = {
@@ -361,22 +339,7 @@ function selectBundleSize(type, size, buttonEl) {
 }
 
 function buyFullBundle() {
-  const teeSize = bundleSelectionState.teeSize || 'L';
-  const joggerSize = bundleSelectionState.joggerSize || 'M';
-  const bundleId = `bundle-szn1-tee-${teeSize}-jogger-${joggerSize}`.toLowerCase();
-  
-  addToCart({
-    id: bundleId,
-    name: 'AUJLA SZN 1 Uniform Set',
-    meta: `Tee: Mocha Tan (Size ${teeSize}) + Jogger: Obsidian Black (Size ${joggerSize})`,
-    price: 1999,
-    img: 'karan-szn1-card.jpg',
-    qty: 1,
-    isBundle: true
-  });
-  
-  openCartDrawer();
-  showToast(`⚡ AUJLA SZN 1 Set (Tee: ${teeSize} + Jogger: ${joggerSize}) Added to Bag!`);
+  openVipModal('bundle');
 }
 
 function addToCart(product) {
@@ -415,96 +378,15 @@ function saveCart() {
   localStorage.setItem('eclipse_cart_v2', JSON.stringify(state.cart));
 }
 
-function updateCartBadge() {
-  const totalCount = state.cart.reduce((sum, item) => sum + item.qty, 0);
-  const badge = document.getElementById('cartBadgeCount');
-  if (badge) {
-    badge.textContent = totalCount;
-    badge.style.display = totalCount > 0 ? 'flex' : 'none';
-  }
-}
+function updateCartBadge() {}
 
-function renderCart() {
-  const container = document.getElementById('cartItemsList');
-  const subtotalEl = document.getElementById('drawerSubtotal');
-  const meterText = document.getElementById('shippingMeterText');
-  const meterFill = document.getElementById('shippingMeterFill');
-  if (!container) return;
-
-  if (state.cart.length === 0) {
-    container.innerHTML = `
-      <div style="text-align: center; padding: 60px 20px; color: var(--text-muted);">
-        <div style="font-size: 40px; margin-bottom: 12px;">🛍️</div>
-        <p style="font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 6px;">Your Bag is Empty</p>
-        <p style="font-size: 13px;">Experience AUJLA SZN 1 in our Try-On studio.</p>
-      </div>
-    `;
-    if (subtotalEl) subtotalEl.textContent = '₹0';
-    if (meterText) meterText.textContent = 'Free Shipping on orders above ₹1,499';
-    if (meterFill) meterFill.style.width = '0%';
-    return;
-  }
-
-  let subtotal = 0;
-  container.innerHTML = state.cart.map(item => {
-    subtotal += item.price * item.qty;
-    return `
-      <div class="cart-item">
-        <img src="${item.img}" alt="${item.name}" class="cart-item-img" />
-        <div class="cart-item-info">
-          <div class="cart-item-name">${item.name}</div>
-          <div class="cart-item-meta">${item.meta || 'AUJLA SZN 1'}</div>
-          <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 8px;">
-            <div style="display: flex; align-items: center; gap: 8px; background: #f1f3f5; border-radius: 20px; padding: 2px 10px;">
-              <button onclick="updateQty('${item.id}', -1)" style="font-size: 14px; font-weight: 700;">-</button>
-              <span style="font-size: 13px; font-weight: 700; min-width: 16px; text-align: center;">${item.qty}</span>
-              <button onclick="updateQty('${item.id}', 1)" style="font-size: 14px; font-weight: 700;">+</button>
-            </div>
-            <div class="cart-item-price">₹${item.price * item.qty}</div>
-          </div>
-        </div>
-        <button onclick="removeFromCart('${item.id}')" style="color: var(--text-muted); font-size: 16px;">✕</button>
-      </div>
-    `;
-  }).join('');
-
-  // Auto Bundle Savings if customer added 1 Tee & 1 Jogger individually
-  const teesCount = state.cart.filter(i => (i.id.includes('karan-001') || i.name.toLowerCase().includes('tee')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
-  const joggersCount = state.cart.filter(i => (i.id.includes('jogger-003') || i.name.toLowerCase().includes('jogger')) && !i.isBundle).reduce((s, i) => s + i.qty, 0);
-  const bundlePairs = Math.min(teesCount, joggersCount);
-  const bundleDiscount = bundlePairs * 199;
-  const netSubtotal = Math.max(0, subtotal - bundleDiscount);
-
-  if (subtotalEl) {
-    if (bundleDiscount > 0) {
-      subtotalEl.innerHTML = `₹${netSubtotal} <span style="font-size: 12px; color: #16a34a; font-weight: 700; display: block;">⚡ Saved ₹${bundleDiscount} (Bundle Deal ₹1,999)</span>`;
-    } else {
-      subtotalEl.textContent = `₹${subtotal}`;
-    }
-  }
-
-  const freeThreshold = 1499;
-  if (netSubtotal >= freeThreshold) {
-    if (meterText) meterText.innerHTML = `🎉 <strong>Congratulations!</strong> You unlocked Free Express Shipping!`;
-    if (meterFill) meterFill.style.width = '100%';
-  } else {
-    const diff = freeThreshold - netSubtotal;
-    const pct = Math.min(100, Math.round((netSubtotal / freeThreshold) * 100));
-    if (meterText) meterText.innerHTML = `Add <strong>₹${diff}</strong> more to unlock <strong>Free Express Shipping</strong>`;
-    if (meterFill) meterFill.style.width = `${pct}%`;
-  }
-}
+function renderCart() {}
 
 function openCartDrawer() {
-  document.getElementById('cartDrawerOverlay')?.classList.add('active');
-  document.getElementById('cartDrawer')?.classList.add('active');
-  renderCart();
+  openVipModal('karan-001');
 }
 
-function closeCartDrawer() {
-  document.getElementById('cartDrawerOverlay')?.classList.remove('active');
-  document.getElementById('cartDrawer')?.classList.remove('active');
-}
+function closeCartDrawer() {}
 
 function scrollToSection(id) {
   const el = document.getElementById(id);
@@ -528,12 +410,7 @@ function openVideoModal() {
 }
 
 function triggerCheckout() {
-  if (state.cart.length === 0) {
-    showToast('Your bag is empty! Add an item to proceed.');
-    return;
-  }
-  // Navigate directly to dedicated WhatsApp Checkout Page
-  window.location.href = 'checkout.html';
+  openVipModal('karan-001');
 }
 
 function toggleMobileNav() {
@@ -546,10 +423,194 @@ function toggleMobileNav() {
   }
 }
 
+// ==========================================================================
+// 8. PRE-LAUNCH COUNTDOWN TIMER (DECEMBER 1ST, 2026 DROP)
+// ==========================================================================
+
+const DROP_DATE = new Date('2026-12-01T00:00:00+05:30').getTime();
+
+function updateDropCountdown() {
+  const now = new Date().getTime();
+  const diff = DROP_DATE - now;
+
+  let days = 0, hours = 0, mins = 0, secs = 0;
+  if (diff > 0) {
+    days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    hours = Math.floor((diff / (1000 * 60 * 60)) % 24);
+    mins = Math.floor((diff / (1000 * 60)) % 60);
+    secs = Math.floor((diff / 1000) % 60);
+  }
+
+  const dStr = String(days).padStart(2, '0');
+  const hStr = String(hours).padStart(2, '0');
+  const mStr = String(mins).padStart(2, '0');
+  const sStr = String(secs).padStart(2, '0');
+
+  // Navbar ticker
+  const navD = document.getElementById('navDays');
+  const navH = document.getElementById('navHours');
+  const navM = document.getElementById('navMins');
+  const navS = document.getElementById('navSecs');
+  if (navD) navD.textContent = dStr;
+  if (navH) navH.textContent = hStr;
+  if (navM) navM.textContent = mStr;
+  if (navS) navS.textContent = sStr;
+
+  // Hero Countdown Cards
+  const heroD = document.getElementById('heroDays');
+  const heroH = document.getElementById('heroHours');
+  const heroM = document.getElementById('heroMins');
+  const heroS = document.getElementById('heroSecs');
+  if (heroD) heroD.textContent = dStr;
+  if (heroH) heroH.textContent = hStr;
+  if (heroM) heroM.textContent = mStr;
+  if (heroS) heroS.textContent = sStr;
+
+  // Modal Countdown
+  const modalD = document.getElementById('modalDays');
+  const modalH = document.getElementById('modalHours');
+  const modalM = document.getElementById('modalMins');
+  const modalS = document.getElementById('modalSecs');
+  if (modalD) modalD.textContent = dStr;
+  if (modalH) modalH.textContent = hStr;
+  if (modalM) modalM.textContent = mStr;
+  if (modalS) modalS.textContent = sStr;
+}
+
+// ==========================================================================
+// 9. VIP EARLY ACCESS PASS MODAL HANDLER
+// ==========================================================================
+
+let currentVipItem = {
+  id: 'karan-001',
+  name: 'AUJLA SZN 1 Signature Tee',
+  drop: 'OFFICIAL DROP // AUJLA SZN 1',
+  meta: 'Mocha Tan · Size L · 🔒 Price Unlocks Dec 1',
+  img: 'hero-szn1-back-cutout.png',
+  size: 'L'
+};
+
+function openVipModal(itemId) {
+  if (itemId === 'bundle') {
+    const teeSize = bundleSelectionState.teeSize || 'L';
+    const joggerSize = bundleSelectionState.joggerSize || 'M';
+    currentVipItem = {
+      id: 'bundle',
+      name: 'THE AUJLA SZN 1 UNIFORM (2-PIECE)',
+      drop: 'OFFICIAL DROP BUNDLE // 2-PIECE SET',
+      meta: `Tee: Size ${teeSize} · Jogger: Size ${joggerSize} · 🔒 VIP Pricing Unlocks Dec 1`,
+      img: 'karan-szn1-card.jpg',
+      size: `${teeSize} (Tee) / ${joggerSize} (Jogger)`
+    };
+  } else if (itemId === 'jogger-003') {
+    currentVipItem = {
+      id: 'jogger-003',
+      name: 'Signature Streetwear Jogger',
+      drop: 'DROP 003 // SIGNATURE JOGGERS',
+      meta: 'Obsidian Black · Size L · 🔒 Price Unlocks Dec 1',
+      img: 'eclipse-jogger-card.jpg',
+      size: 'L'
+    };
+  } else {
+    currentVipItem = {
+      id: 'karan-001',
+      name: 'AUJLA SZN 1 Signature Tee',
+      drop: 'OFFICIAL DROP // AUJLA SZN 1',
+      meta: 'Mocha Tan · Size L · 🔒 Price Unlocks Dec 1',
+      img: 'hero-szn1-back-cutout.png',
+      size: 'L'
+    };
+  }
+
+  const imgEl = document.getElementById('vipItemImg');
+  const dropEl = document.getElementById('vipItemDrop');
+  const nameEl = document.getElementById('vipItemName');
+  const metaEl = document.getElementById('vipItemMeta');
+
+  if (imgEl) imgEl.src = currentVipItem.img;
+  if (dropEl) dropEl.textContent = currentVipItem.drop;
+  if (nameEl) nameEl.textContent = currentVipItem.name;
+  if (metaEl) metaEl.textContent = currentVipItem.meta;
+
+  document.getElementById('vipModalOverlay')?.classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function openVipFromStudio() {
+  const prod = state.activeProduct || PRODUCTS_DATA['karan-001'];
+  const look = state.activeLook || { color: 'Mocha Tan', fit: 'Oversized', size: 'L', view: 'Back' };
+  const size = look.size || 'L';
+  const colorViews = prod.views[look.color] || prod.views[prod.defaultColor];
+  const imgSrc = colorViews[look.view] || colorViews['Front'];
+
+  currentVipItem = {
+    id: prod.id,
+    name: prod.name,
+    drop: prod.drop,
+    meta: `${look.color} · ${look.fit} · Size ${size} · 🔒 Price Unlocks Dec 1`,
+    img: imgSrc,
+    size: size
+  };
+
+  const imgEl = document.getElementById('vipItemImg');
+  const dropEl = document.getElementById('vipItemDrop');
+  const nameEl = document.getElementById('vipItemName');
+  const metaEl = document.getElementById('vipItemMeta');
+
+  if (imgEl) imgEl.src = currentVipItem.img;
+  if (dropEl) dropEl.textContent = currentVipItem.drop;
+  if (nameEl) nameEl.textContent = currentVipItem.name;
+  if (metaEl) metaEl.textContent = currentVipItem.meta;
+
+  document.querySelectorAll('.vip-size-pill').forEach(b => {
+    b.classList.toggle('active', b.dataset.size === size);
+  });
+
+  document.getElementById('vipModalOverlay')?.classList.add('active');
+}
+
+function closeVipModal(e) {
+  if (e && e.target && !e.target.classList.contains('vip-modal-overlay') && !e.target.classList.contains('vip-modal-close')) {
+    return;
+  }
+  document.getElementById('vipModalOverlay')?.classList.remove('active');
+  document.body.style.overflow = 'auto';
+}
+
+function selectVipSize(size, btn) {
+  currentVipItem.size = size;
+  document.querySelectorAll('.vip-size-pill').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const metaEl = document.getElementById('vipItemMeta');
+  if (metaEl) {
+    metaEl.textContent = metaEl.textContent.replace(/Size [A-Z0-9]+/, `Size ${size}`);
+  }
+}
+
+function submitVipPass(e) {
+  e.preventDefault();
+  const name = document.getElementById('vipName').value.trim();
+  const phone = document.getElementById('vipPhone').value.trim();
+  const size = currentVipItem.size || 'L';
+
+  const reservationCode = 'VIP-' + Math.floor(1000 + Math.random() * 9000);
+  const data = { name, phone, size, item: currentVipItem.name, code: reservationCode, date: new Date().toISOString() };
+  localStorage.setItem('eclipse_vip_pass', JSON.stringify(data));
+
+  const msg = `⚡ *AUJLA SZN 1 — VIP EARLY ACCESS PASS* ⚡\n\nHey ECLIPSE, lock my VIP Drop Pass for 1st December!\n\n• *Pass ID:* ${reservationCode}\n• *Name:* ${name}\n• *WhatsApp:* ${phone}\n• *Preferred Piece:* ${currentVipItem.name}\n• *Selected Size:* ${size}\n\nSend me the 1-hour early drop link before public sellout!`;
+
+  const waUrl = `https://wa.me/919342738374?text=${encodeURIComponent(msg)}`;
+  window.open(waUrl, '_blank');
+
+  closeVipModal();
+  showToast(`✦ VIP Pass ${reservationCode} Reserved! Opening WhatsApp...`);
+}
+
 window.addEventListener('keydown', (e) => {
   if (e.key === 'Escape') {
     closeProductTryOn();
     closeCartDrawer();
+    closeVipModal();
     const drawer = document.getElementById('mobileNavDrawer');
     if (drawer && drawer.classList.contains('active')) {
       toggleMobileNav();
@@ -558,11 +619,19 @@ window.addEventListener('keydown', (e) => {
 });
 
 document.addEventListener('DOMContentLoaded', () => {
-  updateCartBadge();
-  renderCart();
+  updateDropCountdown();
+  setInterval(updateDropCountdown, 1000);
+
+  const urlParams = new URLSearchParams(window.location.search);
+  
+  // If vip=1 is present, open VIP pass modal immediately
+  if (urlParams.get('vip')) {
+    setTimeout(() => {
+      openVipModal('karan-001');
+    }, 200);
+  }
 
   // Support direct URL deeplinking to 3D Try-On Studio (e.g. ?tryon=karan-001&view=Back)
-  const urlParams = new URLSearchParams(window.location.search);
   const tryonTarget = urlParams.get('tryon');
   const viewTarget = urlParams.get('view');
   if (tryonTarget && PRODUCTS_DATA[tryonTarget]) {
